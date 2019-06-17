@@ -1,0 +1,8 @@
+stages:
+  - test
+
+dummy:
+  stage: test
+  image: ubuntu:16.04
+  script:
+    - echo test
