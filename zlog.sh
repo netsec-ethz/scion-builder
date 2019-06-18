@@ -5,19 +5,16 @@
 
 set -ex
 
-mkdir /buildroot
+mkdir -p /buildroot
 cd /buildroot
-if [ ! -d "$(pwd)/zlog" ]
-then
-	git clone "$CI_ZLOG_REPO"
-fi
+git clone -b "$CI_ZLOG_BRANCH" "$CI_ZLOG_REPO"
 cd zlog
-git checkout 1.2.12/debian
-debuild -us -uc -b -aamd64 -tc
-debuild -us -uc -b -aarm64 -tc
-debuild -us -uc -b -aarmhf -tc
+
+debuild -us -uc -b -a"$CI_TARGET_ARCHITECTURE" -tc
+
 cd /buildroot
-mkdir debs
+mkdir -p debs
 cp *.deb debs
+
 echo "Installing libzlog."
 dpkg -i *.deb

@@ -10,9 +10,7 @@ dummy:
   script:
     - echo test
 
-build-deb:
-  stage: build
-  image: $CI_DOCKER_IMAGE
+.build-deb-script: &build-deb-script
   script:
     - dpkg --add-architecture i386
     - dpkg --add-architecture armhf
@@ -61,20 +59,51 @@ build-deb:
       libpcap0.8-dev:arm64
       libpcap0.8-dev:armhf
       libpcap0.8-dev:i386
-    - cp zlog.sh /bin/zlog.sh && chmod +x /bin/zlog.sh && /bin/zlog.sh
-    - mkdir /data && cp -r debian /data/debian
+    - cp zlog.sh /bin/zlog.sh && /bin/zlog.sh
+    - mkdir -p /data && cp -r debian /data/debian
     - cp build-in-tmp.sh /data/build-in-tmp.sh
-    - cp scion.sh /bin/scion.sh && chmod +x /bin/scion.sh && /bin/scion.sh
-    - mkdir output && cp -r /buildroot/debs output
+    - cp scion.sh /bin/scion.sh && /bin/scion.sh
+    - mkdir -p output-$CI_TARGET_ARCHITECTURE && cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
+
+build-deb-amd64:
+  stage: build
+  image: $CI_DOCKER_IMAGE
+  before_script:
+    - export CI_TARGET_ARCHITECTURE=amd64
+  <<: *build-deb-script
   artifacts:
     paths:
-    - output/
+    - output-amd64/
+    expire_in: 1 day
+
+build-deb-arm64:
+  only:
+    - tags
+  stage: build
+  image: $CI_DOCKER_IMAGE
+  before_script:
+    - export CI_TARGET_ARCHITECTURE=arm64
+  <<: *build-deb-script
+  artifacts:
+    paths:
+    - output-arm64/
+    expire_in: 1 day
+
+build-deb-armhf:
+  only:
+    - tags
+  stage: build
+  image: $CI_DOCKER_IMAGE
+  before_script:
+    - export CI_TARGET_ARCHITECTURE=armhf
+  <<: *build-deb-script
+  artifacts:
+    paths:
+    - output-armhf/
     expire_in: 1 day
 
 deploy-deb:
   stage: deploy
   image: $CI_DOCKER_IMAGE
-  dependencies:
-    - build-deb
   script:
-    - ls -l output/debs/
+    - ls -l output*/debs

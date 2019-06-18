@@ -12,7 +12,9 @@ CI process relies on some variables defined below. They can be configured using 
 
 * `CI_DOCKER_IMAGE`
 * `CI_SCION_REPO`
+* `CI_SCION_BRANCH`
 * `CI_ZLOG_REPO`
+* `CI_ZLOG_BRANCH`
 
 ## Origins
 
