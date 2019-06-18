@@ -103,7 +103,14 @@ override_dh_auto_install:
 	mkdir -p $(DEBDIR)/scion-daemons$(BINDIR)
 	echo $(shell pwd)
 	cp bin/* $(DEBDIR)/scion-daemons$(BINDIR)/
-	#dh $
+
+	# Copy logrotate config
+	mkdir -p $(DEBDIR)/scion-daemons$(ETCDIR)/logrotate.d/
+	cp $(DEBDIR)/config/scion-logrotate.conf $(DEBDIR)/scion-daemons$(ETCDIR)/logrotate.d/scion-new
+
+	# Create directory for gen folder
+	mkdir -p $(DEBDIR)/scion-daemons$(ETCDIR)/scion/gen
+	touch $(DEBDIR)/scion-daemons$(ETCDIR)/scion/gen/.keep
 
 #override_dh_shlibdeps
 #	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/debian/libscion0/usr/lib:$(pwd)/debian/libfilter0/usr/lib:$(pwd)/debian/libtcpmw0/usr/lib dh_shlibdeps --dpkg-shlibdeps-params="--ignore-missing-info"
@@ -112,4 +119,3 @@ override_dh_auto_install:
 # This is example for Cmake (See https://bugs.debian.org/641051 )
 #override_dh_auto_configure:
 #	dh_auto_configure -- #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
-
