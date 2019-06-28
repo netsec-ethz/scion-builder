@@ -2,12 +2,12 @@
 set -e
 
 # Create system user and group for scion
-id scion || adduser --system --no-create-home scion
-getent group scion || groupadd scion && usermod -g scion scion
+id sciond || adduser --system --no-create-home sciond
+getent group sciond || groupadd sciond && usermod -g sciond sciond
 
 # Create directory for logs and own it
 mkdir -p /var/log/scion/
-chown scion:scion /var/log/scion/
+chown sciond:sciond /var/log/scion/
 
 # Same for gen folder
-chown -R scion:scion /etc/scion/
+chown -R sciond:sciond /etc/scion/
