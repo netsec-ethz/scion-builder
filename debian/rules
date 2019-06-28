@@ -99,18 +99,51 @@ override_dh_auto_install:
 	cp $(TARGETBIN)/dispatcher $(DEBDIR)/scion-dispatcher$(BINDIR)/dispatcher
 	cp $(TARGETETC)/scion/dispatcher.conf $(DEBDIR)/scion-dispatcher$(ETCDIR)/scion/dispatcher.conf
 
-	# Copy files for scion-daemons
-	mkdir -p $(DEBDIR)/scion-daemons$(BINDIR)
-	echo $(shell pwd)
-	cp bin/* $(DEBDIR)/scion-daemons$(BINDIR)/
+	## Copy files for scion-daemons
+	#mkdir -p $(DEBDIR)/scion-daemons$(BINDIR)
+	#echo $(shell pwd)
+	#cp bin/* $(DEBDIR)/scion-daemons$(BINDIR)/
+
+	# Copy files for scion-daemon
+	mkdir -p $(DEBDIR)/scion-daemon$(BINDIR)
+	cp bin/sciond $(DEBDIR)/scion-daemon$(BINDIR)/
+
+	# Copy files for scion-ip-gateway
+	mkdir -p $(DEBDIR)/scion-ip-gateway$(BINDIR)
+	cp bin/sig $(DEBDIR)/scion-ip-gateway$(BINDIR)/
+
+	# Copy files for scion-path-server
+	mkdir -p $(DEBDIR)/scion-path-server$(BINDIR)
+	cp bin/path_srv $(DEBDIR)/scion-path-server$(BINDIR)/
+
+	# Copy files for scion-certificate-server
+	mkdir -p $(DEBDIR)/scion-certificate-server$(BINDIR)
+	cp bin/cert_srv $(DEBDIR)/scion-certificate-server$(BINDIR)/
+
+	# Copy files for scion-border-router
+	mkdir -p $(DEBDIR)/scion-border-router$(BINDIR)
+	cp bin/border $(DEBDIR)/scion-border-router$(BINDIR)/
+
+	# Copy files for scion-tools
+	mkdir -p $(DEBDIR)/scion-tools$(BINDIR)
+	cp bin/cert_req $(DEBDIR)/scion-tools$(BINDIR)/
+	cp bin/logdog $(DEBDIR)/scion-tools$(BINDIR)/
+	cp bin/scion-pki $(DEBDIR)/scion-tools$(BINDIR)/
+	cp bin/scmp $(DEBDIR)/scion-tools$(BINDIR)/
 
 	# Copy logrotate config
-	mkdir -p $(DEBDIR)/scion-daemons$(ETCDIR)/logrotate.d/
-	cp $(DEBDIR)/config/scion-logrotate.conf $(DEBDIR)/scion-daemons$(ETCDIR)/logrotate.d/scion-new
+	mkdir -p $(DEBDIR)/scion-daemon$(ETCDIR)/logrotate.d/
+	cp $(DEBDIR)/config/scion-logrotate.conf $(DEBDIR)/scion-daemon$(ETCDIR)/logrotate.d/scion-new
 
 	# Create directory for gen folder
-	mkdir -p $(DEBDIR)/scion-daemons$(ETCDIR)/scion/gen
-	touch $(DEBDIR)/scion-daemons$(ETCDIR)/scion/gen/.keep
+	mkdir -p $(DEBDIR)/scion-daemon$(ETCDIR)/scion/gen
+	touch $(DEBDIR)/scion-daemon$(ETCDIR)/scion/gen/.keep
+
+override_dh_installinit:
+	dh_installinit -pscion-daemon --name=scion-daemon
+	dh_installinit -pscion-daemon --name=scion-bootstrap
+	dh_installinit -pscion-daemon --name=scion
+	dh_installinit --remaining
 
 #override_dh_shlibdeps
 #	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/debian/libscion0/usr/lib:$(pwd)/debian/libfilter0/usr/lib:$(pwd)/debian/libtcpmw0/usr/lib dh_shlibdeps --dpkg-shlibdeps-params="--ignore-missing-info"

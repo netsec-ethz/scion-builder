@@ -48,10 +48,50 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, libzlog1
 Description: SCION dispatcher service
  Supportive SCION service
 
-Package: scion-daemons
+Package: scion-daemon
+Section: net
+Multi-Arch: foreign
+Architecture: amd64 i386 arm64 armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}, scion-dispatcher
+Description: SCION daemon
+ SCION daemon
+
+Package: scion-ip-gateway
+Section: net
+Multi-Arch: foreign
+Architecture: amd64 i386 arm64 armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}, scion-daemon
+Description: SCION IP Gateway
+ SCION IP Gateway
+
+Package: scion-path-server
+Section: net
+Multi-Arch: foreign
+Architecture: amd64 i386 arm64 armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}, scion-daemon
+Description: SCION Path Server
+ SCION Path Server
+
+Package: scion-certificate-server
+Section: net
+Multi-Arch: foreign
+Architecture: amd64 i386 arm64 armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}, scion-daemon
+Description: SCION Certificate Server
+ SCION Certificate Server
+
+Package: scion-border-router
+Section: net
+Multi-Arch: foreign
+Architecture: amd64 i386 arm64 armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}, scion-daemon
+Description: SCION Border Router
+ SCION Border Router
+
+Package: scion-tools
 Section: net
 Multi-Arch: foreign
 Architecture: amd64 i386 arm64 armhf
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: SCION daemons
- All golang daemons of SCION
+Description: SCION Tools
+ Supportive SCION tools

@@ -19,12 +19,11 @@ build-deb-amd64:
     - ./deps.sh
     - /bin/zlog.sh
     - /bin/scion.sh
-  after_script:
     - cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
   artifacts:
     paths:
     - output-amd64/
-    expire_in: 1 day
+    expire_in: 1 hour
 
 build-deb-arm64:
   only:
@@ -37,12 +36,11 @@ build-deb-arm64:
     - ./deps.sh
     - /bin/zlog.sh
     - /bin/scion.sh
-  after_script:
     - cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
   artifacts:
     paths:
     - output-arm64/
-    expire_in: 1 day
+    expire_in: 1 hour
 
 build-deb-armhf:
   only:
@@ -55,12 +53,11 @@ build-deb-armhf:
     - ./deps.sh
     - /bin/zlog.sh
     - /bin/scion.sh
-  after_script:
     - cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
   artifacts:
     paths:
     - output-armhf/
-    expire_in: 1 day
+    expire_in: 1 hour
 
 deploy-deb:
   stage: deploy
