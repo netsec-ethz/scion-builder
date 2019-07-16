@@ -1,0 +1,170 @@
+load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
+load("@io_bazel_rules_go//go:def.bzl", "nogo")
+
+# gazelle:prefix github.com/scionproto/scion
+gazelle(name = "gazelle")
+
+# bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
+# bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64
+
+# SCION Border Router
+pkg_tar(
+    name = "scion-border-router-bin",
+    srcs = [
+        "//go/border",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+pkg_tar(
+    name = "scion-border-router-systemd",
+    srcs = [
+        "systemd/scion-border-router.service",
+    ],
+    mode = "0644",
+    package_dir = "/etc/systemd/system",
+)
+
+pkg_tar(
+    name = "scion-border-router",
+    extension = "tar.gz",
+    deps = [
+        ":scion-border-router-bin",
+        ":scion-border-router-systemd",
+    ],
+)
+
+pkg_deb(
+    name = "scion-border-router-debian",
+    architecture = "amd64",
+    built_using = "bazel (0.25.3)",
+    conffiles = [
+        "/usr/local/corp/etc/app.flagfile",
+    ],
+    data = ":scion-border-router",
+    #    depends = [
+    #        "unzip",
+    #    ],
+    description = "SCION Border Router",
+    #    description_file = "debian/description/scion-border-router",
+    homepage = "https://www.scion-architecture.net/",
+    maintainer = "SCION Team <scionlab-admins@sympa.ethz.ch>",
+    package = "scion-border-router",
+    postinst = "postinst/scion-border-router.postinst",
+    priority = "optional",
+    section = "net",
+    version = "0.1.2",
+)
+
+# SCION Beacon Server
+pkg_tar(
+    name = "scion-beacon-server",
+    srcs = [
+        "//go/beacon_srv",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# SCION Certificate Server
+pkg_tar(
+    name = "scion-cert-server",
+    srcs = [
+        "//go/cert_srv",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# SCION Path Server
+pkg_tar(
+    name = "scion-path-server",
+    srcs = [
+        "//go/path_srv",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# SCION IP Gateway
+pkg_tar(
+    name = "scion-ip-gateway",
+    srcs = [
+        "//go/sig",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# SCION Tools
+pkg_tar(
+    name = "scion-tools",
+    srcs = [
+        "//go/examples/discovery_client",
+        "//go/examples/pingpong",
+        "//go/tools/buildkite_log_downloader",
+        "//go/tools/logdog",
+        "//go/tools/scion-custpk-load",
+        "//go/tools/scion-pki",
+        "//go/tools/scmp",
+        "//go/tools/showpaths",
+        "//go/tools/topopruner",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# SCION Deamon
+pkg_tar(
+    name = "scion-deamon",
+    srcs = [
+        "//go/sciond",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# SCION Dispatcher
+pkg_tar(
+    name = "scion-dispatcher",
+    srcs = [
+        "//go/godispatcher",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# Nogo - Go code analysis tool
+nogo(
+    name = "nogo",
+    config = "nogo.json",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//go/lint:log",
+        "@org_golang_x_tools//go/analysis/passes/asmdecl:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/assign:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/atomic:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/bools:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/buildtag:go_tool_library",
+        # This crashes the build of @com_github_vishvananda_netlink
+        # "@org_golang_x_tools//go/analysis/passes/cgocall:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/composite:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/copylock:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/httpresponse:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/loopclosure:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/lostcancel:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/nilfunc:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/nilness:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/printf:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/shift:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/stdmethods:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/structtag:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/tests:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/unmarshal:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/unreachable:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/unsafeptr:go_tool_library",
+        "@org_golang_x_tools//go/analysis/passes/unusedresult:go_tool_library",
+    ],
+)

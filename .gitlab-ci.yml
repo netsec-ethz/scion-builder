@@ -13,54 +13,84 @@ dummy:
 build-deb-amd64:
   stage: build
   image: $CI_DOCKER_IMAGE
-  before_script:
-    - export CI_TARGET_ARCHITECTURE=amd64
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
   script:
-    - ./deps.sh
-    - /bin/zlog.sh
-    - /bin/scion.sh
-    - cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
+    # Prepare operating system
+    - cp debian/apt.sources.list /etc/apt/sources.list
+    - apt update && apt install -y git wget unzip
+    # Clone SCION source code
+    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH
+    # Install selected release of BAZEL
+    - wget $CI_BAZEL_URL -O bazel_install_script.sh
+    - bash bazel_install_script.sh
+    # Override some files from upstream SCION
+    - cp common.sh scion/env/common.sh
+    - cp deps.sh scion/env/debian/deps
+    - cp BUILD.bazel scion/BUILD.bazel
+    # Copy build-related directories into SCION codebase
+    - cp -r conf scion
+    - cp -r debian scion
+    - cp -r postinst scion
+    - cp -r rhel scion
+    - cp -r systemd scion
+    # Install SCION dependencies
+    - cd scion
+    - ./env/debian/deps
+    # Build and prepare packages
+    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
+    - mkdir ../output-$CI_TARGET_ARCHITECTURE
+    - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
   artifacts:
     paths:
     - output-amd64/
     expire_in: 1 hour
 
-build-deb-arm64:
-  only:
-    - tags
-  stage: build
-  image: $CI_DOCKER_IMAGE
-  before_script:
-    - export CI_TARGET_ARCHITECTURE=arm64
-  script:
-    - ./deps.sh
-    - /bin/zlog.sh
-    - /bin/scion.sh
-    - cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
-  artifacts:
-    paths:
-    - output-arm64/
-    expire_in: 1 hour
+#build-deb-arm64:
+#  only:
+#    - tags
+#  stage: build
+#  image: $CI_DOCKER_IMAGE
+#  before_script:
+#    - export CI_TARGET_ARCHITECTURE=arm64
+#  script:
+#    - ./deps.sh
+#    - /bin/zlog.sh
+#    - /bin/scion.sh
+#    - cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
+#  artifacts:
+#    paths:
+#    - output-arm64/
+#    expire_in: 1 hour
+#
+#build-deb-armhf:
+#  only:
+#    - tags
+#  stage: build
+#  image: $CI_DOCKER_IMAGE
+#  before_script:
+#    - export CI_TARGET_ARCHITECTURE=armhf
+#  script:
+#    - ./deps.sh
+#    - /bin/zlog.sh
+#    - /bin/scion.sh
+#    - cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
+#  artifacts:
+#    paths:
+#    - output-armhf/
+#    expire_in: 1 hour
 
-build-deb-armhf:
-  only:
-    - tags
-  stage: build
+test-deb-amd64:
+  stage: test
   image: $CI_DOCKER_IMAGE
-  before_script:
-    - export CI_TARGET_ARCHITECTURE=armhf
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
   script:
-    - ./deps.sh
-    - /bin/zlog.sh
-    - /bin/scion.sh
-    - cp -r /buildroot/debs output-$CI_TARGET_ARCHITECTURE
-  artifacts:
-    paths:
-    - output-armhf/
-    expire_in: 1 hour
+    - cd output-$CI_TARGET_ARCHITECTURE
+    - ls | xargs dpkg -i
 
 deploy-deb:
   stage: deploy
   image: $CI_DOCKER_IMAGE
   script:
-    - ls -l output*/debs
+    - ls -l output*/

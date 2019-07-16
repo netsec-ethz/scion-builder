@@ -10,4 +10,13 @@ mkdir -p /var/log/scion/
 chown sciond:sciond /var/log/scion/
 
 # Same for gen folder
+mkdir -p /etc/scion/
 chown -R sciond:sciond /etc/scion/
+
+if [ -f /.dockerenv ]; then
+	# Systemd is not running when in docker, therefore ignore the following command
+    echo "I'm inside matrix ;(";
+else
+    # Reload systemd unit files after installing a new one
+    systemctl daemon-reload
+fi
