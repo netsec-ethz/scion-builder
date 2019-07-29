@@ -92,5 +92,13 @@ test-deb-amd64:
 deploy-deb:
   stage: deploy
   image: $CI_DOCKER_IMAGE
+  before_script:
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$CI_SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - ls -l output*/
+    - ls -l output*/*.deb
+    - scp output*/*.deb reprepro@packages.netsec.inf.ethz.ch:/tmp
+    - for deb in `ls output*/*.deb`; do ssh reprepro@packages.netsec.inf.ethz.ch "cd /tmp && reprepro -b /home/reprepro includedeb precise $deb"; done

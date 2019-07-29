@@ -44,9 +44,9 @@ pkg_deb(
         "/usr/local/corp/etc/app.flagfile",
     ],
     data = ":scion-border-router",
-    #    depends = [
-    #        "unzip",
-    #    ],
+        depends = [
+            "adduser",
+        ],
     description = "SCION Border Router",
     #    description_file = "debian/description/scion-border-router",
     homepage = "https://www.scion-architecture.net/",
