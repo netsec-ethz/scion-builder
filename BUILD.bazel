@@ -44,9 +44,9 @@ pkg_deb(
         "/usr/local/corp/etc/app.flagfile",
     ],
     data = ":scion-border-router",
-        depends = [
-            "adduser",
-        ],
+    depends = [
+        "adduser",
+    ],
     description = "SCION Border Router",
     #    description_file = "debian/description/scion-border-router",
     homepage = "https://www.scion-architecture.net/",
@@ -55,7 +55,7 @@ pkg_deb(
     postinst = "postinst/scion-border-router.postinst",
     priority = "optional",
     section = "net",
-    version = "0.1.2",
+    version = "0.1.3",
 )
 
 # SCION Beacon Server

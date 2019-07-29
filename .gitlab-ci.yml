@@ -101,4 +101,4 @@ deploy-deb:
   script:
     - ls -l output*/*.deb
     - scp output*/*.deb reprepro@packages.netsec.inf.ethz.ch:/tmp
-    - cd output* && for deb in `ls *.deb`; do ssh reprepro@packages.netsec.inf.ethz.ch "cd /tmp && reprepro -b /home/reprepro includedeb precise $deb"; done
+    - cd output* && for deb in `ls *.deb`; do ssh reprepro@packages.netsec.inf.ethz.ch "cd /tmp && reprepro -b /home/reprepro/reprepro includedeb precise $deb"; done
