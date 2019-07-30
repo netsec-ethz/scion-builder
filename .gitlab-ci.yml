@@ -150,9 +150,8 @@ deploy-deb:
     - ssh-add <(echo "$CI_SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh $CI_SCP_TARGET "rm -f /tmp/scion-*.deb"
   script:
     - ls -l output*/*.deb
     - scp output*/*.deb $CI_SCP_TARGET:/tmp
     - cd output* && for deb in `ls *.deb`; do ssh $CI_SCP_TARGET "cd /tmp && reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
-  after_script:
-    - ssh $CI_SCP_TARGET "rm -f /tmp/scion-*.deb"
