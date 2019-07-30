@@ -95,10 +95,10 @@ deploy-deb:
   before_script:
     - 'which ssh-agent || ( apt update && apt-get install -qq openssh-client )'
     - eval $(ssh-agent -s)
-    - ssh-add <(echo "$CI_SSH_PRIVATE_KEY")
+    - ssh-add $CI_SSH_PRIVATE_KEY
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
     - ls -l output*/*.deb
-    - scp output*/*.deb reprepro@packages.netsec.inf.ethz.ch:/tmp
-    - cd output* && for deb in `ls *.deb`; do ssh reprepro@packages.netsec.inf.ethz.ch "cd /tmp && reprepro -b /home/reprepro/reprepro includedeb precise $deb"; done
+    - scp output*/*.deb $CI_SCP_TARGET:/tmp
+    - cd output* && for deb in `ls *.deb`; do ssh $CI_SCP_TARGET "cd /tmp && reprepro -b /home/reprepro/reprepro includedeb precise $deb"; done
