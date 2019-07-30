@@ -123,7 +123,7 @@ pkg_deb(
 
 # SCION Certificate Server
 pkg_tar(
-    name = "scion-cert-server",
+    name = "scion-cert-server-bin",
     srcs = [
         "//go/cert_srv",
     ],
@@ -172,7 +172,7 @@ pkg_deb(
 
 # SCION Path Server
 pkg_tar(
-    name = "scion-path-server",
+    name = "scion-path-server-bin",
     srcs = [
         "//go/path_srv",
     ],
@@ -221,7 +221,7 @@ pkg_deb(
 
 # SCION IP Gateway
 pkg_tar(
-    name = "scion-ip-gateway",
+    name = "scion-ip-gateway-bin",
     srcs = [
         "//go/sig",
     ],
@@ -270,7 +270,7 @@ pkg_deb(
 
 # SCION Daemon
 pkg_tar(
-    name = "scion-daemon",
+    name = "scion-daemon-bin",
     srcs = [
         "//go/sciond",
     ],
@@ -319,7 +319,7 @@ pkg_deb(
 
 # SCION Dispatcher
 pkg_tar(
-    name = "scion-dispatcher",
+    name = "scion-dispatcher-bin",
     srcs = [
         "//go/godispatcher",
     ],
@@ -368,7 +368,7 @@ pkg_deb(
 
 # SCION Tools
 pkg_tar(
-    name = "scion-tools",
+    name = "scion-tools-bin",
     srcs = [
         "//go/examples/discovery_client",
         "//go/examples/pingpong",
@@ -391,7 +391,7 @@ pkg_deb(
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
-    data = ":scion-tools",
+    data = ":scion-tools-bin",
     depends = [
         "adduser",
     ],
