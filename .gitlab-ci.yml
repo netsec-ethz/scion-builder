@@ -101,4 +101,4 @@ deploy-deb:
   script:
     - ls -l output*/*.deb
     - scp output*/*.deb $CI_SCP_TARGET:/tmp
-    - cd output* && for deb in `ls *.deb`; do ssh $CI_SCP_TARGET "cd /tmp && reprepro -b /home/reprepro/reprepro includedeb precise $deb"; done
+    - cd output* && for deb in `ls *.deb`; do ssh $CI_SCP_TARGET "cd /tmp && reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done

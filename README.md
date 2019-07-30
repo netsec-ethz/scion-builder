@@ -15,10 +15,11 @@ CI process relies on some variables defined below. They can be configured using 
 * `CI_SCION_BRANCH`
 * `CI_BAZEL_URL`
 
-As the last step uploads generated packages to the online repository, an SSH private key is required so that GitLab CI can automatically upload files to the destination server. This configuration is stored in the following variables
+As the last step uploads generated packages to the online repository, its configuration is stored in the following variables
 
 * `CI_SSH_PRIVATE_KEY`
 * `CI_SCP_TARGET`
+* `CI_DEB_CODENAME`
 
 ## Upstream project
 
