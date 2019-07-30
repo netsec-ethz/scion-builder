@@ -9,6 +9,10 @@ gazelle(name = "gazelle")
 # bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64
 
 # Variables used to prepare DEB and RPM packages
+PKG_ARCHITECTURE = "amd64"
+
+PKG_BUILT_USING = "bazel (0.25.3)"
+
 PKG_HOMEPAGE = "https://www.scion-architecture.net/"
 
 PKG_MAINTAINER = "SCION Team <scionlab-admins@sympa.ethz.ch>"
@@ -49,8 +53,8 @@ pkg_tar(
 
 pkg_deb(
     name = "scion-border-router-debian",
-    architecture = "amd64",
-    built_using = "bazel (0.25.3)",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
@@ -59,7 +63,6 @@ pkg_deb(
         "adduser",
     ],
     description = "SCION Border Router",
-    #    description_file = "debian/description/scion-border-router",
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scion-border-router",
@@ -97,6 +100,27 @@ pkg_tar(
     ],
 )
 
+pkg_deb(
+    name = "scion-beacon-server-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scion-beacon-server",
+    depends = [
+        "adduser",
+    ],
+    description = "SCION Beacon Server",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-beacon-server",
+    postinst = "postinst/scion-beacon-server.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
+)
+
 # SCION Certificate Server
 pkg_tar(
     name = "scion-cert-server",
@@ -123,6 +147,27 @@ pkg_tar(
         ":scion-cert-server-bin",
         ":scion-cert-server-systemd",
     ],
+)
+
+pkg_deb(
+    name = "scion-cert-server-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scion-cert-server",
+    depends = [
+        "adduser",
+    ],
+    description = "SCION Certificate Server",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-cert-server",
+    postinst = "postinst/scion-cert-server.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
 )
 
 # SCION Path Server
@@ -153,6 +198,27 @@ pkg_tar(
     ],
 )
 
+pkg_deb(
+    name = "scion-path-server-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scion-path-server",
+    depends = [
+        "adduser",
+    ],
+    description = "SCION Path Server",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-path-server",
+    postinst = "postinst/scion-path-server.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
+)
+
 # SCION IP Gateway
 pkg_tar(
     name = "scion-ip-gateway",
@@ -179,6 +245,27 @@ pkg_tar(
         ":scion-ip-gateway-bin",
         ":scion-ip-gateway-systemd",
     ],
+)
+
+pkg_deb(
+    name = "scion-ip-gateway-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scion-ip-gateway",
+    depends = [
+        "adduser",
+    ],
+    description = "SCION IP Gateway",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-ip-gateway",
+    postinst = "postinst/scion-ip-gateway.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
 )
 
 # SCION Daemon
@@ -209,6 +296,27 @@ pkg_tar(
     ],
 )
 
+pkg_deb(
+    name = "scion-daemon-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scion-daemon-router",
+    depends = [
+        "adduser",
+    ],
+    description = "SCION Daemon",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-daemon",
+    postinst = "postinst/scion-daemon.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
+)
+
 # SCION Dispatcher
 pkg_tar(
     name = "scion-dispatcher",
@@ -237,6 +345,27 @@ pkg_tar(
     ],
 )
 
+pkg_deb(
+    name = "scion-dispatcher-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scion-dispatcher",
+    depends = [
+        "adduser",
+    ],
+    description = "SCION Dispatcher",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-dispatcher",
+    postinst = "postinst/scion-dispatcher.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
+)
+
 # SCION Tools
 pkg_tar(
     name = "scion-tools",
@@ -253,6 +382,27 @@ pkg_tar(
     ],
     mode = "0755",
     package_dir = "/usr/bin",
+)
+
+pkg_deb(
+    name = "scion-tools-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scion-tools",
+    depends = [
+        "adduser",
+    ],
+    description = "SCION Tools",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-tools",
+    postinst = "postinst/scion-tools.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
 )
 
 # Nogo - Go code analysis tool
