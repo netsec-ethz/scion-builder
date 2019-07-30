@@ -303,7 +303,7 @@ pkg_deb(
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
-    data = ":scion-daemon-router",
+    data = ":scion-daemon",
     depends = [
         "adduser",
     ],
