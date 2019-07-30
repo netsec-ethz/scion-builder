@@ -405,6 +405,43 @@ pkg_deb(
     version = PKG_VERSION,
 )
 
+# SCIONLab
+
+pkg_tar(
+    name = "scionlab-null",
+    srcs = [],
+    mode = "0755",
+    package_dir = "/dev/null",
+)
+
+pkg_deb(
+    name = "scionlab-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scionlab-null",
+    depends = [
+        "scion-border-router",
+        #        "scion-beacon-server",
+        #        "scion-certificate-server",
+        #        "scion-path-server",
+        #        "scion-ip-gateway",
+        #        "scion-daemon",
+        #        "scion-dispatcher",
+        #        "scion-tools",
+    ],
+    description = "SCIONLab",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scionlab",
+    postinst = "postinst/scion.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
+)
+
 # Nogo - Go code analysis tool
 nogo(
     name = "nogo",
