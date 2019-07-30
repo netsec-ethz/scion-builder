@@ -40,7 +40,7 @@ build-all-deb-amd64:
     # Build SCION packages
     - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
     - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
-    - bazel build //:scion-cert-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
+    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
     - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
     - bazel build //:scion-ip-gateway-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
     - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
@@ -84,7 +84,7 @@ build-all-deb-amd64:
 #    # Build SCION packages
 ##    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
 ##    - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
-##    - bazel build //:scion-cert-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
+##    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
 ##    - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
 ##    - bazel build //:scion-ip-gateway-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
 #    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
