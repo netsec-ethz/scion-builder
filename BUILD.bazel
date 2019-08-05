@@ -21,7 +21,7 @@ PKG_PRORITY = "optional"
 
 PKG_SECTION = "net"
 
-PKG_VERSION = "0.1.5"
+PKG_VERSION = "0.1.6"
 
 # SCION Border Router
 pkg_tar(
@@ -424,13 +424,13 @@ pkg_deb(
     data = ":scionlab-null",
     depends = [
         "scion-border-router (=" + PKG_VERSION + ")",
-        #        "scion-beacon-server (=" + PKG_VERSION + ")",
-        #        "scion-certificate-server (=" + PKG_VERSION + ")",
-        #        "scion-path-server (=" + PKG_VERSION + ")",
-        #        "scion-ip-gateway (=" + PKG_VERSION + ")",
-        #        "scion-daemon (=" + PKG_VERSION + ")",
-        #        "scion-dispatcher (=" + PKG_VERSION + ")",
-        #        "scion-tools (=" + PKG_VERSION + ")",
+        "scion-beacon-server (=" + PKG_VERSION + ")",
+        "scion-certificate-server (=" + PKG_VERSION + ")",
+        "scion-path-server (=" + PKG_VERSION + ")",
+        "scion-ip-gateway (=" + PKG_VERSION + ")",
+        "scion-daemon (=" + PKG_VERSION + ")",
+        "scion-dispatcher (=" + PKG_VERSION + ")",
+        "scion-tools (=" + PKG_VERSION + ")",
     ],
     description = "SCIONLab",
     homepage = PKG_HOMEPAGE,
