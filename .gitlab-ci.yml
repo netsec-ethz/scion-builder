@@ -20,7 +20,7 @@ build-all-deb-amd64:
     - cp debian/apt.sources.list /etc/apt/sources.list
     - apt update && apt install -y git wget unzip
     # Clone SCION source code
-    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH
+    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
     # Install selected release of BAZEL
     - wget $CI_BAZEL_URL -O bazel_install_script.sh
     - bash bazel_install_script.sh
