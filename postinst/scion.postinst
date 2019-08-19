@@ -4,16 +4,17 @@ set -e
 case "$1" in
     configure)
         # Create system user and group for scion
-        id sciond || adduser --system --no-create-home sciond
-        getent group sciond || groupadd sciond && usermod -g sciond sciond
+        id scion || adduser --system --no-create-home scion
+        getent group scion || groupadd scion
+        usermod -g scion scion
 
         # Create directory for logs and own it
         mkdir -p /var/log/scion/
-        chown sciond:sciond /var/log/scion/
+        chown scion:scion /var/log/scion/
 
         # Same for gen folder
         mkdir -p /etc/scion/
-        chown -R sciond:sciond /etc/scion/
+        chown -R scion:scion /etc/scion/
 
         if [ -f /.dockerenv ]; then
 			# Systemd is not running when in docker, therefore ignore the following command
