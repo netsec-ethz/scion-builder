@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=scion
-ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/sciond /var/lib/scion/ISD-isd-/AS-as-/endhost/sciond.toml $i
+ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/sciond /var/lib/scion/ISD-isd-/AS-as-/endhost/sciond.toml %i
 RemainAfterExit=False
 KillMode=control-group
 Restart=on-failure
