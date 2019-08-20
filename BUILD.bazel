@@ -37,9 +37,6 @@ pkg_deb(
     name = "scion-systemd-wrapper-debian",
     architecture = PKG_ARCHITECTURE,
     built_using = PKG_BUILT_USING,
-    #    conffiles = [
-    #        "/usr/local/corp/etc/app.flagfile",
-    #    ],
     data = ":scion-systemd-wrapper-bin",
     description = "SCION systemd wrapper",
     homepage = PKG_HOMEPAGE,
