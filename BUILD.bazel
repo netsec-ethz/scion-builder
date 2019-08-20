@@ -23,6 +23,33 @@ PKG_SECTION = "net"
 
 PKG_VERSION = "0.2.0"
 
+# SCION wrapper script
+pkg_tar (
+	name = "scion-systemd-wrapper-bin",
+	srcs = [
+		"scion-systemd-wrapper",
+	],
+	mode = "0755",
+	package_dir = "/usr/bin",
+)
+
+pkg_deb(
+    name = "scion-systemd-wrapper-debian",
+    architecture = PKG_ARCHITECTURE,
+    built_using = PKG_BUILT_USING,
+    #    conffiles = [
+    #        "/usr/local/corp/etc/app.flagfile",
+    #    ],
+    data = ":scion-systemd-wrapper-bin",
+    description = "SCION systemd wrapper",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-systemd-wrapper",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION,
+)
+
 # SCION Border Router
 pkg_tar(
     name = "scion-border-router-bin",
@@ -61,6 +88,7 @@ pkg_deb(
     data = ":scion-border-router",
     depends = [
         "adduser",
+        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
     ],
     description = "SCION Border Router",
     homepage = PKG_HOMEPAGE,
@@ -110,6 +138,7 @@ pkg_deb(
     data = ":scion-beacon-server",
     depends = [
         "adduser",
+        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
     ],
     description = "SCION Beacon Server",
     homepage = PKG_HOMEPAGE,
@@ -159,6 +188,7 @@ pkg_deb(
     data = ":scion-certificate-server",
     depends = [
         "adduser",
+        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
     ],
     description = "SCION Certificate Server",
     homepage = PKG_HOMEPAGE,
@@ -208,6 +238,7 @@ pkg_deb(
     data = ":scion-path-server",
     depends = [
         "adduser",
+        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
     ],
     description = "SCION Path Server",
     homepage = PKG_HOMEPAGE,
@@ -257,6 +288,7 @@ pkg_deb(
     data = ":scion-ip-gateway",
     depends = [
         "adduser",
+        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
     ],
     description = "SCION IP Gateway",
     homepage = PKG_HOMEPAGE,
@@ -281,7 +313,7 @@ pkg_tar(
 pkg_tar(
     name = "scion-daemon-systemd",
     srcs = [
-        "systemd/scion-daemon.service",
+        "systemd/scion-daemon@.service",
     ],
     mode = "0644",
     package_dir = "/etc/systemd/system",
@@ -306,6 +338,7 @@ pkg_deb(
     data = ":scion-daemon",
     depends = [
         "adduser",
+        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
     ],
     description = "SCION Daemon",
     homepage = PKG_HOMEPAGE,
@@ -355,6 +388,7 @@ pkg_deb(
     data = ":scion-dispatcher",
     depends = [
         "adduser",
+        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
     ],
     description = "SCION Dispatcher",
     homepage = PKG_HOMEPAGE,

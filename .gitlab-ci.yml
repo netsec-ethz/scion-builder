@@ -38,6 +38,7 @@ build-all-deb-amd64:
     - cd scion
     - ./env/debian/deps
     # Build SCION packages
+    - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
     - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
     - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
     - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64

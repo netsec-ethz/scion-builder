@@ -13,8 +13,8 @@ case "$1" in
         chown scion:scion /var/log/scion/
 
         # Same for gen folder
-        mkdir -p /etc/scion/
-        chown -R scion:scion /etc/scion/
+        mkdir -p /var/lib/scion/
+        chown -R scion:scion /var/lib/scion/
 
         if [ -f /.dockerenv ]; then
 			# Systemd is not running when in docker, therefore ignore the following command
