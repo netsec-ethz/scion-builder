@@ -34,6 +34,7 @@ build-all-deb-amd64:
     - cp -r postinst scion
     - cp -r rhel scion
     - cp -r systemd scion
+    - cp scion-systemd-wrapper scion
     # Install SCION dependencies
     - cd scion
     - ./env/debian/deps
