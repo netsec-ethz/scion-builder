@@ -11,6 +11,7 @@ dummy:
     - echo test
 
 .build-deb-script: &build-deb-script
+  script:
     # Prepare operating system
     - cp debian/apt.sources.list /etc/apt/sources.list
     - apt update && apt install -y git wget unzip
@@ -52,8 +53,7 @@ build-all-deb-amd64:
   image: $CI_DOCKER_IMAGE
   variables:
     CI_TARGET_ARCHITECTURE: amd64
-  script:
-    <<: *build-deb-script
+  <<: *build-deb-script
   artifacts:
     paths:
     - output-amd64/
