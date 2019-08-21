@@ -60,15 +60,15 @@ build-all-deb-amd64:
     - output-amd64/
     expire_in: 1 hour
 
-build-all-deb-arm:
+build-all-deb-arm64:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
-    CI_TARGET_ARCHITECTURE: arm
+    CI_TARGET_ARCHITECTURE: arm64
   <<: *build-deb-script
   artifacts:
     paths:
-      - output-arm/
+      - output-arm64/
     expire_in: 1 hour
   allow_failure: true
 
