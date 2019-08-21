@@ -15,7 +15,7 @@ PKG_BUILT_USING = "bazel (0.25.3)"
 
 PKG_HOMEPAGE = "https://www.scion-architecture.net"
 
-PKG_MAINTAINER = "SCIONLab Team <scionlab-admins@sympa.ethz.ch>"
+PKG_MAINTAINER = "ETH Zurich, SCIONLab Team <scionlab-admins@sympa.ethz.ch>"
 
 PKG_PRORITY = "optional"
 
