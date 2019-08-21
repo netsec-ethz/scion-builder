@@ -13,9 +13,9 @@ PKG_ARCHITECTURE = "amd64"
 
 PKG_BUILT_USING = "bazel (0.25.3)"
 
-PKG_HOMEPAGE = "https://www.scion-architecture.net/"
+PKG_HOMEPAGE = "https://www.scion-architecture.net"
 
-PKG_MAINTAINER = "SCION Team <scionlab-admins@sympa.ethz.ch>"
+PKG_MAINTAINER = "SCIONLab Team <scionlab-admins@sympa.ethz.ch>"
 
 PKG_PRORITY = "optional"
 
