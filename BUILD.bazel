@@ -60,7 +60,7 @@ pkg_tar(
 pkg_tar(
     name = "scion-border-router-systemd",
     srcs = [
-        "systemd/scion-border-router.service",
+        "systemd/scion-border-router@.service",
     ],
     mode = "0644",
     package_dir = "/lib/systemd/system",
@@ -110,7 +110,7 @@ pkg_tar(
 pkg_tar(
     name = "scion-beacon-server-systemd",
     srcs = [
-        "systemd/scion-beacon-server.service",
+        "systemd/scion-beacon-server@.service",
     ],
     mode = "0644",
     package_dir = "/lib/systemd/system",
@@ -160,7 +160,7 @@ pkg_tar(
 pkg_tar(
     name = "scion-certificate-server-systemd",
     srcs = [
-        "systemd/scion-certificate-server.service",
+        "systemd/scion-certificate-server@.service",
     ],
     mode = "0644",
     package_dir = "/lib/systemd/system",
@@ -210,7 +210,7 @@ pkg_tar(
 pkg_tar(
     name = "scion-path-server-systemd",
     srcs = [
-        "systemd/scion-path-server.service",
+        "systemd/scion-path-server@.service",
     ],
     mode = "0644",
     package_dir = "/lib/systemd/system",
