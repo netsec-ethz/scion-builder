@@ -4,11 +4,12 @@ stages:
   - test
   - deploy
 
-dummy:
+test-connectivity:
   stage: pre-build
-  image: $CI_DOCKER_IMAGE
+  image: busybox
   script:
-    - echo test
+    - ping github.com -c1
+    - wget packages.netsec.inf.ethz.ch
 
 .build-deb-script: &build-deb-script
   script:
