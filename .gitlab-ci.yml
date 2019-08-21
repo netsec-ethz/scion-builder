@@ -10,12 +10,7 @@ dummy:
   script:
     - echo test
 
-build-all-deb-amd64:
-  stage: build
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-  script:
+.build-deb-script: &build-deb-script
     # Prepare operating system
     - cp debian/apt.sources.list /etc/apt/sources.list
     - apt update && apt install -y git wget unzip
@@ -51,6 +46,14 @@ build-all-deb-amd64:
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
+
+build-all-deb-amd64:
+  stage: build
+  image: $CI_DOCKER_IMAGE
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+  script:
+    <<: *build-deb-script
   artifacts:
     paths:
     - output-amd64/
