@@ -1,14 +1,14 @@
 [Unit]
-Description=SCION Dispatcher
+Description=SCION Border Router
 Documentation=https://www.scionlab.org
-After=network-online.target
+After=network-online.target scion-dispatcher.service
 Wants=network-online.target
 PartOf=scionlab.service
 
 [Service]
 Type=simple
 User=scion
-ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/godispatcher /etc/scion/dispatcher/disp.toml %i
+ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/border /etc/scion/ISD-isd-/AS-as-/br%i/br.toml %i
 RemainAfterExit=False
 KillMode=control-group
 Restart=on-failure

@@ -21,7 +21,7 @@ PKG_PRORITY = "optional"
 
 PKG_SECTION = "net"
 
-PKG_VERSION = "0.2.1"
+PKG_VERSION = "0.2.2"
 
 # SCION wrapper script
 pkg_tar (
@@ -63,7 +63,7 @@ pkg_tar(
         "systemd/scion-border-router.service",
     ],
     mode = "0644",
-    package_dir = "/etc/systemd/system",
+    package_dir = "/lib/systemd/system",
 )
 
 pkg_tar(
@@ -113,7 +113,7 @@ pkg_tar(
         "systemd/scion-beacon-server.service",
     ],
     mode = "0644",
-    package_dir = "/etc/systemd/system",
+    package_dir = "/lib/systemd/system",
 )
 
 pkg_tar(
@@ -163,7 +163,7 @@ pkg_tar(
         "systemd/scion-certificate-server.service",
     ],
     mode = "0644",
-    package_dir = "/etc/systemd/system",
+    package_dir = "/lib/systemd/system",
 )
 
 pkg_tar(
@@ -213,7 +213,7 @@ pkg_tar(
         "systemd/scion-path-server.service",
     ],
     mode = "0644",
-    package_dir = "/etc/systemd/system",
+    package_dir = "/lib/systemd/system",
 )
 
 pkg_tar(
@@ -247,56 +247,6 @@ pkg_deb(
     version = PKG_VERSION,
 )
 
-# SCION IP Gateway
-pkg_tar(
-    name = "scion-ip-gateway-bin",
-    srcs = [
-        "//go/sig",
-    ],
-    mode = "0755",
-    package_dir = "/usr/bin",
-)
-
-pkg_tar(
-    name = "scion-ip-gateway-systemd",
-    srcs = [
-        "systemd/scion-ip-gateway.service",
-    ],
-    mode = "0644",
-    package_dir = "/etc/systemd/system",
-)
-
-pkg_tar(
-    name = "scion-ip-gateway",
-    extension = "tar.gz",
-    deps = [
-        ":scion-ip-gateway-bin",
-        ":scion-ip-gateway-systemd",
-    ],
-)
-
-pkg_deb(
-    name = "scion-ip-gateway-debian",
-    architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
-    #    conffiles = [
-    #        "/usr/local/corp/etc/app.flagfile",
-    #    ],
-    data = ":scion-ip-gateway",
-    depends = [
-        "adduser",
-        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
-    ],
-    description = "SCION IP Gateway",
-    homepage = PKG_HOMEPAGE,
-    maintainer = PKG_MAINTAINER,
-    package = "scion-ip-gateway",
-    postinst = "postinst/scion.postinst",
-    priority = PKG_PRORITY,
-    section = PKG_SECTION,
-    version = PKG_VERSION,
-)
-
 # SCION Daemon
 pkg_tar(
     name = "scion-daemon-bin",
@@ -313,7 +263,7 @@ pkg_tar(
         "systemd/scion-daemon@.service",
     ],
     mode = "0644",
-    package_dir = "/etc/systemd/system",
+    package_dir = "/lib/systemd/system",
 )
 
 pkg_tar(
@@ -363,7 +313,7 @@ pkg_tar(
         "systemd/scion-dispatcher.service",
     ],
     mode = "0644",
-    package_dir = "/etc/systemd/system",
+    package_dir = "/lib/systemd/system",
 )
 
 pkg_tar(
@@ -458,7 +408,6 @@ pkg_deb(
         "scion-beacon-server (=" + PKG_VERSION + ")",
         "scion-certificate-server (=" + PKG_VERSION + ")",
         "scion-path-server (=" + PKG_VERSION + ")",
-        "scion-ip-gateway (=" + PKG_VERSION + ")",
         "scion-daemon (=" + PKG_VERSION + ")",
         "scion-dispatcher (=" + PKG_VERSION + ")",
         "scion-tools (=" + PKG_VERSION + ")",
