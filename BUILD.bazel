@@ -9,7 +9,7 @@ gazelle(name = "gazelle")
 # bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64
 
 # Variables used to prepare DEB and RPM packages
-PKG_ARCHITECTURE = "amd64"
+PKG_ARCHITECTURE = "CI_TARGET_ARCHITECTURE"
 
 PKG_BUILT_USING = "bazel (0.25.3)"
 
