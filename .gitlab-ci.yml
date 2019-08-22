@@ -25,9 +25,11 @@ test-connectivity:
     # Set variables in BUILD.bazel
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
     # Override some files from upstream SCION
-    - cp common.sh scion/env/common.sh
-    - cp deps.sh scion/env/debian/deps
+    - cp patches/common.sh scion/env/common.sh
+    - cp patches/deps.sh scion/env/debian/deps
     - cp BUILD.bazel scion/BUILD.bazel
+    # Copy platform-specific patches into SCION codebase
+    - cp --verbose -r patches/$CI_TARGET_ARCHITECTURE/. scion || true
     # Copy build-related directories into SCION codebase
     - cp -r conf scion
     - cp -r debian scion
@@ -35,8 +37,6 @@ test-connectivity:
     - cp -r rhel scion
     - cp -r systemd scion
     - cp scion-systemd-wrapper scion
-    # Copy platform-specific patches into SCION codebase
-    - cp --verbose -r platform-patches/$CI_TARGET_ARCHITECTURE/. scion || true
     # Install SCION dependencies
     - cd scion
     - ./env/debian/deps
@@ -97,6 +97,6 @@ deploy-deb:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - ssh $CI_SCP_TARGET "rm -f /tmp/*.deb"
   script:
-    - ls -l output*/*.deb
-    - scp output*/*.deb $CI_SCP_TARGET:/tmp
-    - ssh $CI_SCP_TARGET "set -o xtrace && cd /tmp && for deb in `ls *.deb`; do reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME \$deb; done"
+    - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
+    - export files=$(ssh $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
+    - for deb in $files; do ssh $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
