@@ -9,7 +9,7 @@ test-connectivity:
   image: busybox
   script:
     - ping github.com -c1
-    - wget packages.netsec.inf.ethz.ch
+    - nc -vz packages.netsec.inf.ethz.ch 22
 
 .build-deb-script: &build-deb-script
   script:
@@ -21,6 +21,8 @@ test-connectivity:
     # Install selected release of BAZEL
     - wget $CI_BAZEL_URL -O bazel_install_script.sh
     - bash bazel_install_script.sh
+    # Set variables in BUILD.bazel
+    - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
     # Override some files from upstream SCION
     - cp common.sh scion/env/common.sh
     - cp deps.sh scion/env/debian/deps
@@ -32,6 +34,8 @@ test-connectivity:
     - cp -r rhel scion
     - cp -r systemd scion
     - cp scion-systemd-wrapper scion
+    # Copy platform-specific patches into SCION codebase
+    - cp --verbose -r platform-patches/$CI_TARGET_ARCHITECTURE/. scion || true
     # Install SCION dependencies
     - cd scion
     - ./env/debian/deps
@@ -69,18 +73,6 @@ build-all-deb-arm64:
   artifacts:
     paths:
       - output-arm64/
-    expire_in: 1 hour
-  allow_failure: true
-
-build-all-deb-armhf:
-  stage: build
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: armhf
-  <<: *build-deb-script
-  artifacts:
-    paths:
-      - output-armhf/
     expire_in: 1 hour
   allow_failure: true
 
