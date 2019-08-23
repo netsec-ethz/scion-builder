@@ -67,11 +67,21 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "scion-border-router-logrotate",
+    srcs = [
+        "logrotate/scion-border-router",
+    ],
+    mode = "0644",
+    package_dir = "/etc/logrotate.d",
+)
+
+pkg_tar(
     name = "scion-border-router",
     extension = "tar.gz",
     deps = [
         ":scion-border-router-bin",
         ":scion-border-router-systemd",
+        ":scion-border-router-logrotate",
     ],
 )
 
@@ -117,11 +127,21 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "scion-beacon-server-logrotate",
+    srcs = [
+        "logrotate/scion-beacon-server",
+    ],
+    mode = "0644",
+    package_dir = "/etc/logrotate.d",
+)
+
+pkg_tar(
     name = "scion-beacon-server",
     extension = "tar.gz",
     deps = [
         ":scion-beacon-server-bin",
         ":scion-beacon-server-systemd",
+        ":scion-beacon-server-logrotate",
     ],
 )
 
@@ -167,11 +187,21 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "scion-certificate-server-logrotate",
+    srcs = [
+        "logrotate/scion-certificate-server",
+    ],
+    mode = "0644",
+    package_dir = "/etc/logrotate.d",
+)
+
+pkg_tar(
     name = "scion-certificate-server",
     extension = "tar.gz",
     deps = [
         ":scion-certificate-server-bin",
         ":scion-certificate-server-systemd",
+        ":scion-certificate-server-logrotate",
     ],
 )
 
@@ -217,11 +247,21 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "scion-path-server-logrotate",
+    srcs = [
+        "logrotate/scion-path-server",
+    ],
+    mode = "0644",
+    package_dir = "/etc/logrotate.d",
+)
+
+pkg_tar(
     name = "scion-path-server",
     extension = "tar.gz",
     deps = [
         ":scion-path-server-bin",
         ":scion-path-server-systemd",
+        ":scion-path-server-logrotate",
     ],
 )
 
@@ -267,11 +307,21 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "scion-daemon-logrotate",
+    srcs = [
+        "logrotate/scion-daemon",
+    ],
+    mode = "0644",
+    package_dir = "/etc/logrotate.d",
+)
+
+pkg_tar(
     name = "scion-daemon",
     extension = "tar.gz",
     deps = [
         ":scion-daemon-bin",
         ":scion-daemon-systemd",
+        ":scion-daemon-logrotate",
     ],
 )
 
@@ -317,11 +367,21 @@ pkg_tar(
 )
 
 pkg_tar(
+    name = "scion-dispatcher-logrotate",
+    srcs = [
+        "logrotate/scion-dispatcher",
+    ],
+    mode = "0644",
+    package_dir = "/etc/logrotate.d",
+)
+
+pkg_tar(
     name = "scion-dispatcher",
     extension = "tar.gz",
     deps = [
         ":scion-dispatcher-bin",
         ":scion-dispatcher-systemd",
+        ":scion-dispatcher-logrotate",
     ],
 )
 

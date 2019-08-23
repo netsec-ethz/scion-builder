@@ -138,6 +138,7 @@ scionlab-autoconfigure-deb-amd64-test:
     - stat -c "%U %G" /etc/scion | grep "scion scion"
     - ls /lib/systemd/system/$CI_PACKAGE*.service
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+    - ls /etc/logrotate.d/$CI_PACKAGE
 
 border-router-deb-amd64-test:
   stage: test-2
