@@ -79,9 +79,9 @@ all-deb-arm64:
 
 .test-deb-script: &test-deb-script
   script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE_*_$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper_*_$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE_*_$CI_TARGET_ARCHITECTURE.deb
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - id scion
     - getent group scion
     - stat -c "%U %G" /var/log/scion | grep "scion scion"
@@ -98,8 +98,8 @@ scion-systemd-wrapper-deb-amd64-test:
     CI_PACKAGE: scion-systemd-wrapper
     CI_BINARY_NAME: scion-systemd-wrapper
   script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE_*_$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE_*_$CI_TARGET_ARCHITECTURE.deb
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
 
 scion-border-router-deb-amd64-test:
