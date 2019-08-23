@@ -39,7 +39,7 @@ init7-mirror-test:
     - cp patches/deps.sh scion/env/debian/deps
     - cp BUILD.bazel scion/BUILD.bazel
     # Copy SCIONLab automatic configuration script into SCION codebase
-    - cp scionlab/hostfiles/scionlab-config scion/scionlab-autoupdate
+    - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-autoupdate
     # Copy platform-specific patches into SCION codebase
     - cp --verbose -r patches/$CI_TARGET_ARCHITECTURE/. scion || true
     # Copy build-related directories into SCION codebase
