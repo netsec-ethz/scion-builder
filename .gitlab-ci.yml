@@ -87,6 +87,7 @@ build-all-deb-arm64:
     - stat -c "%U %G" /tmp | grep "/var/lib/scion/"
     - stat -c "%U %G" /tmp | grep "/etc/scion/"
     - ls /lib/systemd/system/$CI_PACKAGE*.service
+    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
 
 test-scion-beacon-server-deb-amd64:
   stage: test
@@ -94,6 +95,7 @@ test-scion-beacon-server-deb-amd64:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-beacon-server
+    CI_BINARY_NAME: beacon_srv
   <<: *test-deb-script
 
 deploy-deb:
