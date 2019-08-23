@@ -11,12 +11,20 @@ connectivity-check:
     - ping github.com -c1
     - nc -vz packages.netsec.inf.ethz.ch 22
 
+init7-mirror-test:
+  stage: pre-build
+  image: $CI_DOCKER_IMAGE
+  script:
+    - apt update && apt install -y wget
+    - for i in {1..10}; do wget ch.archive.ubuntu.com/ubuntu/pool/main/n/nss/libnss3_3.35-2ubuntu2_amd64.deb -o /dev/null; md5sum -c <<<"70f2f7d4128d512a0736310779d3d432 libnss3_3.35-2ubuntu2_amd64.deb"; rm -f libnss3_3.35-2ubuntu2_amd64.deb; done
+
 .build-deb-script: &build-deb-script
   script:
     # Prepare operating system
+    - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
+    - apt update && apt install -y apt-transport-https
     - cp debian/apt.sources.list /etc/apt/sources.list
-    - rm -rf /var/lib/apt/lists/*
-    - apt update && apt install -y git wget unzip
+    - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget unzip
     # Clone SCION source code
     - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
     # Install selected release of BAZEL
