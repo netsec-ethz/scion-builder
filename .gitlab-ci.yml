@@ -43,8 +43,8 @@ init7-mirror-test:
     # Copy platform-specific patches into SCION codebase
     - cp --verbose -r patches/$CI_TARGET_ARCHITECTURE/. scion || true
     # Copy build-related directories into SCION codebase
-    - cp -r conf scion
     - cp -r debian scion
+    - cp -r logrotate scion
     - cp -r postinst scion
     - cp -r rhel scion
     - cp -r systemd scion
