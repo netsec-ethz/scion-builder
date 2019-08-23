@@ -4,7 +4,7 @@ stages:
   - test
   - deploy
 
-test-connectivity:
+connectivity-check:
   stage: pre-build
   image: busybox
   script:
@@ -54,7 +54,7 @@ test-connectivity:
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
 
-build-all-deb-amd64:
+all-deb-amd64:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
@@ -65,7 +65,7 @@ build-all-deb-amd64:
     - output-amd64/
     expire_in: 1 hour
 
-build-all-deb-arm64:
+all-deb-arm64:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
@@ -90,7 +90,7 @@ build-all-deb-arm64:
     - ls /lib/systemd/system/$CI_PACKAGE*.service
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
 
-test-scion-systemd-wrapper-deb-amd64:
+scion-systemd-wrapper-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -102,7 +102,7 @@ test-scion-systemd-wrapper-deb-amd64:
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE_*_$CI_TARGET_ARCHITECTURE.deb
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
 
-test-scion-border-router-deb-amd64:
+scion-border-router-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -111,7 +111,7 @@ test-scion-border-router-deb-amd64:
     CI_BINARY_NAME: border
   <<: *test-deb-script
 
-test-scion-beacon-server-deb-amd64:
+scion-beacon-server-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -120,7 +120,7 @@ test-scion-beacon-server-deb-amd64:
     CI_BINARY_NAME: beacon_srv
   <<: *test-deb-script
 
-test-scion-certificate-server-deb-amd64:
+scion-certificate-server-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -129,7 +129,7 @@ test-scion-certificate-server-deb-amd64:
     CI_BINARY_NAME: cert_srv
   <<: *test-deb-script
 
-test-scion-path-server-deb-amd64:
+scion-path-server-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -138,7 +138,7 @@ test-scion-path-server-deb-amd64:
     CI_BINARY_NAME: path_srv
   <<: *test-deb-script
 
-test-scion-daemon-deb-amd64:
+scion-daemon-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -147,7 +147,7 @@ test-scion-daemon-deb-amd64:
     CI_BINARY_NAME: sciond
   <<: *test-deb-script
 
-test-scion-dispatcher-deb-amd64:
+scion-dispatcher-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -156,7 +156,7 @@ test-scion-dispatcher-deb-amd64:
     CI_BINARY_NAME: godispatcher
   <<: *test-deb-script
 
-test-scion-tools-deb-amd64:
+scion-tools-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -168,8 +168,7 @@ test-scion-tools-deb-amd64:
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE_*_$CI_TARGET_ARCHITECTURE.deb
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
 
-
-deploy-deb:
+all-deb-deploy:
   stage: deploy
   image: $CI_DOCKER_IMAGE
   before_script:
