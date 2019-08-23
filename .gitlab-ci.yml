@@ -84,9 +84,9 @@ all-deb-arm64:
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE_*_$CI_TARGET_ARCHITECTURE.deb
     - id scion
     - getent group scion
-    - stat -c "%U %G" /tmp | grep "/var/log/scion/"
-    - stat -c "%U %G" /tmp | grep "/var/lib/scion/"
-    - stat -c "%U %G" /tmp | grep "/etc/scion/"
+    - stat -c "%U %G" /var/log/scion | grep "scion scion"
+    - stat -c "%U %G" /var/lib/scion | grep "scion scion"
+    - stat -c "%U %G" /etc/scion | grep "scion scion"
     - ls /lib/systemd/system/$CI_PACKAGE*.service
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
 
