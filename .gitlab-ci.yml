@@ -90,7 +90,7 @@ all-deb-arm64:
     - ls /lib/systemd/system/$CI_PACKAGE*.service
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
 
-scion-systemd-wrapper-deb-amd64-test:
+systemd-wrapper-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -102,7 +102,7 @@ scion-systemd-wrapper-deb-amd64-test:
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
 
-scion-border-router-deb-amd64-test:
+border-router-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -111,7 +111,7 @@ scion-border-router-deb-amd64-test:
     CI_BINARY_NAME: border
   <<: *test-deb-script
 
-scion-beacon-server-deb-amd64-test:
+beacon-server-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -120,7 +120,7 @@ scion-beacon-server-deb-amd64-test:
     CI_BINARY_NAME: beacon_srv
   <<: *test-deb-script
 
-scion-certificate-server-deb-amd64-test:
+certificate-server-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -129,7 +129,7 @@ scion-certificate-server-deb-amd64-test:
     CI_BINARY_NAME: cert_srv
   <<: *test-deb-script
 
-scion-path-server-deb-amd64-test:
+path-server-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -138,7 +138,7 @@ scion-path-server-deb-amd64-test:
     CI_BINARY_NAME: path_srv
   <<: *test-deb-script
 
-scion-daemon-deb-amd64-test:
+daemon-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
@@ -147,7 +147,7 @@ scion-daemon-deb-amd64-test:
     CI_BINARY_NAME: sciond
   <<: *test-deb-script
 
-scion-dispatcher-deb-amd64-test:
+dispatcher-deb-amd64-test:
   stage: test
   image: $CI_DOCKER_IMAGE
   variables:
