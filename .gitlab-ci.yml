@@ -49,7 +49,7 @@ connectivity-check:
 #    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
 #    - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
 #    - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-#    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
