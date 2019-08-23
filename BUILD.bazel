@@ -411,6 +411,7 @@ pkg_deb(
         "scion-daemon (=" + PKG_VERSION + ")",
         "scion-dispatcher (=" + PKG_VERSION + ")",
         "scion-tools (=" + PKG_VERSION + ")",
+        "openvpn",
     ],
     description = "SCIONLab",
     homepage = PKG_HOMEPAGE,
