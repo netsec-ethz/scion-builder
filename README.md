@@ -11,9 +11,11 @@ This repo currently uses GitLab CI and artifacts to store the output. Each commi
 CI process relies on some variables defined below. They can be configured using `Settings / CICD / Environment variables`.
 
 * `CI_DOCKER_IMAGE`
+* `CI_BAZEL_URL`
 * `CI_SCION_REPO`
 * `CI_SCION_BRANCH`
-* `CI_BAZEL_URL`
+* `CI_SCIONLAB_REPO`
+* `CI_SCIONLAB_BRANCH`
 
 As the last step uploads generated packages to the online repository, its configuration is stored in the following variables
 
