@@ -55,3 +55,7 @@ The builder is configured to run twice per day in order to check whether the pac
 ## Origins
 
 https://github.com/netsec-ethz/scion-debian-packager/
+
+## Further improvements
+
+It is foreseen to integrate this repo and its pipeline with GitLab workflow, i.e. where every PR triggers a pipeline here and returns a result. Initial investigations show due to lack of GitLab Premium license this would need to be done through CircleCI already used in GitLab. And additional step would need to be written and GitLab API endpoint would be called from there. GitHub webhooks can't be used directly as the payload has a completely different syntax from the one supported by GitLab.
