@@ -1,0 +1,17 @@
+[Unit]
+Description=SCION Beacon Server
+Documentation=https://www.scionlab.org
+After=network-online.target scion-dispatcher.service
+Wants=network-online.target
+PartOf=scionlab.service
+
+[Service]
+Type=simple
+User=scion
+ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/beacon_srv /etc/scion/ISD-isd-/AS-as-/bs%i/bs.toml %i
+RemainAfterExit=False
+KillMode=control-group
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

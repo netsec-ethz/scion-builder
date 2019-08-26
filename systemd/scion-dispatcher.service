@@ -1,0 +1,17 @@
+[Unit]
+Description=SCION Dispatcher
+Documentation=https://www.scionlab.org
+After=network-online.target
+Wants=network-online.target
+PartOf=scionlab.service
+
+[Service]
+Type=simple
+User=scion
+ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/godispatcher /etc/scion/dispatcher/disp.toml %i
+RemainAfterExit=False
+KillMode=control-group
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
