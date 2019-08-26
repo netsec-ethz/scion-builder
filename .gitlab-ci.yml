@@ -19,180 +19,180 @@ init7-mirror-test:
     - apt update && apt install -y wget
     - for i in {1..10}; do wget ch.archive.ubuntu.com/ubuntu/pool/main/n/nss/libnss3_3.35-2ubuntu2_amd64.deb -o /dev/null; md5sum -c <<<"70f2f7d4128d512a0736310779d3d432 libnss3_3.35-2ubuntu2_amd64.deb"; rm -f libnss3_3.35-2ubuntu2_amd64.deb; done
 
-.build-deb-script: &build-deb-script
-  script:
-    # Prepare operating system
-    - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
-    - apt update && apt install -y apt-transport-https
-    - cp debian/apt.sources.list /etc/apt/sources.list
-    - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget unzip
-    # Clone SCION source code
-    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
-    - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
-    # Install selected release of BAZEL
-    - wget $CI_BAZEL_URL -O bazel_install_script.sh
-    - bash bazel_install_script.sh
-    # Set variables in BUILD.bazel
-    - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
-    # Override some files from upstream SCION
-    - cp patches/common.sh scion/env/common.sh
-    - cp patches/deps.sh scion/env/debian/deps
-    - cp BUILD.bazel scion/BUILD.bazel
-    # Copy SCIONLab automatic configuration script into SCION codebase
-    - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-autoconfigure
-    # Copy platform-specific patches into SCION codebase
-    - cp --verbose -r patches/$CI_TARGET_ARCHITECTURE/. scion || true
-    # Copy build-related directories into SCION codebase
-    - cp -r debian scion
-    - cp -r logrotate scion
-    - cp -r postinst scion
-    - cp -r rhel scion
-    - cp -r systemd scion
-    - cp scion-systemd-wrapper scion
-    # Install SCION dependencies
-    - cd scion
-    - ./env/debian/deps
-    # Build SCION packages
-    - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scionlab-autoconfigure-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    # Prepare packages to shipment
-    - mkdir ../output-$CI_TARGET_ARCHITECTURE
-    - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
-
-all-deb-amd64:
-  stage: build
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-  <<: *build-deb-script
-  artifacts:
-    paths:
-    - output-amd64/
-    expire_in: 1 hour
-
-all-deb-arm64:
-  stage: build
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: arm64
-  <<: *build-deb-script
-  artifacts:
-    paths:
-      - output-arm64/
-    expire_in: 1 hour
-#  allow_failure: true
-
-systemd-wrapper-deb-amd64-test:
-  stage: test-1
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-systemd-wrapper
-    CI_BINARY_NAME: scion-systemd-wrapper
-  script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
-
-scion-tools-deb-amd64-test:
-  stage: test-1
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-tools
-    CI_BINARIES: "discovery_client pingpong buildkite_log_downloader logdog scion-custpk-load scion-pki scmp showpaths topopruner"
-  script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
-
-scionlab-autoconfigure-deb-amd64-test:
-  stage: test-1
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scionlab-autoconfigure
-    CI_BINARY_NAME: scionlab-autoconfigure
-  script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
-
-.test-deb-script: &test-deb-script
-  script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - id scion
-    - getent group scion
-    - stat -c "%U %G" /var/log/scion | grep "scion scion"
-    - stat -c "%U %G" /var/lib/scion | grep "scion scion"
-    - stat -c "%U %G" /etc/scion | grep "scion scion"
-    - ls /lib/systemd/system/$CI_PACKAGE*.service
-    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
-    - ls /etc/logrotate.d/$CI_PACKAGE
-
-border-router-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-border-router
-    CI_BINARY_NAME: border
-  <<: *test-deb-script
-
-beacon-server-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-beacon-server
-    CI_BINARY_NAME: beacon_srv
-  <<: *test-deb-script
-
-certificate-server-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-certificate-server
-    CI_BINARY_NAME: cert_srv
-  <<: *test-deb-script
-
-path-server-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-path-server
-    CI_BINARY_NAME: path_srv
-  <<: *test-deb-script
-
-daemon-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-daemon
-    CI_BINARY_NAME: sciond
-  <<: *test-deb-script
-
-dispatcher-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-dispatcher
-    CI_BINARY_NAME: godispatcher
-  <<: *test-deb-script
+#.build-deb-script: &build-deb-script
+#  script:
+#    # Prepare operating system
+#    - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
+#    - apt update && apt install -y apt-transport-https
+#    - cp debian/apt.sources.list /etc/apt/sources.list
+#    - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget unzip
+#    # Clone SCION source code
+#    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
+#    - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
+#    # Install selected release of BAZEL
+#    - wget $CI_BAZEL_URL -O bazel_install_script.sh
+#    - bash bazel_install_script.sh
+#    # Set variables in BUILD.bazel
+#    - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
+#    # Override some files from upstream SCION
+#    - cp patches/common.sh scion/env/common.sh
+#    - cp patches/deps.sh scion/env/debian/deps
+#    - cp BUILD.bazel scion/BUILD.bazel
+#    # Copy SCIONLab automatic configuration script into SCION codebase
+#    - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-autoconfigure
+#    # Copy platform-specific patches into SCION codebase
+#    - cp --verbose -r patches/$CI_TARGET_ARCHITECTURE/. scion || true
+#    # Copy build-related directories into SCION codebase
+#    - cp -r debian scion
+#    - cp -r logrotate scion
+#    - cp -r postinst scion
+#    - cp -r rhel scion
+#    - cp -r systemd scion
+#    - cp scion-systemd-wrapper scion
+#    # Install SCION dependencies
+#    - cd scion
+#    - ./env/debian/deps
+#    # Build SCION packages
+#    - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scionlab-autoconfigure-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+#    # Prepare packages to shipment
+#    - mkdir ../output-$CI_TARGET_ARCHITECTURE
+#    - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
+#
+#all-deb-amd64:
+#  stage: build
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#  <<: *build-deb-script
+#  artifacts:
+#    paths:
+#    - output-amd64/
+#    expire_in: 1 hour
+#
+#all-deb-arm64:
+#  stage: build
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: arm64
+#  <<: *build-deb-script
+#  artifacts:
+#    paths:
+#      - output-arm64/
+#    expire_in: 1 hour
+##  allow_failure: true
+#
+#systemd-wrapper-deb-amd64-test:
+#  stage: test-1
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-systemd-wrapper
+#    CI_BINARY_NAME: scion-systemd-wrapper
+#  script:
+#    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+#    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+#    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+#
+#scion-tools-deb-amd64-test:
+#  stage: test-1
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-tools
+#    CI_BINARIES: "discovery_client pingpong buildkite_log_downloader logdog scion-custpk-load scion-pki scmp showpaths topopruner"
+#  script:
+#    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+#    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+#    - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
+#
+#scionlab-autoconfigure-deb-amd64-test:
+#  stage: test-1
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scionlab-autoconfigure
+#    CI_BINARY_NAME: scionlab-autoconfigure
+#  script:
+#    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+#    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+#    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+#
+#.test-deb-script: &test-deb-script
+#  script:
+#    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+#    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
+#    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+#    - id scion
+#    - getent group scion
+#    - stat -c "%U %G" /var/log/scion | grep "scion scion"
+#    - stat -c "%U %G" /var/lib/scion | grep "scion scion"
+#    - stat -c "%U %G" /etc/scion | grep "scion scion"
+#    - ls /lib/systemd/system/$CI_PACKAGE*.service
+#    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+#    - ls /etc/logrotate.d/$CI_PACKAGE
+#
+#border-router-deb-amd64-test:
+#  stage: test-2
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-border-router
+#    CI_BINARY_NAME: border
+#  <<: *test-deb-script
+#
+#beacon-server-deb-amd64-test:
+#  stage: test-2
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-beacon-server
+#    CI_BINARY_NAME: beacon_srv
+#  <<: *test-deb-script
+#
+#certificate-server-deb-amd64-test:
+#  stage: test-2
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-certificate-server
+#    CI_BINARY_NAME: cert_srv
+#  <<: *test-deb-script
+#
+#path-server-deb-amd64-test:
+#  stage: test-2
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-path-server
+#    CI_BINARY_NAME: path_srv
+#  <<: *test-deb-script
+#
+#daemon-deb-amd64-test:
+#  stage: test-2
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-daemon
+#    CI_BINARY_NAME: sciond
+#  <<: *test-deb-script
+#
+#dispatcher-deb-amd64-test:
+#  stage: test-2
+#  image: $CI_DOCKER_IMAGE
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-dispatcher
+#    CI_BINARY_NAME: godispatcher
+#  <<: *test-deb-script
 
 all-deb-deploy:
   stage: deploy
@@ -209,6 +209,9 @@ all-deb-deploy:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - ssh -q $CI_SCP_TARGET "rm -f /tmp/*.deb"
   script:
+    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g")
+    - sed -i "s/CI_PKG_VERSION/$CI_PKG_VERSION/g" BUILD.bazel
+    - echo $CI_PKG_VERSION
     - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
     - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
