@@ -4,6 +4,7 @@ stages:
   - test-1
   - test-2
   - deploy
+  - post-deploy
 
 connectivity-check:
   stage: pre-build
@@ -34,6 +35,7 @@ init7-mirror-test:
     - bash bazel_install_script.sh
     # Set variables in BUILD.bazel
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
+    - '[[ $CI_COMMIT_TAG == release/* ]] && export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && sed -i "s/0.0.0/$CI_PKG_VERSION/g" BUILD.bazel && echo $CI_PKG_VERSION || true'
     # Override some files from upstream SCION
     - cp patches/common.sh scion/env/common.sh
     - cp patches/deps.sh scion/env/debian/deps
@@ -212,9 +214,17 @@ all-deb-deploy:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - ssh -q $CI_SCP_TARGET "rm -f /tmp/*.deb"
   script:
-    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g")
-    - sed -i "s/0.0.0/$CI_PKG_VERSION/g" BUILD.bazel
-    - echo $CI_PKG_VERSION
     - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
     - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
+
+deb-amd64-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - /^release\/.*$/
+  except:
+    - branches
+  script:
+    - echo "deb [trusted=yes] http://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
+    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
