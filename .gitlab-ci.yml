@@ -66,6 +66,9 @@ init7-mirror-test:
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
+    # Place hashes of git repos in the output for auditing
+    - cd ../scion && git log -1
+    - cd ../scionlab && git log -1
 
 all-deb-amd64:
   stage: build
@@ -197,6 +200,10 @@ dispatcher-deb-amd64-test:
 all-deb-deploy:
   stage: deploy
   image: $CI_DOCKER_IMAGE
+  only:
+    - /^release\/.*$/
+  except:
+    - branches
   before_script:
     - 'which ssh-agent || ( apt update && apt-get install -qq openssh-client )'
     - eval $(ssh-agent -s)
@@ -205,6 +212,9 @@ all-deb-deploy:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - ssh -q $CI_SCP_TARGET "rm -f /tmp/*.deb"
   script:
+    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g")
+    - sed -i "s/0.0.0/$CI_PKG_VERSION/g" BUILD.bazel
+    - echo $CI_PKG_VERSION
     - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
     - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
