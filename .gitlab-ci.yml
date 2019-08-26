@@ -66,6 +66,9 @@ init7-mirror-test:
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
+    # Place hashes of git repos in the output for auditing
+    - cd ../scion && git log -1
+    - cd ../scionlab && git log -1
 
 all-deb-amd64:
   stage: build
