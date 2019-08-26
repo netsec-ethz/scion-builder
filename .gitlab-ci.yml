@@ -197,6 +197,10 @@ dispatcher-deb-amd64-test:
 all-deb-deploy:
   stage: deploy
   image: $CI_DOCKER_IMAGE
+  only:
+    - /^release\/.*$/
+  except:
+    - branches
   before_script:
     - 'which ssh-agent || ( apt update && apt-get install -qq openssh-client )'
     - eval $(ssh-agent -s)
