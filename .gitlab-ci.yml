@@ -218,7 +218,7 @@ all-deb-deploy:
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
     - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
 
-deb-amd64-test:
+deb-http-test:
   stage: post-deploy
   image: $CI_DOCKER_IMAGE
   only:
@@ -227,4 +227,16 @@ deb-amd64-test:
     - branches
   script:
     - echo "deb [trusted=yes] http://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
+    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
+
+deb-https-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - /^release\/.*$/
+  except:
+    - branches
+  script:
+    - apt update && apt install -y apt-transport-https
+    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
     - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
