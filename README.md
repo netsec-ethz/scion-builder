@@ -46,6 +46,23 @@ If it is ever needed to check which commit a selected version of DEB package is 
 
 The builder is configured to run twice per day in order to check whether the packages can be still created successfuly, but without releasing them. The last step has to be invoked manually by the operator as described above (by pushing a proper tag).
 
+## Package installation
+
+Based on the current configuration, packages can be installed in one of the following ways
+
+### Debian-based
+```bash
+echo "deb [trusted=yes] http://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list
+```
+
+```bash
+apt install -y apt-transport-https
+echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list
+```
+
+### RH-based
+Not yet available.
+
 ## Upstream projects
 
 * https://github.com/scionproto/scion
