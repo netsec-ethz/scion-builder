@@ -502,7 +502,7 @@ pkg_deb(
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scionlab",
-    postinst = "postinst/scion.postinst",
+    postinst = "postinst/scionlab.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION,
