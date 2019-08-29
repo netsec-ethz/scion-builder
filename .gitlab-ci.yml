@@ -41,7 +41,7 @@ init7-mirror-test:
     - cp patches/deps.sh scion/env/debian/deps
     - cp BUILD.bazel scion/BUILD.bazel
     # Copy SCIONLab automatic configuration script into SCION codebase
-    - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-config
+    - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-autoconfigure
     # Copy platform-specific patches into SCION codebase
     - cp --verbose -r patches/$CI_TARGET_ARCHITECTURE/. scion || true
     # Copy build-related directories into SCION codebase
@@ -63,7 +63,7 @@ init7-mirror-test:
     - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scionlab-config-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+    - bazel build //:scionlab-autoconfigure-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
@@ -119,13 +119,13 @@ scion-tools-deb-amd64-test:
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
 
-scionlab-config-deb-amd64-test:
+scionlab-autoconfigure-deb-amd64-test:
   stage: test-1
   image: $CI_DOCKER_IMAGE
   variables:
     CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scionlab-config
-    CI_BINARY_NAME: scionlab-config
+    CI_PACKAGE: scionlab-autoconfigure
+    CI_BINARY_NAME: scionlab-autoconfigure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
