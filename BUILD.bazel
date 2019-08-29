@@ -448,23 +448,23 @@ pkg_deb(
 
 # SCIONLab autoconfigure script
 pkg_tar (
-    name = "scionlab-autoconfigure-bin",
+    name = "scionlab-config-bin",
 	srcs = [
-		"scionlab-autoconfigure",
+		"scionlab-config",
 	],
 	mode = "0755",
 	package_dir = "/usr/bin",
 )
 
 pkg_deb(
-    name = "scionlab-autoconfigure-debian",
+    name = "scionlab-config-debian",
     architecture = PKG_ARCHITECTURE,
     built_using = PKG_BUILT_USING,
-    data = ":scionlab-autoconfigure-bin",
+    data = ":scionlab-config-bin",
     description = "SCIONLab automatic configuration",
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
-    package = "scionlab-autoconfigure",
+    package = "scionlab-config",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION,
@@ -495,7 +495,7 @@ pkg_deb(
         "scion-daemon (=" + PKG_VERSION + ")",
         "scion-dispatcher (=" + PKG_VERSION + ")",
         "scion-tools (=" + PKG_VERSION + ")",
-        "scionlab-autoconfigure (=" + PKG_VERSION + ")",
+        "scionlab-config (=" + PKG_VERSION + ")",
         "openvpn",
     ],
     description = "SCIONLab",
