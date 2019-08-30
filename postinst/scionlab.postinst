@@ -1,7 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
-scionlab-config --force
+# check gen-certs/tls.{pem,key}
+if [ ! -e "gen-certs/tls.pem" -o ! -e "gen-certs/tls.key" ]; then
+    echo "Generating TLS cert"
+    mkdir -p /etc/scion/gen-certs
+    chown scion.scion "/etc/scion/gen-certs"
+    pushd /etc/scion/gen-certs
+    local old=$(umask)
+    umask 0177
+    sudo -u scion openssl genrsa -out "gen-certs/tls.key" 2048
+    umask "$old"
+    sudo -u scion openssl req -new -x509 -key "gen-certs/tls.key" -out "gen-certs/tls.pem" -days 3650 -subj /CN=scion_def_srv
+    popd
+fi
+
+# check configuration. We must have it in /etc/scion/gen/scionlab-config.json
+scionlab-config
 
 #DEBHELPER#
 
