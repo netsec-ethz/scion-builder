@@ -7,9 +7,9 @@ if [ ! -e "/etc/scion/gen-certs/tls.pem" -o ! -e "/etc/scion/gen-certs/tls.key" 
     mkdir -p "/etc/scion/gen-certs"
 
     pushd "/etc/scion/gen-certs"
-    scion openssl genrsa -out "gen-certs/tls.key" 2048
+    openssl genrsa -out "gen-certs/tls.key" 2048
     chmod 600 "gen-certs/tls.key"
-    scion openssl req -new -x509 -key "gen-certs/tls.key" -out "gen-certs/tls.pem" -days 3650 -subj /CN=scion_def_srv
+    openssl req -new -x509 -key "gen-certs/tls.key" -out "gen-certs/tls.pem" -days 3650 -subj /CN=scion_def_srv
     popd
 
     chown -R scion.scion "/etc/scion/gen-certs"
