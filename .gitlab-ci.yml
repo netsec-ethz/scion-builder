@@ -213,9 +213,7 @@ all-deb-deploy:
   stage: deploy
   image: $CI_DOCKER_IMAGE
   only:
-    - /^release\/.*$/
-  except:
-    - branches
+    - master
   before_script:
     - 'which ssh-agent || ( apt update && apt-get install -qq openssh-client )'
     - eval $(ssh-agent -s)
@@ -232,9 +230,7 @@ deb-http-test:
   stage: post-deploy
   image: $CI_DOCKER_IMAGE
   only:
-    - /^release\/.*$/
-  except:
-    - branches
+    - master
   script:
     - echo "deb [trusted=yes] http://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
 #    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
@@ -244,9 +240,7 @@ deb-https-test:
   stage: post-deploy
   image: $CI_DOCKER_IMAGE
   only:
-    - /^release\/.*$/
-  except:
-    - branches
+    - master
   script:
     - apt update && apt install -y apt-transport-https
     - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
@@ -258,12 +252,15 @@ deb-https-test:
     - apt update && apt install -y apt-transport-https
     - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
     - source ./RELEASE
+    - export CI_VERSION=$(printenv `echo $CI_VERSION_VARIABLE`)
     - apt show $CI_PACKAGE=$CI_VERSION
 
 border-router-deb-deploy-test:
   stage: post-deploy
   image: $CI_DOCKER_IMAGE
+#  only:
+#    - master
   variables:
     CI_PACKAGE: scion-border-router
-    CI_VERSION: border
+    CI_VERSION_VARIABLE: PKG_VERSION_SCION_SYSTEMD_WRAPPER
   <<: *test-deb-script
