@@ -19,9 +19,9 @@ set -e
 case "$1" in
     configure)
         # Create system user and group for scion
-        id scion || adduser --system --no-create-home scion
-        getent group scion || groupadd scion
-        usermod -g scion scion
+        id scion >/dev/null 2>&1 || adduser --system --no-create-home scion
+        getent group scion >/dev/null 2>&1 || groupadd scion >/dev/null 2>&1
+        usermod -g scion scion >/dev/null 2>&1
 
         # Create directory for logs and own it
         mkdir -p /var/log/scion/
@@ -35,12 +35,8 @@ case "$1" in
 		mkdir -p /etc/scion/
 		chown -R scion:scion /etc/scion/
 
-        if [ -f /.dockerenv ]; then
-			# Systemd is not running when in docker, therefore ignore the following command
-            echo "I'm inside matrix ;(";
-        else
-            # Reload systemd unit files after installing a new one
-            systemctl daemon-reload
+        if [ ! -f /.dockerenv ]; then
+			systemctl daemon-reload
         fi
         ;;
 esac
