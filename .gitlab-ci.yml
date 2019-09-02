@@ -234,12 +234,92 @@ all-deb-deploy:
     - export CI_VERSION=$(printenv `echo $CI_VERSION_VARIABLE`)
     - apt show $CI_PACKAGE=$CI_VERSION
 
-border-router-deb-deploy-test:
+systemd-wrapper-deb-deploy-test:
   stage: post-deploy
   image: $CI_DOCKER_IMAGE
-#  only:
-#    - master
+  only:
+    - master
   variables:
-    CI_PACKAGE: scion-border-router
+    CI_PACKAGE: scion-systemd-wrapper
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_SYSTEMD_WRAPPER
+  <<: *test-deb-deploy-script
+
+beacon-server-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scion-beacon-server
+    CI_VERSION_VARIABLE: PKG_VERSION_SCION_BEACON_SERVER
+  <<: *test-deb-deploy-script
+
+certificate-server-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scion-certificate-server
+    CI_VERSION_VARIABLE: PKG_VERSION_SCION_CERTIFICATE_SERVER
+  <<: *test-deb-deploy-script
+
+path-server-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scion-path-server
+    CI_VERSION_VARIABLE: PKG_VERSION_SCION_PATH_SERVER
+  <<: *test-deb-deploy-script
+
+daemon-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scion-daemon
+    CI_VERSION_VARIABLE: PKG_VERSION_SCION_DAEMON
+  <<: *test-deb-deploy-script
+
+dispatcher-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scion-dispatcher
+    CI_VERSION_VARIABLE: PKG_VERSION_SCION_DISPATCHER
+  <<: *test-deb-deploy-script
+
+scion-tools-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scion-tools
+    CI_VERSION_VARIABLE: PKG_VERSION_SCION_TOOLS
+  <<: *test-deb-deploy-script
+
+scionlab-config-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scionlab-config
+    CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB_CONFIG
+  <<: *test-deb-deploy-script
+
+scionlab-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scionlab
+    CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB
   <<: *test-deb-deploy-script
