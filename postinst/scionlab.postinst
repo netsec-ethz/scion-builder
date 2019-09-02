@@ -2,17 +2,17 @@
 set -e
 
 # check gen-certs/tls.{pem,key}
-if [ ! -e "gen-certs/tls.pem" -o ! -e "gen-certs/tls.key" ]; then
-    echo "Generating TLS cert"
-    mkdir -p /etc/scion/gen-certs
-    chown scion.scion "/etc/scion/gen-certs"
-    pushd /etc/scion/gen-certs
-    local old=$(umask)
-    umask 0177
-    sudo -u scion openssl genrsa -out "gen-certs/tls.key" 2048
-    umask "$old"
-    sudo -u scion openssl req -new -x509 -key "gen-certs/tls.key" -out "gen-certs/tls.pem" -days 3650 -subj /CN=scion_def_srv
+if [ ! -e "/etc/scion/gen-certs/tls.pem" -o ! -e "/etc/scion/gen-certs/tls.key" ]; then
+    echo "SCIONLab: Generating TLS cert"
+    mkdir -p "/etc/scion/gen-certs"
+
+    pushd "/etc/scion/gen-certs"
+    scion openssl genrsa -out "gen-certs/tls.key" 2048
+    chmod 600 "gen-certs/tls.key"
+    scion openssl req -new -x509 -key "gen-certs/tls.key" -out "gen-certs/tls.pem" -days 3650 -subj /CN=scion_def_srv
     popd
+
+    chown -R scion.scion "/etc/scion/gen-certs"
 fi
 
 # ensure we re-install the configuration (expected in e.g. Vagrantfile)
