@@ -10,18 +10,22 @@ gazelle(name = "gazelle")
 
 # Variables used to prepare DEB and RPM packages
 PKG_ARCHITECTURE = "CI_TARGET_ARCHITECTURE"
-
 PKG_BUILT_USING = "bazel (0.25.3)"
-
 PKG_HOMEPAGE = "https://www.scion-architecture.net"
-
 PKG_MAINTAINER = "ETH Zurich, SCIONLab Team <scionlab-admins@sympa.ethz.ch>"
-
 PKG_PRORITY = "optional"
-
 PKG_SECTION = "net"
 
-PKG_VERSION = "0.0.0"
+PKG_VERSION_SCION_SYSTEMD_WRAPPER = "CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER"
+PKG_VERSION_SCION_BORDER_ROUTER = "CI_PKG_VERSION_SCION_BORDER_ROUTER"
+PKG_VERSION_SCION_BEACON_SERVER = "CI_PKG_VERSION_SCION_BEACON_SERVER"
+PKG_VERSION_SCION_CERTIFICATE_SERVER = "CI_PKG_VERSION_SCION_CERTIFICATE_SERVER"
+PKG_VERSION_SCION_PATH_SERVER = "CI_PKG_VERSION_SCION_PATH_SERVER"
+PKG_VERSION_SCION_DAEMON = "CI_PKG_VERSION_SCION_DAEMON"
+PKG_VERSION_SCION_DISPATCHER = "CI_PKG_VERSION_SCION_DISPATCHER"
+PKG_VERSION_SCION_TOOLS = "CI_PKG_VERSION_SCION_TOOLS"
+PKG_VERSION_SCIONLAB_CONFIG = "CI_PKG_VERSION_SCIONLAB_CONFIG"
+PKG_VERSION_SCIONLAB = "CI_PKG_VERSION_SCIONLAB"
 
 # SCION wrapper script
 pkg_tar (
@@ -44,7 +48,7 @@ pkg_deb(
     package = "scion-systemd-wrapper",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCION_SYSTEMD_WRAPPER,
 )
 
 # SCION Border Router
@@ -95,7 +99,7 @@ pkg_deb(
     data = ":scion-border-router",
     depends = [
         "adduser",
-        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
+        "scion-systemd-wrapper (=" + PKG_VERSION_SCION_SYSTEMD_WRAPPER + ")",
     ],
     description = "SCION Border Router",
     homepage = PKG_HOMEPAGE,
@@ -104,7 +108,7 @@ pkg_deb(
     postinst = "postinst/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCION_BORDER_ROUTER,
 )
 
 # SCION Beacon Server
@@ -155,7 +159,7 @@ pkg_deb(
     data = ":scion-beacon-server",
     depends = [
         "adduser",
-        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
+        "scion-systemd-wrapper (=" + PKG_VERSION_SCION_SYSTEMD_WRAPPER + ")",
     ],
     description = "SCION Beacon Server",
     homepage = PKG_HOMEPAGE,
@@ -164,7 +168,7 @@ pkg_deb(
     postinst = "postinst/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCION_BEACON_SERVER,
 )
 
 # SCION Certificate Server
@@ -215,7 +219,7 @@ pkg_deb(
     data = ":scion-certificate-server",
     depends = [
         "adduser",
-        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
+        "scion-systemd-wrapper (=" + PKG_VERSION_SCION_SYSTEMD_WRAPPER + ")",
     ],
     description = "SCION Certificate Server",
     homepage = PKG_HOMEPAGE,
@@ -224,7 +228,7 @@ pkg_deb(
     postinst = "postinst/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCION_CERTIFICATE_SERVER,
 )
 
 # SCION Path Server
@@ -275,7 +279,7 @@ pkg_deb(
     data = ":scion-path-server",
     depends = [
         "adduser",
-        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
+        "scion-systemd-wrapper (=" + PKG_VERSION_SCION_SYSTEMD_WRAPPER + ")",
     ],
     description = "SCION Path Server",
     homepage = PKG_HOMEPAGE,
@@ -284,7 +288,7 @@ pkg_deb(
     postinst = "postinst/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCION_PATH_SERVER,
 )
 
 # SCION Daemon
@@ -335,7 +339,7 @@ pkg_deb(
     data = ":scion-daemon",
     depends = [
         "adduser",
-        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
+        "scion-systemd-wrapper (=" + PKG_VERSION_SCION_SYSTEMD_WRAPPER + ")",
     ],
     description = "SCION Daemon",
     homepage = PKG_HOMEPAGE,
@@ -344,7 +348,7 @@ pkg_deb(
     postinst = "postinst/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCION_DAEMON,
 )
 
 # SCION Dispatcher
@@ -395,7 +399,7 @@ pkg_deb(
     data = ":scion-dispatcher",
     depends = [
         "adduser",
-        "scion-systemd-wrapper (=" + PKG_VERSION + ")",
+        "scion-systemd-wrapper (=" + PKG_VERSION_SCION_SYSTEMD_WRAPPER + ")",
     ],
     description = "SCION Dispatcher",
     homepage = PKG_HOMEPAGE,
@@ -404,22 +408,16 @@ pkg_deb(
     postinst = "postinst/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCION_DISPATCHER,
 )
 
 # SCION Tools
 pkg_tar(
     name = "scion-tools-bin",
     srcs = [
-        "//go/examples/discovery_client",
         "//go/examples/pingpong",
-        "//go/tools/buildkite_log_downloader",
-        "//go/tools/logdog",
-        "//go/tools/scion-custpk-load",
-        "//go/tools/scion-pki",
         "//go/tools/scmp",
         "//go/tools/showpaths",
-        "//go/tools/topopruner",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -443,7 +441,7 @@ pkg_deb(
     postinst = "postinst/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCION_TOOLS,
 )
 
 # SCIONLab config script
@@ -467,7 +465,7 @@ pkg_deb(
     package = "scionlab-config",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCIONLAB_CONFIG_DEBIAN,
 )
 
 # SCIONLab
@@ -488,14 +486,14 @@ pkg_deb(
     #    ],
     data = ":scionlab-null",
     depends = [
-        "scion-border-router (=" + PKG_VERSION + ")",
-        "scion-beacon-server (=" + PKG_VERSION + ")",
-        "scion-certificate-server (=" + PKG_VERSION + ")",
-        "scion-path-server (=" + PKG_VERSION + ")",
-        "scion-daemon (=" + PKG_VERSION + ")",
-        "scion-dispatcher (=" + PKG_VERSION + ")",
-        "scion-tools (=" + PKG_VERSION + ")",
-        "scionlab-config (=" + PKG_VERSION + ")",
+        "scion-border-router (=" + PKG_VERSION_SCION_BORDER_ROUTER + ")",
+        "scion-beacon-server (=" + PKG_VERSION_SCION_BEACON_SERVER + ")",
+        "scion-certificate-server (=" + PKG_VERSION_SCION_CERTIFICATE_SERVER + ")",
+        "scion-path-server (=" + PKG_VERSION_SCION_PATH_SERVER + ")",
+        "scion-daemon (=" + PKG_VERSION_SCION_DAEMON + ")",
+        "scion-dispatcher (=" + PKG_VERSION_SCION_DISPATCHER + ")",
+        "scion-tools (=" + PKG_VERSION_SCION_TOOLS + ")",
+        "scionlab-config (=" + PKG_VERSION_SCIONLAB_CONFIG + ")",
         "openvpn",
     ],
     description = "SCIONLab",
@@ -505,7 +503,7 @@ pkg_deb(
     postinst = "postinst/scionlab.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION,
+    version = PKG_VERSION_SCIONLAB,
 )
 
 # Nogo - Go code analysis tool

@@ -34,8 +34,19 @@ init7-mirror-test:
     - wget $CI_BAZEL_URL -O bazel_install_script.sh
     - bash bazel_install_script.sh
     # Set variables in BUILD.bazel
+    - source ./RELEASE
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
-    - '[[ $CI_COMMIT_TAG == release/* ]] && export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && sed -i "s/0.0.0/$CI_PKG_VERSION/g" BUILD.bazel && echo $CI_PKG_VERSION || true'
+    - sed -i "s/CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER/$PKG_VERSION_SCION_SYSTEMD_WRAPPER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_PATH_SERVER/$PKG_VERSION_SCION_PATH_SERVER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCIONLAB_CONFIG/$PKG_VERSION_SCIONLAB_CONFIG/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCIONLAB/$PKG_VERSION_SCIONLAB/g" BUILD.bazel
+#    - '[[ $CI_COMMIT_TAG == release/* ]] && export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && sed -i "s/0.0.0/$CI_PKG_VERSION/g" BUILD.bazel && echo $CI_PKG_VERSION || true'
     # Override some files from upstream SCION
     - cp BUILD.bazel scion/BUILD.bazel
     - pushd scion && for i in ../patches/*.patch; do git apply $i --verbose; done && popd
@@ -215,7 +226,7 @@ all-deb-deploy:
   script:
     - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
-    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
+    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb" || true; done
 
 deb-http-test:
   stage: post-deploy
@@ -226,7 +237,8 @@ deb-http-test:
     - branches
   script:
     - echo "deb [trusted=yes] http://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
-    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
+#    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
+    - source ./RELEASE && apt show scionlab=$PKG_VERSION_SCIONLAB
 
 deb-https-test:
   stage: post-deploy
@@ -238,4 +250,5 @@ deb-https-test:
   script:
     - apt update && apt install -y apt-transport-https
     - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
-    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
+#    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
+    - source ./RELEASE && apt show scionlab=$PKG_VERSION_SCIONLAB
