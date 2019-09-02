@@ -15,8 +15,8 @@ if [ ! -e "gen-certs/tls.pem" -o ! -e "gen-certs/tls.key" ]; then
     popd
 fi
 
-# check configuration. We must have it in /etc/scion/gen/scionlab-config.json
-scionlab-config
+# ensure we re-install the configuration (expected in e.g. Vagrantfile)
+scionlab-config --force
 
 #DEBHELPER#
 
