@@ -123,7 +123,7 @@ scion-tools-deb-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
-    CI_BINARIES: "discovery_client pingpong buildkite_log_downloader logdog scion-custpk-load scion-pki scmp showpaths topopruner"
+    CI_BINARIES: "pingpong scmp showpaths"
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
