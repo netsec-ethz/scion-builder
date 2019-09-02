@@ -8,7 +8,7 @@ PartOf=scionlab.service
 [Service]
 Type=simple
 User=scion
-ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/path_srv /etc/scion/ISD-isd-/AS-as-/ps%i/ps.toml %i
+ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/path_srv /etc/scion/gen/ISD-isd-/AS-as-/ps%i/ps.toml %i
 RemainAfterExit=False
 KillMode=control-group
 Restart=on-failure
