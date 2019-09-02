@@ -24,9 +24,9 @@ case "$1" in
             mkdir -p "/etc/scion/gen-certs"
 
             pushd "/etc/scion/gen-certs"
-            openssl genrsa -out "gen-certs/tls.key" 2048
-            chmod 600 "gen-certs/tls.key"
-            openssl req -new -x509 -key "gen-certs/tls.key" -out "gen-certs/tls.pem" -days 3650 -subj /CN=scion_def_srv
+            openssl genrsa -out "tls.key" 2048
+            chmod 600 "tls.key"
+            openssl req -new -x509 -key "tls.key" -out "tls.pem" -days 3650 -subj /CN=scion_def_srv
             popd
 
             chown -R scion.scion "/etc/scion/gen-certs"
