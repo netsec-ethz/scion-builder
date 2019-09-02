@@ -242,4 +242,4 @@ border-router-deb-deploy-test:
   variables:
     CI_PACKAGE: scion-border-router
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_SYSTEMD_WRAPPER
-  <<: *test-deb-script
+  <<: *test-deb-deploy-script
