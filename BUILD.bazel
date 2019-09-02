@@ -465,7 +465,7 @@ pkg_deb(
     package = "scionlab-config",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
-    version = PKG_VERSION_SCIONLAB_CONFIG_DEBIAN,
+    version = PKG_VERSION_SCIONLAB_CONFIG,
 )
 
 # SCIONLab

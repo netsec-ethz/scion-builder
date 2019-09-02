@@ -252,3 +252,18 @@ deb-https-test:
     - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
 #    - export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && apt show scionlab=$CI_PKG_VERSION
     - source ./RELEASE && apt show scionlab=$PKG_VERSION_SCIONLAB
+
+.test-deb-deploy-script: &test-deb-deploy-script
+  script:
+    - apt update && apt install -y apt-transport-https
+    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
+    - source ./RELEASE
+    - apt show $CI_PACKAGE=$CI_VERSION
+
+border-router-deb-deploy-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  variables:
+    CI_PACKAGE: scion-border-router
+    CI_VERSION: border
+  <<: *test-deb-script
