@@ -16,7 +16,7 @@ CI process relies on some variables defined below. They can be configured using 
 ### Builder configuration
 
 * `CI_DOCKER_IMAGE`
-* `CI_BAZEL_URL`
+* `CI_BAZEL_VERSION`
 
 ### DEB repository configuration
 

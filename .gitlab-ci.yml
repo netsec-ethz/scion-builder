@@ -31,11 +31,12 @@ init7-mirror-test:
     - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
     - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
     # Install selected release of BAZEL
-    - wget $CI_BAZEL_URL -O bazel_install_script.sh
+    - wget https://github.com/bazelbuild/bazel/releases/download/$CI_BAZEL_VERSION/bazel-$CI_BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
     - bash bazel_install_script.sh
     # Set variables in BUILD.bazel
     - source ./RELEASE
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
+    - sed -i "s/CI_BAZEL_VERSION/$CI_BAZEL_VERSION/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER/$PKG_VERSION_SCION_SYSTEMD_WRAPPER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" BUILD.bazel
