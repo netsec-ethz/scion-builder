@@ -2,6 +2,5 @@
 set -e
 
 if [ "$1" = remove ]; then
-    systemctl stop $DPKG_MAINTSCRIPT_PACKAGE.service || [ $? -eq 5 ] || exit 1
-    systemctl stop $DPKG_MAINTSCRIPT_PACKAGE@*.service
+    systemctl stop $DPKG_MAINTSCRIPT_PACKAGE@\*.service
 fi
