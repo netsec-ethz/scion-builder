@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+# Systemd is required but we don't want to install it automatically
+# thus using "Depends" directive is not a proper place for this check
+[[ `systemctl` =~ -\.mount ]] || echo "Systemd is a prerequisite for this package"

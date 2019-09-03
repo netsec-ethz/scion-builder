@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+if [ "$1" = remove ]; then
+    systemctl stop $DPKG_MAINTSCRIPT_PACKAGE\*.service
+fi
