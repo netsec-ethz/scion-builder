@@ -42,12 +42,13 @@ case "$1" in
             chown -R scion.scion "/etc/scion/gen-certs"
         fi
 
-        # ensure we re-install the configuration (expected in e.g. Vagrantfile)
-        scionlab-config --force
+        # refresh the configuration
+        scionlab-config
         ;;
     abort-*)
         # How'd we get here??
         exit 1
+        ;;
     *)
         ;;
 esac
