@@ -3,7 +3,7 @@ Description=SCION Border Router
 Documentation=https://www.scionlab.org
 After=network-online.target scion-dispatcher.service
 Wants=network-online.target
-PartOf=scionlab.service
+PartOf=scionlab.target
 
 [Service]
 Type=simple
@@ -14,4 +14,4 @@ KillMode=control-group
 Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=scionlab.target
