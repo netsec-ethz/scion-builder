@@ -138,6 +138,7 @@ scionlab-config-deb-amd64-test:
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+    - ls /lib/systemd/system/scionlab.target
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
 
 .test-deb-script: &test-deb-script
