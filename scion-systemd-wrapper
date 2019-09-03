@@ -2,7 +2,7 @@
 
 # absolute path to the SCION binary
 binary=$1
-# config_file has form of /var/lib/scion/ISD-isd-/AS-as-/endhost/sciond.toml
+# config_file has form of /var/lib/scion/ISD-isd-/AS-as-/endhost/sd.toml
 # with variables to substitute marked with dashes
 config_file=$2
 # v has form of 16-ffaa_0_1002 or 16-ffaa_0_1002-1
