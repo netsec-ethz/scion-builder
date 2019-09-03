@@ -39,8 +39,15 @@ case "$1" in
 			systemctl daemon-reload
         fi
         ;;
+    abort-*)
+        # How'd we get here??
+        exit 1
+        ;;
+    *)
+        ;;
 esac
 
-#DEBHELPER#
-
-exit 0
+# Restart services if they are running and this is an upgrade
+if [ -n "$2" ] && [ "$1" = 'configure' ]; then
+    systemctl restart $DPKG_MAINTSCRIPT_PACKAGE\*.service
+fi
