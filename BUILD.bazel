@@ -448,7 +448,7 @@ pkg_deb(
 pkg_tar (
     name = "scionlab-config-bin",
 	srcs = [
-		"//scionlab-config",
+		"scionlab-config",
 	],
 	mode = "0755",
 	package_dir = "/usr/bin",
@@ -464,7 +464,7 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "scionlab-config",
+    name = "scionlab-config-pkg",
     extension = "tar.gz",
     deps = [
         ":scionlab-config-bin",
@@ -476,7 +476,7 @@ pkg_deb(
     name = "scionlab-config-debian",
     architecture = PKG_ARCHITECTURE,
     built_using = PKG_BUILT_USING,
-    data = ":scionlab-config",
+    data = ":scionlab-config-pkg",
     description = "SCIONLab automatic configuration",
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
