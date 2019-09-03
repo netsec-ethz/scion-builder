@@ -53,8 +53,6 @@ init7-mirror-test:
     - pushd scion && for i in ../patches/*.patch; do git apply $i --verbose; done && popd
     # Copy SCIONLab automatic configuration script into SCION codebase
     - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-config
-    # Copy platform-specific patches into SCION codebase
-    - cp --verbose -r patches/$CI_TARGET_ARCHITECTURE/. scion || true
     # Copy build-related directories into SCION codebase
     - cp -r debian scion
     - cp -r logrotate scion
