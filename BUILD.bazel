@@ -454,11 +454,29 @@ pkg_tar (
 	package_dir = "/usr/bin",
 )
 
+pkg_tar(
+    name = "scionlab-config-systemd",
+    srcs = [
+        "systemd/scionlab.target",
+    ],
+    mode = "0644",
+    package_dir = "/lib/systemd/system",
+)
+
+pkg_tar(
+    name = "scionlab-config-pkg",
+    extension = "tar.gz",
+    deps = [
+        ":scionlab-config-bin",
+        ":scionlab-config-systemd",
+    ],
+)
+
 pkg_deb(
     name = "scionlab-config-debian",
     architecture = PKG_ARCHITECTURE,
     built_using = PKG_BUILT_USING,
-    data = ":scionlab-config-bin",
+    data = ":scionlab-config-pkg",
     description = "SCIONLab automatic configuration",
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,

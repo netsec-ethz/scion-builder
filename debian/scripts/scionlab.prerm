@@ -2,5 +2,5 @@
 set -e
 
 if [ "$1" = remove ]; then
-    systemctl stop scionlab.service
+    systemctl disable scionlab.target
 fi
