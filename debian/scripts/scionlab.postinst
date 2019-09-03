@@ -34,10 +34,10 @@ case "$1" in
 
         # ensure we re-install the configuration (expected in e.g. Vagrantfile)
         scionlab-config --force
-
+        ;;
+    abort-*)
+        # How'd we get here??
+        exit 1
+    *)
         ;;
 esac
-
-#DEBHELPER#
-
-exit 0

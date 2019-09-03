@@ -39,8 +39,9 @@ case "$1" in
 			systemctl daemon-reload
         fi
         ;;
+    abort-*)
+        # How'd we get here??
+        exit 1
+    *)
+        ;;
 esac
-
-#DEBHELPER#
-
-exit 0
