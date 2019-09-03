@@ -448,7 +448,7 @@ pkg_deb(
 pkg_tar (
     name = "scionlab-config-bin",
 	srcs = [
-		"scionlab-config",
+		"//scionlab-config",
 	],
 	mode = "0755",
 	package_dir = "/usr/bin",
