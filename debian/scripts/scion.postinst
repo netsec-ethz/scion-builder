@@ -42,6 +42,7 @@ case "$1" in
     abort-*)
         # How'd we get here??
         exit 1
+        ;;
     *)
         ;;
 esac
