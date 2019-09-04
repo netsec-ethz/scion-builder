@@ -3,6 +3,7 @@ stages:
   - build
   - test-1
   - test-2
+  - test-3
   - deploy
   - post-deploy
 
@@ -45,7 +46,6 @@ init7-mirror-test:
     - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCIONLAB_CONFIG/$PKG_VERSION_SCIONLAB_CONFIG/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCIONLAB/$PKG_VERSION_SCIONLAB/g" BUILD.bazel
 #    - '[[ $CI_COMMIT_TAG == release/* ]] && export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && sed -i "s/0.0.0/$CI_PKG_VERSION/g" BUILD.bazel && echo $CI_PKG_VERSION || true'
     # Override some files from upstream SCION
@@ -71,7 +71,6 @@ init7-mirror-test:
     - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scionlab-config-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
@@ -101,7 +100,30 @@ all-deb-arm64:
     paths:
       - output-arm64/
     expire_in: 1 hour
-#  allow_failure: true
+
+.test-deb-script: &test-deb-script
+  script:
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+    # Test installation
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+    # Test system after the installation
+    - id scion
+    - getent group scion
+    - stat -c "%U %G" /var/log/scion | grep "scion scion"
+    - stat -c "%U %G" /var/lib/scion | grep "scion scion"
+    - stat -c "%U %G" /etc/scion | grep "scion scion"
+    - ls /lib/systemd/system/$CI_PACKAGE*.service
+    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+    - ls /etc/logrotate.d/$CI_PACKAGE
+    # Test removal
+    - dpkg --purge $CI_PACKAGE
+    # Test system after the removal
+    - id scion
+    - getent group scion
+    - ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true )
+    - ls /lib/systemd/system/$CI_PACKAGE*.service || ([[ $? -eq 2 ]] && true )
+    - ls /etc/logrotate.d/$CI_PACKAGE || ([[ $? -eq 2 ]] && true )
 
 systemd-wrapper-deb-amd64-test:
   stage: test-1
@@ -114,6 +136,8 @@ systemd-wrapper-deb-amd64-test:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+    - dpkg --purge $CI_PACKAGE
+    - ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true )
 
 scion-tools-deb-amd64-test:
   stage: test-1
@@ -126,33 +150,8 @@ scion-tools-deb-amd64-test:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
-
-scionlab-config-deb-amd64-test:
-  stage: test-1
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scionlab-config
-    CI_BINARY_NAME: scionlab-config
-  script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - ls /lib/systemd/system/scionlab.target
-    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
-
-.test-deb-script: &test-deb-script
-  script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - id scion
-    - getent group scion
-    - stat -c "%U %G" /var/log/scion | grep "scion scion"
-    - stat -c "%U %G" /var/lib/scion | grep "scion scion"
-    - stat -c "%U %G" /etc/scion | grep "scion scion"
-    - ls /lib/systemd/system/$CI_PACKAGE*.service
-    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
-    - ls /etc/logrotate.d/$CI_PACKAGE
+    - dpkg --purge $CI_PACKAGE
+    - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true ); done
 
 border-router-deb-amd64-test:
   stage: test-2
@@ -207,6 +206,21 @@ dispatcher-deb-amd64-test:
     CI_PACKAGE: scion-dispatcher
     CI_BINARY_NAME: godispatcher
   <<: *test-deb-script
+
+scionlab-deb-amd64-test:
+  stage: test-3
+  image: $CI_DOCKER_IMAGE
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scionlab
+    CI_BINARY_NAME: scionlab-config
+  script:
+    - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
+    - ls /lib/systemd/system/scionlab.target
+    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+    - dpkg --purge $CI_PACKAGE
+    - ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true )
 
 all-deb-deploy:
   stage: deploy
@@ -301,16 +315,6 @@ scion-tools-deb-deploy-test:
   variables:
     CI_PACKAGE: scion-tools
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_TOOLS
-  <<: *test-deb-deploy-script
-
-scionlab-config-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  variables:
-    CI_PACKAGE: scionlab-config
-    CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB_CONFIG
   <<: *test-deb-deploy-script
 
 scionlab-deb-deploy-test:
