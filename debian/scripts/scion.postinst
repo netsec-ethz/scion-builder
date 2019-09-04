@@ -48,6 +48,6 @@ case "$1" in
 esac
 
 # Restart services if they are running and this is an upgrade
-if [ -n "$2" ] && [ "$1" = 'configure' ]; then
+if [ -n "$2" ] && [ "$1" = 'configure' ] && [ ! -f /.dockerenv ]; then
     systemctl restart $DPKG_MAINTSCRIPT_PACKAGE\*.service
 fi

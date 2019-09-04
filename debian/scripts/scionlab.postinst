@@ -24,7 +24,7 @@ case "$1" in
 
         # enable systemd target if the package is installed for the first time
         # and preserve user's setting if this is an upgrade
-        if [ -z "$2" ]; then
+        if [ -z "$2" ] && [ ! -f /.dockerenv ]; then
             systemctl enable scionlab.target > /dev/null 2>&1
         fi
 
