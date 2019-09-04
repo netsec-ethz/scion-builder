@@ -10,7 +10,6 @@ gazelle(name = "gazelle")
 
 # Variables used to prepare DEB and RPM packages
 PKG_ARCHITECTURE = "CI_TARGET_ARCHITECTURE"
-PKG_BUILT_USING = "bazel (CI_BAZEL_VERSION)"
 PKG_HOMEPAGE = "https://www.scion-architecture.net"
 PKG_MAINTAINER = "ETH Zurich, SCIONLab Team <scionlab-admins@sympa.ethz.ch>"
 PKG_PRORITY = "optional"
@@ -39,7 +38,6 @@ pkg_tar (
 pkg_deb(
     name = "scion-systemd-wrapper-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     data = ":scion-systemd-wrapper-bin",
     description = "SCION systemd wrapper",
     homepage = PKG_HOMEPAGE,
@@ -91,7 +89,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-border-router-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
@@ -154,7 +151,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-beacon-server-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
@@ -217,7 +213,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-certificate-server-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
@@ -280,7 +275,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-path-server-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
@@ -343,7 +337,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-daemon-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
@@ -406,7 +399,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-dispatcher-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
@@ -443,7 +435,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-tools-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
@@ -495,7 +486,6 @@ pkg_tar(
 pkg_deb(
     name = "scionlab-debian",
     architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
