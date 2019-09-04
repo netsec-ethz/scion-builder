@@ -168,6 +168,15 @@ systemd-wrapper-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: scion-systemd-wrapper
   <<: *test-systemd-wrapper-deb-script
 
+systemd-wrapper-debian-10-amd64-test:
+  stage: test-1
+  image: debian:buster
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-systemd-wrapper
+    CI_BINARY_NAME: scion-systemd-wrapper
+  <<: *test-systemd-wrapper-deb-script
+
 scion-tools-ubuntu-16.04-amd64-test:
   stage: test-1
   image: ubuntu:16.04
@@ -180,6 +189,15 @@ scion-tools-ubuntu-16.04-amd64-test:
 scion-tools-ubuntu-18.04-amd64-test:
   stage: test-1
   image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-tools
+    CI_BINARIES: "pingpong scmp showpaths"
+  <<: *test-scion-tools-deb-script
+
+scion-tools-debian-10-amd64-test:
+  stage: test-1
+  image: debian:buster
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
@@ -204,6 +222,15 @@ border-router-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: border
   <<: *test-deb-script
 
+border-router-debian-10-amd64-test:
+  stage: test-2
+  image: debian:buster
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-border-router
+    CI_BINARY_NAME: border
+  <<: *test-deb-script
+
 beacon-server-ubuntu-16.04-amd64-test:
   stage: test-2
   image: ubuntu:16.04
@@ -216,6 +243,15 @@ beacon-server-ubuntu-16.04-amd64-test:
 beacon-server-ubuntu-18.04-amd64-test:
   stage: test-2
   image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-beacon-server
+    CI_BINARY_NAME: beacon_srv
+  <<: *test-deb-script
+
+beacon-server-debian-10-amd64-test:
+  stage: test-2
+  image: debian:buster
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-beacon-server
@@ -240,6 +276,15 @@ certificate-server-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: cert_srv
   <<: *test-deb-script
 
+certificate-server-debian-10-amd64-test:
+  stage: test-2
+  image: debian:buster
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-certificate-server
+    CI_BINARY_NAME: cert_srv
+  <<: *test-deb-script
+
 path-server-ubuntu-16.04-amd64-test:
   stage: test-2
   image: ubuntu:16.04
@@ -252,6 +297,15 @@ path-server-ubuntu-16.04-amd64-test:
 path-server-ubuntu-18.04-amd64-test:
   stage: test-2
   image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-path-server
+    CI_BINARY_NAME: path_srv
+  <<: *test-deb-script
+
+path-server-debian-10-amd64-test:
+  stage: test-2
+  image: debian:buster
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-path-server
@@ -276,6 +330,15 @@ daemon-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: sciond
   <<: *test-deb-script
 
+daemon-debian-10-amd64-test:
+  stage: test-2
+  image: debian:buster
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-daemon
+    CI_BINARY_NAME: sciond
+  <<: *test-deb-script
+
 dispatcher-ubuntu-16.04-amd64-test:
   stage: test-2
   image: ubuntu:16.04
@@ -294,6 +357,15 @@ dispatcher-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: godispatcher
   <<: *test-deb-script
 
+dispatcher-debian-10-amd64-test:
+  stage: test-2
+  image: debian:buster
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-dispatcher
+    CI_BINARY_NAME: godispatcher
+  <<: *test-deb-script
+
 scionlab-ubuntu-16.04-amd64-test:
   stage: test-3
   image: ubuntu:16.04
@@ -306,6 +378,15 @@ scionlab-ubuntu-16.04-amd64-test:
 scionlab-ubuntu-18.04-amd64-test:
   stage: test-3
   image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scionlab
+    CI_BINARY_NAME: scionlab-config
+  <<: *test-scionlab-deb-script
+
+scionlab-debian-10-amd64-test:
+  stage: test-3
+  image: debian:buster
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scionlab
