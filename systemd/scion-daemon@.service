@@ -3,7 +3,6 @@ Description=SCION Daemon
 Documentation=https://www.scionlab.org
 After=network-online.target scion-dispatcher.service
 Wants=network-online.target
-PartOf=scionlab.target
 
 [Service]
 Type=simple
