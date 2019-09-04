@@ -142,7 +142,7 @@ all-deb-arm64:
 
 .test-scionlab-deb-script: &test-scionlab-deb-script
   script:
-    - apt update && apt install -y openvpn openssl
+    - apt update && apt install -y openvpn openssl python3
     - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
     - ls /lib/systemd/system/scionlab.target
