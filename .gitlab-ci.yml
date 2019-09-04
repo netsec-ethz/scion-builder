@@ -125,13 +125,7 @@ all-deb-arm64:
     - ls /lib/systemd/system/$CI_PACKAGE*.service || ([[ $? -eq 2 ]] && true )
     - ls /etc/logrotate.d/$CI_PACKAGE || ([[ $? -eq 2 ]] && true )
 
-systemd-wrapper-deb-amd64-test:
-  stage: test-1
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-systemd-wrapper
-    CI_BINARY_NAME: scion-systemd-wrapper
+.test-systemd-wrapper-deb-script: &test-systemd-wrapper-deb-script
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
@@ -139,13 +133,7 @@ systemd-wrapper-deb-amd64-test:
     - dpkg --purge $CI_PACKAGE
     - ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true )
 
-scion-tools-deb-amd64-test:
-  stage: test-1
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-tools
-    CI_BINARIES: "pingpong scmp showpaths"
+.test-scion-tools-deb-script: &test-scion-tools-deb-script
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
@@ -153,67 +141,7 @@ scion-tools-deb-amd64-test:
     - dpkg --purge $CI_PACKAGE
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true ); done
 
-border-router-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-border-router
-    CI_BINARY_NAME: border
-  <<: *test-deb-script
-
-beacon-server-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-beacon-server
-    CI_BINARY_NAME: beacon_srv
-  <<: *test-deb-script
-
-certificate-server-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-certificate-server
-    CI_BINARY_NAME: cert_srv
-  <<: *test-deb-script
-
-path-server-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-path-server
-    CI_BINARY_NAME: path_srv
-  <<: *test-deb-script
-
-daemon-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-daemon
-    CI_BINARY_NAME: sciond
-  <<: *test-deb-script
-
-dispatcher-deb-amd64-test:
-  stage: test-2
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-dispatcher
-    CI_BINARY_NAME: godispatcher
-  <<: *test-deb-script
-
-scionlab-deb-amd64-test:
-  stage: test-3
-  image: $CI_DOCKER_IMAGE
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scionlab
-    CI_BINARY_NAME: scionlab-config
+.test-scionlab-deb-script: &test-scionlab-deb-script
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
@@ -221,6 +149,168 @@ scionlab-deb-amd64-test:
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
     - dpkg --purge $CI_PACKAGE
     - ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true )
+
+systemd-wrapper-ubuntu-16.04-amd64-test:
+  stage: test-1
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-systemd-wrapper
+    CI_BINARY_NAME: scion-systemd-wrapper
+  <<: *test-systemd-wrapper-deb-script
+
+systemd-wrapper-ubuntu-18.04-amd64-test:
+  stage: test-1
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-systemd-wrapper
+    CI_BINARY_NAME: scion-systemd-wrapper
+  <<: *test-systemd-wrapper-deb-script
+
+scion-tools-ubuntu-16.04-amd64-test:
+  stage: test-1
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-tools
+    CI_BINARIES: "pingpong scmp showpaths"
+  <<: *test-scion-tools-deb-script
+
+scion-tools-ubuntu-18.04-amd64-test:
+  stage: test-1
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-tools
+    CI_BINARIES: "pingpong scmp showpaths"
+  <<: *test-scion-tools-deb-script
+
+border-router-ubuntu-16.04-amd64-test:
+  stage: test-2
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-border-router
+    CI_BINARY_NAME: border
+  <<: *test-deb-script
+
+border-router-ubuntu-18.04-amd64-test:
+  stage: test-2
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-border-router
+    CI_BINARY_NAME: border
+  <<: *test-deb-script
+
+beacon-server-ubuntu-16.04-amd64-test:
+  stage: test-2
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-beacon-server
+    CI_BINARY_NAME: beacon_srv
+  <<: *test-deb-script
+
+beacon-server-ubuntu-18.04-amd64-test:
+  stage: test-2
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-beacon-server
+    CI_BINARY_NAME: beacon_srv
+  <<: *test-deb-script
+
+certificate-server-ubuntu-16.04-amd64-test:
+  stage: test-2
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-certificate-server
+    CI_BINARY_NAME: cert_srv
+  <<: *test-deb-script
+
+certificate-server-ubuntu-18.04-amd64-test:
+  stage: test-2
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-certificate-server
+    CI_BINARY_NAME: cert_srv
+  <<: *test-deb-script
+
+path-server-ubuntu-16.04-amd64-test:
+  stage: test-2
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-path-server
+    CI_BINARY_NAME: path_srv
+  <<: *test-deb-script
+
+path-server-ubuntu-18.04-amd64-test:
+  stage: test-2
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-path-server
+    CI_BINARY_NAME: path_srv
+  <<: *test-deb-script
+
+daemon-ubuntu-16.04-amd64-test:
+  stage: test-2
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-daemon
+    CI_BINARY_NAME: sciond
+  <<: *test-deb-script
+
+daemon-ubuntu-18.04-amd64-test:
+  stage: test-2
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-daemon
+    CI_BINARY_NAME: sciond
+  <<: *test-deb-script
+
+dispatcher-ubuntu-16.04-amd64-test:
+  stage: test-2
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-dispatcher
+    CI_BINARY_NAME: godispatcher
+  <<: *test-deb-script
+
+dispatcher-ubuntu-18.04-amd64-test:
+  stage: test-2
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-dispatcher
+    CI_BINARY_NAME: godispatcher
+  <<: *test-deb-script
+
+scionlab-ubuntu-16.04-amd64-test:
+  stage: test-3
+  image: ubuntu:16.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scionlab
+    CI_BINARY_NAME: scionlab-config
+  <<: *test-scionlab-deb-script
+
+scionlab-ubuntu-18.04-amd64-test:
+  stage: test-3
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scionlab
+    CI_BINARY_NAME: scionlab-config
+  <<: *test-scionlab-deb-script
 
 all-deb-deploy:
   stage: deploy
