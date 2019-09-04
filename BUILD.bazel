@@ -105,7 +105,10 @@ pkg_deb(
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scion-border-router",
+    preinst = "debian/scripts/scion.preinst",
     postinst = "debian/scripts/scion.postinst",
+    prerm = "debian/scripts/scion.prerm",
+    postrm = "debian/scripts/scion.postrm",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_BORDER_ROUTER,
@@ -165,7 +168,10 @@ pkg_deb(
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scion-beacon-server",
+    preinst = "debian/scripts/scion.preinst",
     postinst = "debian/scripts/scion.postinst",
+    prerm = "debian/scripts/scion.prerm",
+    postrm = "debian/scripts/scion.postrm",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_BEACON_SERVER,
@@ -225,7 +231,10 @@ pkg_deb(
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scion-certificate-server",
+    preinst = "debian/scripts/scion.preinst",
     postinst = "debian/scripts/scion.postinst",
+    prerm = "debian/scripts/scion.prerm",
+    postrm = "debian/scripts/scion.postrm",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_CERTIFICATE_SERVER,
@@ -285,7 +294,10 @@ pkg_deb(
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scion-path-server",
+    preinst = "debian/scripts/scion.preinst",
     postinst = "debian/scripts/scion.postinst",
+    prerm = "debian/scripts/scion.prerm",
+    postrm = "debian/scripts/scion.postrm",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_PATH_SERVER,
@@ -345,7 +357,10 @@ pkg_deb(
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scion-daemon",
+    preinst = "debian/scripts/scion.preinst",
     postinst = "debian/scripts/scion.postinst",
+    prerm = "debian/scripts/scion.prerm",
+    postrm = "debian/scripts/scion.postrm",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_DAEMON,
@@ -405,7 +420,10 @@ pkg_deb(
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scion-dispatcher",
+    preinst = "debian/scripts/scion.preinst",
     postinst = "debian/scripts/scion.postinst",
+    prerm = "debian/scripts/scion.prerm",
+    postrm = "debian/scripts/scion.postrm",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_DISPATCHER,
@@ -438,13 +456,16 @@ pkg_deb(
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scion-tools",
+    preinst = "debian/scripts/scion.preinst",
     postinst = "debian/scripts/scion.postinst",
+    prerm = "debian/scripts/scion.prerm",
+    postrm = "debian/scripts/scion.postrm",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_TOOLS,
 )
 
-# SCIONLab config script
+# SCIONLab
 pkg_tar (
     name = "scionlab-config-bin",
 	srcs = [
@@ -455,7 +476,7 @@ pkg_tar (
 )
 
 pkg_tar(
-    name = "scionlab-config-systemd",
+    name = "scionlab-systemd",
     srcs = [
         "systemd/scionlab.target",
     ],
@@ -464,35 +485,12 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "scionlab-config-pkg",
+    name = "scionlab",
     extension = "tar.gz",
     deps = [
         ":scionlab-config-bin",
-        ":scionlab-config-systemd",
+        ":scionlab-systemd",
     ],
-)
-
-pkg_deb(
-    name = "scionlab-config-debian",
-    architecture = PKG_ARCHITECTURE,
-    built_using = PKG_BUILT_USING,
-    data = ":scionlab-config-pkg",
-    description = "SCIONLab automatic configuration",
-    homepage = PKG_HOMEPAGE,
-    maintainer = PKG_MAINTAINER,
-    package = "scionlab-config",
-    priority = PKG_PRORITY,
-    section = PKG_SECTION,
-    version = PKG_VERSION_SCIONLAB_CONFIG,
-)
-
-# SCIONLab
-
-pkg_tar(
-    name = "scionlab-null",
-    srcs = [],
-    mode = "0755",
-    package_dir = "/dev/null",
 )
 
 pkg_deb(
@@ -502,7 +500,7 @@ pkg_deb(
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
     #    ],
-    data = ":scionlab-null",
+    data = ":scionlab",
     depends = [
         "scion-border-router (=" + PKG_VERSION_SCION_BORDER_ROUTER + ")",
         "scion-beacon-server (=" + PKG_VERSION_SCION_BEACON_SERVER + ")",
@@ -511,14 +509,16 @@ pkg_deb(
         "scion-daemon (=" + PKG_VERSION_SCION_DAEMON + ")",
         "scion-dispatcher (=" + PKG_VERSION_SCION_DISPATCHER + ")",
         "scion-tools (=" + PKG_VERSION_SCION_TOOLS + ")",
-        "scionlab-config (=" + PKG_VERSION_SCIONLAB_CONFIG + ")",
         "openvpn",
     ],
     description = "SCIONLab",
     homepage = PKG_HOMEPAGE,
     maintainer = PKG_MAINTAINER,
     package = "scionlab",
+    preinst = "debian/scripts/scionlab.preinst",
     postinst = "debian/scripts/scionlab.postinst",
+    prerm = "debian/scripts/scionlab.prerm",
+    postrm = "debian/scripts/scionlab.postrm",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCIONLAB,
