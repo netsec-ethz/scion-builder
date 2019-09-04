@@ -121,9 +121,9 @@ all-deb-arm64:
     # Test system after the removal
     - id scion
     - getent group scion
-    - ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true )
-    - ls /lib/systemd/system/$CI_PACKAGE*.service || ([[ $? -eq 2 ]] && true )
-    - ls /etc/logrotate.d/$CI_PACKAGE || ([[ $? -eq 2 ]] && true )
+    - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
+    - "[[ ! -f /etc/logrotate.d/$CI_PACKAGE ]]"
+    - "[[ $(ls /lib/systemd/system/$CI_PACKAGE*.service | wc -l) -eq 0  ]]"
 
 .test-systemd-wrapper-deb-script: &test-systemd-wrapper-deb-script
   script:
@@ -131,7 +131,7 @@ all-deb-arm64:
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
     - dpkg --purge $CI_PACKAGE
-    - ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true )
+    - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
 .test-scion-tools-deb-script: &test-scion-tools-deb-script
   script:
@@ -139,7 +139,7 @@ all-deb-arm64:
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
     - dpkg --purge $CI_PACKAGE
-    - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true ); done
+    - for CI_BINARY_NAME in $CI_BINARIES; do [[ ! -f /usr/bin/$CI_BINARY_NAME ]]; done
 
 .test-scionlab-deb-script: &test-scionlab-deb-script
   script:
@@ -149,7 +149,7 @@ all-deb-arm64:
     - ls /lib/systemd/system/scionlab.target
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
     - dpkg --purge $CI_PACKAGE
-    - ls /usr/bin/$CI_BINARY_NAME || ([[ $? -eq 2 ]] && true )
+    - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
 systemd-wrapper-ubuntu-16.04-amd64-test:
   stage: test-1
