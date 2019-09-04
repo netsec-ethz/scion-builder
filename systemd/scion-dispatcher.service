@@ -3,6 +3,7 @@ Description=SCION Dispatcher
 Documentation=https://www.scionlab.org
 After=network-online.target
 Wants=network-online.target
+PartOf=scionlab.target
 
 [Service]
 Type=simple
