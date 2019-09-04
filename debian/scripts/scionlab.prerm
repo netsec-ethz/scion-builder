@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-if [ "$1" = remove ]; then
+if [ "$1" = remove ] && [ ! -f /.dockerenv ]; then
     systemctl disable scionlab.target
+    systemctl stop scionlab.target
 fi

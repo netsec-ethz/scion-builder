@@ -3,4 +3,4 @@ set -e
 
 # Systemd is required but we don't want to install it automatically
 # thus using "Depends" directive is not a proper place for this check
-[[ `systemctl` =~ -\.mount ]] || echo "Systemd is a prerequisite for this package"
+[[ `systemctl` =~ -\.mount ]] || [[ -f /.dockerenv ]] || echo "Systemd is a prerequisite for this package"
