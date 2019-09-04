@@ -43,7 +43,7 @@ case "$1" in
         fi
 
         # refresh the configuration
-        scionlab-config
+        scionlab-config || true
         ;;
     abort-*)
         # How'd we get here??
