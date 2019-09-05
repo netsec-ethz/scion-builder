@@ -500,7 +500,7 @@ pkg_deb(
         "scion-tools (=" + PKG_VERSION_SCION_TOOLS + ")",
         "openssl",
         "openvpn",
-        "python3",
+        "python3 (>=3.5)",
     ],
     description = "SCIONLab",
     homepage = PKG_HOMEPAGE,
