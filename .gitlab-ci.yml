@@ -102,7 +102,7 @@ all-deb-arm:
   <<: *build-deb-script
   artifacts:
     paths:
-      - output-arm/
+      - output-armhf/
     expire_in: 1 hour
 
 .test-deb-script: &test-deb-script
