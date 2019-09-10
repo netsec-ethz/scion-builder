@@ -94,7 +94,7 @@ all-deb-arm64:
       - output-arm64/
     expire_in: 1 hour
 
-all-deb-arm:
+all-deb-armhf:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
