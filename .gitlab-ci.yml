@@ -55,15 +55,16 @@ connectivity-check:
     - cd scion
     - ./env/debian/deps
     # Build SCION packages
-    - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
-    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
+    - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GO_TARGET_ARCHITECTURE=arm || export GO_TARGET_ARCHITECTURE=$CI_TARGET_ARCHITECTURE'
+    - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
@@ -93,15 +94,15 @@ all-deb-arm64:
       - output-arm64/
     expire_in: 1 hour
 
-all-deb-arm:
+all-deb-armhf:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
-    CI_TARGET_ARCHITECTURE: arm
+    CI_TARGET_ARCHITECTURE: armhf
   <<: *build-deb-script
   artifacts:
     paths:
-      - output-arm/
+      - output-armhf/
     expire_in: 1 hour
 
 .test-deb-script: &test-deb-script
