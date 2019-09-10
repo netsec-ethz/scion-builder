@@ -93,6 +93,17 @@ all-deb-arm64:
       - output-arm64/
     expire_in: 1 hour
 
+all-deb-arm:
+  stage: build
+  image: $CI_DOCKER_IMAGE
+  variables:
+    CI_TARGET_ARCHITECTURE: arm
+  <<: *build-deb-script
+  artifacts:
+    paths:
+      - output-arm/
+    expire_in: 1 hour
+
 .test-deb-script: &test-deb-script
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
