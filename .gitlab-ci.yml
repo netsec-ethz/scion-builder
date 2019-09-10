@@ -66,7 +66,7 @@ connectivity-check:
     - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$CI_TARGET_ARCHITECTURE
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
-    - cp bazel-bin/*.deb ../output-$CI_TARGET_ARCHITECTURE
+    - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
     # Place hashes of git repos in the output for auditing
     - cd ../scion && git log -1
     - cd ../scionlab && git log -1
@@ -106,10 +106,10 @@ all-deb-arm:
 
 .test-deb-script: &test-deb-script
   script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*.deb
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     # Test installation
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     # Test system after the installation
     - id scion
     - getent group scion
@@ -130,16 +130,16 @@ all-deb-arm:
 
 .test-systemd-wrapper-deb-script: &test-systemd-wrapper-deb-script
   script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*.deb
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
     - dpkg --purge $CI_PACKAGE
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
 .test-scion-tools-deb-script: &test-scion-tools-deb-script
   script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*.deb
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
     - dpkg --purge $CI_PACKAGE
     - for CI_BINARY_NAME in $CI_BINARIES; do [[ ! -f /usr/bin/$CI_BINARY_NAME ]]; done
@@ -147,8 +147,8 @@ all-deb-arm:
 .test-scionlab-deb-script: &test-scionlab-deb-script
   script:
     - apt update && apt install -y openvpn openssl python3
-    - ls -l output-$CI_TARGET_ARCHITECTURE/scion*.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion*.deb
+    - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
     - ls /lib/systemd/system/scionlab.target
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
     - dpkg --purge $CI_PACKAGE
