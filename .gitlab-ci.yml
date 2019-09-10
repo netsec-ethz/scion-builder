@@ -29,7 +29,7 @@ connectivity-check:
     - bash bazel_install_script.sh
     # Set variables in BUILD.bazel
     - source ./RELEASE
-    - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
+    - [ "$CI_TARGET_ARCHITECTURE" == "arm" ] && sed -i "s/CI_TARGET_ARCHITECTURE/armhf/g" BUILD.bazel || sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER/$PKG_VERSION_SCION_SYSTEMD_WRAPPER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" BUILD.bazel
