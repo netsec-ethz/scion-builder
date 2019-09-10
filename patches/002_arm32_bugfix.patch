@@ -1,0 +1,26 @@
+diff --git a/WORKSPACE b/WORKSPACE
+index a823e06..809e220 100644
+--- a/WORKSPACE
++++ b/WORKSPACE
+@@ -139,7 +139,7 @@ go_repository(
+
+ go_repository(
+     name = "com_github_antlr_antlr4",
+-    commit = "d4d7e3d3bc3b65bb00579fe826834a9263fa45e6",
++    commit = "089550df8e458d6e731f37aad74c2a344b18eb46",
+     importpath = "github.com/antlr/antlr4",  # runtime/Go/antlr
+ )
+
+diff --git a/go/lib/addr/isdas.go b/go/lib/addr/isdas.go
+index 06b332a..a2037c7 100644
+--- a/go/lib/addr/isdas.go
++++ b/go/lib/addr/isdas.go
+@@ -163,7 +163,7 @@ func (as AS) inRange() bool {
+
+ func (as AS) MarshalText() ([]byte, error) {
+ 	if !as.inRange() {
+-		return nil, common.NewBasicError("invalid AS", nil, "max", MaxAS, "actual", as)
++		return nil, common.NewBasicError("invalid AS", nil, "max", uint64(MaxAS), "actual", as)
+ 	}
+ 	return []byte(as.String()), nil
+ }
