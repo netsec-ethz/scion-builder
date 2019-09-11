@@ -413,7 +413,7 @@ all-deb-deploy:
   script:
     - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
-    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb" || true; done
+    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
 
 .test-deb-deploy-script: &test-deb-deploy-script
   script:
@@ -502,3 +502,18 @@ scionlab-deb-deploy-test:
     CI_PACKAGE: scionlab
     CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB
   <<: *test-deb-deploy-script
+
+scionlab-deb-install-test:
+  stage: post-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_PACKAGE: scionlab
+    CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB
+  script:
+    - apt update && apt install -y apt-transport-https
+    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
+    - source ./RELEASE
+    - export CI_VERSION=$(printenv `echo $CI_VERSION_VARIABLE`)
+    - apt install -y $CI_PACKAGE=$CI_VERSION
