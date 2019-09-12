@@ -74,10 +74,19 @@ connectivity-check:
     - export GOOS=linux
     - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GOARCH=arm || export GOARCH=$CI_TARGET_ARCHITECTURE'
     - export CC=$CI_CC
-    - go build ./go/...
+    - pushd bin
+    - go build ../go/border/
+    - go build ../go/beacon_srv/
+    - go build ../go/cert_srv/
+    - go build ../go/path_srv/
+    - go build ../go/sciond/
+    - go build ../go/godispatcher/
+    - go build ../go/examples/pingpong/
+    - go build ../go/tools/scmp/
+    - go build ../go/tools/showpaths/
+    - popd
     # DEBUG ME
     - ls -la .
-    - ls -la bin/
     # Build SCION packages
     - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env
