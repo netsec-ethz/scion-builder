@@ -75,6 +75,9 @@ connectivity-check:
     - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GOARCH=arm || export GOARCH=$CI_TARGET_ARCHITECTURE'
     - export CC=$CI_CC
     - go build ./go/...
+    # DEBUG ME
+    - ls -la .
+    - ls -la bin/
     # Build SCION packages
     - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env
