@@ -20,10 +20,22 @@ connectivity-check:
     - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
     - apt update && apt install -y apt-transport-https
     - cp debian/apt.sources.list /etc/apt/sources.list
-    - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget unzip
+    - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget curl unzip gcc file python
+    - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
+    - ln -f -s /usr/local/go/bin/* /usr/bin/
+    # Install multiplatform toolchains
+    - apt install -y libc6-armhf-cross libc6-dev-armhf-cross gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabi
+    - apt install -y libc6-arm64-cross libc6-dev-arm64-cross gcc-aarch64-linux-gnu
     # Clone SCION source code
     - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
+    - mkdir -p $HOME/go/src/github.com/scionproto/
+    - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
+    # Install SCION defined dependencies
+    - apt install -y $(grep -vE "^\s*#" scion/env/debian/pkgs.txt | tr "\n" " ")
+    # Clone SCIONLab source code
     - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
+    - mkdir -p $HOME/go/src/github.com/netsec-ethz/
+    - ln -s $(pwd)/scionlab /root/go/src/github.com/netsec-ethz/
     # Install selected release of BAZEL
     - wget https://github.com/bazelbuild/bazel/releases/download/$CI_BAZEL_VERSION/bazel-$CI_BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
     - bash bazel_install_script.sh
@@ -42,7 +54,8 @@ connectivity-check:
 #    - '[[ $CI_COMMIT_TAG == release/* ]] && export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && sed -i "s/0.0.0/$CI_PKG_VERSION/g" BUILD.bazel && echo $CI_PKG_VERSION || true'
     # Override some files from upstream SCION
     - cp BUILD.bazel scion/BUILD.bazel
-    - pushd scion && for i in ../patches/*.patch; do git apply $i --verbose; done && popd
+    - pushd scion && for i in ../patches/*.patch; do git apply $i --verbose; done || true
+    - popd
     # Copy SCIONLab automatic configuration script into SCION codebase
     - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-config
     # Copy build-related directories into SCION codebase
@@ -52,19 +65,38 @@ connectivity-check:
     - cp -r systemd scion
     - cp scion-systemd-wrapper scion
     # Install SCION dependencies
-    - cd scion
-    - ./env/debian/deps
+    - cd $HOME/go/src/github.com/scionproto/scion
+    - bazel fetch //...
+    - wget https://github.com/kormat/bzlcompat/releases/download/v0.6/bzlcompat-v0.6-linux-x86_64 -O /usr/bin/bzlcompat && chmod +x /usr/bin/bzlcompat
+    - bzlcompat -vendorBase=go
+    # Build SCION binaries
+    - export CGO_ENABLED=1
+    - export GOOS=linux
+    - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GOARCH=arm || export GOARCH=$CI_TARGET_ARCHITECTURE'
+    - export CC=$CI_CC
+    - pushd bin
+    - go build ../go/border/
+    - go build ../go/beacon_srv/
+    - go build ../go/cert_srv/
+    - go build ../go/path_srv/
+    - go build ../go/sciond/
+    - go build ../go/godispatcher/
+    - go build ../go/examples/pingpong/
+    - go build ../go/tools/scmp/
+    - go build ../go/tools/showpaths/
+    - popd
+    # DEBUG ME
+    - ls -la .
     # Build SCION packages
-    - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GO_TARGET_ARCHITECTURE=arm || export GO_TARGET_ARCHITECTURE=$CI_TARGET_ARCHITECTURE'
-    - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
-    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
-    - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
-    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
-    - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
-    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
-    - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
-    - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
-    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_$GO_TARGET_ARCHITECTURE
+    - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
@@ -77,6 +109,7 @@ all-deb-amd64:
   image: $CI_DOCKER_IMAGE
   variables:
     CI_TARGET_ARCHITECTURE: amd64
+    CI_CC: gcc
   <<: *build-deb-script
   artifacts:
     paths:
@@ -88,6 +121,7 @@ all-deb-arm64:
   image: $CI_DOCKER_IMAGE
   variables:
     CI_TARGET_ARCHITECTURE: arm64
+    CI_CC: aarch64-linux-gnu-gcc
   <<: *build-deb-script
   artifacts:
     paths:
@@ -99,6 +133,7 @@ all-deb-armhf:
   image: $CI_DOCKER_IMAGE
   variables:
     CI_TARGET_ARCHITECTURE: armhf
+    CI_CC: arm-linux-gnueabihf-gcc
   <<: *build-deb-script
   artifacts:
     paths:
