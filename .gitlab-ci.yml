@@ -72,11 +72,10 @@ connectivity-check:
     # Build SCION binaries
     - export CGO_ENABLED=1
     - export GOOS=linux
-    - export GOARCH=$CI_TARGET_ARCHITECTURE
+    - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GOARCH=arm || export GOARCH=$CI_TARGET_ARCHITECTURE'
     - export CC=$CI_CC
     - go build ./go/...
     # Build SCION packages
-    - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GO_TARGET_ARCHITECTURE=arm || export GO_TARGET_ARCHITECTURE=$CI_TARGET_ARCHITECTURE'
     - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env
