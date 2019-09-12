@@ -5,9 +5,6 @@ load("@io_bazel_rules_go//go:def.bzl", "nogo")
 # gazelle:prefix github.com/scionproto/scion
 gazelle(name = "gazelle")
 
-# bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64
-# bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64
-
 # Variables used to prepare DEB and RPM packages
 PKG_ARCHITECTURE = "CI_TARGET_ARCHITECTURE"
 PKG_HOMEPAGE = "https://www.scion-architecture.net"
@@ -52,7 +49,7 @@ pkg_deb(
 pkg_tar(
     name = "scion-border-router-bin",
     srcs = [
-        "//go/border",
+        "bin/border",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -114,7 +111,7 @@ pkg_deb(
 pkg_tar(
     name = "scion-beacon-server-bin",
     srcs = [
-        "//go/beacon_srv",
+        "bin/beacon_srv",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -176,7 +173,7 @@ pkg_deb(
 pkg_tar(
     name = "scion-certificate-server-bin",
     srcs = [
-        "//go/cert_srv",
+        "bin/cert_srv",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -238,7 +235,7 @@ pkg_deb(
 pkg_tar(
     name = "scion-path-server-bin",
     srcs = [
-        "//go/path_srv",
+        "bin/path_srv",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -300,7 +297,7 @@ pkg_deb(
 pkg_tar(
     name = "scion-daemon-bin",
     srcs = [
-        "//go/sciond",
+        "bin/sciond",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -362,7 +359,7 @@ pkg_deb(
 pkg_tar(
     name = "scion-dispatcher-bin",
     srcs = [
-        "//go/godispatcher",
+        "bin/godispatcher",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -424,9 +421,9 @@ pkg_deb(
 pkg_tar(
     name = "scion-tools-bin",
     srcs = [
-        "//go/examples/pingpong",
-        "//go/tools/scmp",
-        "//go/tools/showpaths",
+        "bin/pingpong",
+        "bin/scmp",
+        "bin/showpaths",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
