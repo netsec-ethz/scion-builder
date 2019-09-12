@@ -20,7 +20,7 @@ connectivity-check:
     - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
     - apt update && apt install -y apt-transport-https
     - cp debian/apt.sources.list /etc/apt/sources.list
-    - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget unzip curl
+    - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget curl unzip gcc file python
     - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
     - ln -f -s /usr/local/go/bin/* /usr/bin/
     # Install multiplatform toolchains
