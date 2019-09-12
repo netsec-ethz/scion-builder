@@ -30,6 +30,8 @@ connectivity-check:
     - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
     - mkdir -p $HOME/go/src/github.com/scionproto/
     - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
+    # Install SCION defined dependencies
+    - for i in $(cat scion/env/debian/pkgs.txt); do apt install -y $i; done
     # Clone SCIONLab source code
     - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
     - mkdir -p $HOME/go/src/github.com/netsec-ethz/
@@ -66,16 +68,12 @@ connectivity-check:
     - bazel fetch //...
     - wget https://github.com/kormat/bzlcompat/releases/download/v0.6/bzlcompat-v0.6-linux-x86_64 -O /usr/bin/bzlcompat && chmod +x /usr/bin/bzlcompat
     - bzlcompat -vendorBase=go
-    - bazel test //go/...
     # Build SCION binaries
     - export CGO_ENABLED=1
     - export GOOS=linux
     - export GOARCH=$CI_TARGET_ARCHITECTURE
     - export CC=$CI_CC
     - go build ./go/...
-#    # Install SCION dependencies
-#    - cd scion
-#    - ./env/debian/deps
     # Build SCION packages
     - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GO_TARGET_ARCHITECTURE=arm || export GO_TARGET_ARCHITECTURE=$CI_TARGET_ARCHITECTURE'
     - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env
