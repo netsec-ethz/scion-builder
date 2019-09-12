@@ -31,7 +31,7 @@ connectivity-check:
     - mkdir -p $HOME/go/src/github.com/scionproto/
     - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
     # Install SCION defined dependencies
-    - for i in $(cat scion/env/debian/pkgs.txt); do apt install -y $i; done
+    - apt install -y $(grep -vE "^\s*#" scion/env/debian/pkgs.txt | tr "\n" " ")
     # Clone SCIONLab source code
     - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
     - mkdir -p $HOME/go/src/github.com/netsec-ethz/
