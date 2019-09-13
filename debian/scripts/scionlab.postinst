@@ -43,7 +43,12 @@ case "$1" in
         fi
 
         # refresh the configuration and restart services (systemctl restart scionlab.target must be called in scionlab-config)
-        scionlab-config || true
+        if [ -z "$2" ]; then
+            # when installing for the first time make sure tgz with the configuration is always downloaded
+            scionlab-config --force || true
+        else
+            scionlab-config || true
+        fi
         ;;
     abort-*)
         # How'd we get here??
