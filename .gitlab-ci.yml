@@ -445,7 +445,7 @@ scionlab-debian-10-amd64-test:
   script:
     - scp -v output-$CI_DEB_PLATFORM/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
-    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
+    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb || true"; done
 
 all-deb-pre-deploy:
   stage: pre-deploy
