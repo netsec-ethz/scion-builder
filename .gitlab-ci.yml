@@ -443,7 +443,7 @@ scionlab-debian-10-amd64-test:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - ssh -q $CI_SCP_TARGET "rm -f /tmp/*.deb"
   script:
-    - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
+    - scp -v output-$CI_DEB_PLATFORM/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
     - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
 
@@ -452,6 +452,7 @@ all-deb-pre-deploy:
   image: $CI_DOCKER_IMAGE
   variables:
     CI_DEB_CODENAME: testing
+    CI_DEB_PLATFORM: amd64
   <<: *deb-deploy-script
   after_script:
     - apt update && apt install -y apt-transport-https
@@ -467,6 +468,7 @@ all-deb-deploy:
     - master
   variables:
     CI_DEB_CODENAME: all
+    CI_DEB_PLATFORM: "*"
   <<: *deb-deploy-script
 
 .test-deb-deploy-script: &test-deb-deploy-script
