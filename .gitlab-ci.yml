@@ -434,31 +434,7 @@ scionlab-debian-10-amd64-test:
     CI_BINARY_NAME: scionlab-config
   <<: *test-scionlab-deb-script
 
-all-deb-pre-deploy:
-  stage: pre-deploy
-  image: $CI_DOCKER_IMAGE
-  before_script:
-    - 'which ssh-agent || ( apt update && apt-get install -qq openssh-client )'
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$CI_SSH_PRIVATE_KEY")
-    - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - ssh -q $CI_SCP_TARGET "rm -f /tmp/*.deb"
-  script:
-    - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
-    - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
-    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_TESTING_CODENAME $deb || true"; done
-    - apt update && apt install -y apt-transport-https
-    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian testing main" >> /etc/apt/sources.list && apt update
-    - source ./RELEASE
-    - export CI_VERSION=$(printenv `echo PKG_VERSION_SCIONLAB`)
-    - apt install -y scionlab=$CI_VERSION
-
-all-deb-deploy:
-  stage: deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
+.deb-deploy-script: &deb-deploy-script
   before_script:
     - 'which ssh-agent || ( apt update && apt-get install -qq openssh-client )'
     - eval $(ssh-agent -s)
@@ -470,6 +446,28 @@ all-deb-deploy:
     - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
     - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
+
+all-deb-pre-deploy:
+  stage: pre-deploy
+  image: $CI_DOCKER_IMAGE
+  variables:
+    CI_DEB_CODENAME: testing
+  <<: *deb-deploy-script
+  after_script:
+    - apt update && apt install -y apt-transport-https
+    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian testing main" >> /etc/apt/sources.list && apt update
+    - source ./RELEASE
+    - export CI_VERSION=$(printenv `echo PKG_VERSION_SCIONLAB`)
+    - apt install -y scionlab=$CI_VERSION
+
+all-deb-deploy:
+  stage: deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_DEB_CODENAME: all
+  <<: *deb-deploy-script
 
 .test-deb-deploy-script: &test-deb-deploy-script
   script:
