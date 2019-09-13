@@ -22,7 +22,6 @@ CI process relies on some variables defined below. They can be configured using 
 
 * `CI_SCP_TARGET`
 * `CI_SSH_PRIVATE_KEY`
-* `CI_DEB_CODENAME`
 
 ## Usage
 
