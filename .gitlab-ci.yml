@@ -446,6 +446,11 @@ scionlab-debian-10-amd64-test:
     - scp -v output-$CI_DEB_PLATFORM/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
     - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb || true"; done
+    - apt update && apt install -y apt-transport-https
+    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian $CI_DEB_CODENAME main" >> /etc/apt/sources.list && apt update
+    - source ./RELEASE
+    - export CI_VERSION=$(printenv `echo PKG_VERSION_SCIONLAB`)
+    - apt install -y scionlab=$CI_VERSION
 
 all-deb-pre-deploy:
   stage: pre-deploy
@@ -454,12 +459,6 @@ all-deb-pre-deploy:
     CI_DEB_CODENAME: testing
     CI_DEB_PLATFORM: amd64
   <<: *deb-deploy-script
-  after_script:
-    - apt update && apt install -y apt-transport-https
-    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian testing main" >> /etc/apt/sources.list && apt update
-    - source ./RELEASE
-    - export CI_VERSION=$(printenv `echo PKG_VERSION_SCIONLAB`)
-    - apt install -y scionlab=$CI_VERSION
 
 all-deb-deploy:
   stage: deploy
