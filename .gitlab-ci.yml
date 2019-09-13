@@ -4,6 +4,7 @@ stages:
   - test-1
   - test-2
   - test-3
+  - pre-deploy
   - deploy
   - post-deploy
 
@@ -433,11 +434,7 @@ scionlab-debian-10-amd64-test:
     CI_BINARY_NAME: scionlab-config
   <<: *test-scionlab-deb-script
 
-all-deb-deploy:
-  stage: deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
+.deb-deploy-script: &deb-deploy-script
   before_script:
     - 'which ssh-agent || ( apt update && apt-get install -qq openssh-client )'
     - eval $(ssh-agent -s)
@@ -446,9 +443,32 @@ all-deb-deploy:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - ssh -q $CI_SCP_TARGET "rm -f /tmp/*.deb"
   script:
-    - scp -v output*/*.deb $CI_SCP_TARGET:/tmp
+    - scp -v output-$CI_DEB_PLATFORM/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
-    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb"; done
+    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb || true"; done
+    - apt update && apt install -y apt-transport-https
+    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian $CI_DEB_CODENAME main" >> /etc/apt/sources.list && apt update
+    - source ./RELEASE
+    - export CI_VERSION=$(printenv `echo PKG_VERSION_SCIONLAB`)
+    - apt install -y scionlab=$CI_VERSION
+
+all-deb-pre-deploy:
+  stage: pre-deploy
+  image: $CI_DOCKER_IMAGE
+  variables:
+    CI_DEB_CODENAME: testing
+    CI_DEB_PLATFORM: amd64
+  <<: *deb-deploy-script
+
+all-deb-deploy:
+  stage: deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_DEB_CODENAME: all
+    CI_DEB_PLATFORM: "*"
+  <<: *deb-deploy-script
 
 .test-deb-deploy-script: &test-deb-deploy-script
   script:
@@ -537,18 +557,3 @@ scionlab-deb-deploy-test:
     CI_PACKAGE: scionlab
     CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB
   <<: *test-deb-deploy-script
-
-scionlab-deb-install-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  variables:
-    CI_PACKAGE: scionlab
-    CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB
-  script:
-    - apt update && apt install -y apt-transport-https
-    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
-    - source ./RELEASE
-    - export CI_VERSION=$(printenv `echo $CI_VERSION_VARIABLE`)
-    - apt install -y $CI_PACKAGE=$CI_VERSION
