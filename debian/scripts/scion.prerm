@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -e
-
-if [ "$1" = remove ] && [ ! -f /.dockerenv ]; then
-    systemctl disable $DPKG_MAINTSCRIPT_PACKAGE\*.service
-    systemctl stop $DPKG_MAINTSCRIPT_PACKAGE\*.service
-fi

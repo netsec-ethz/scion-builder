@@ -42,7 +42,7 @@ case "$1" in
             chown -R scion.scion "/etc/scion/gen-certs"
         fi
 
-        # refresh the configuration
+        # refresh the configuration and restart services (systemctl restart scionlab.target must be called in scionlab-config)
         scionlab-config || true
         ;;
     abort-*)

@@ -43,19 +43,11 @@ case "$1" in
         mkdir -p /run/shm/sciond
         chown -R scion:scion /run/shm/sciond
 
-        if [ ! -f /.dockerenv ]; then
-			systemctl daemon-reload
-        fi
         ;;
     abort-*)
-        # How'd we get here??
+        # we get here if e.g. prerm fails
         exit 1
         ;;
     *)
         ;;
 esac
-
-# Restart services if they are running and this is an upgrade
-if [ -n "$2" ] && [ "$1" = 'configure' ] && [ ! -f /.dockerenv ]; then
-    systemctl restart $DPKG_MAINTSCRIPT_PACKAGE\*.service
-fi
