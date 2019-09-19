@@ -56,7 +56,7 @@ connectivity-check:
     # Override some files from upstream SCION
     - cp BUILD.bazel scion/BUILD.bazel
     - pushd scion
-    - if [ ! -z "$(ls ../patches)" ]; then ll ../patches; for i in ../patches/*.patch; do git apply $i --verbose; done; fi
+    - if [ ! -z "$(ls ../patches)" ]; then ls -l ../patches; for i in ../patches/*.patch; do git apply $i --verbose; done; fi
     - popd
     # Copy SCIONLab automatic configuration script into SCION codebase
     - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-config
