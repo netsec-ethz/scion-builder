@@ -49,6 +49,9 @@ case "$1" in
         else
             scionlab-config || true
         fi
+        
+        # expiclitly restart services in case scionlab config was not updated
+        systemctl restart scionlab.target > /dev/null 2>&1
         ;;
     abort-*)
         # How'd we get here??
