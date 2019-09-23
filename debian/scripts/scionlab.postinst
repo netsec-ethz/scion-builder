@@ -51,7 +51,9 @@ case "$1" in
         fi
         
         # expiclitly restart services in case scionlab config was not updated
-        systemctl restart scionlab.target > /dev/null 2>&1
+        if [ ! -f /.dockerenv ]; then
+            systemctl restart scionlab.target > /dev/null 2>&1
+        fi
         ;;
     abort-*)
         # How'd we get here??
