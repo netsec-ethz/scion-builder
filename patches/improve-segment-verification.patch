@@ -1,0 +1,201 @@
+From 2b09bca57313b27e6cb1b443e8b0040fb2c8be39 Mon Sep 17 00:00:00 2001
+From: Mateusz Kowalski <kmateusz@inf.ethz.ch>
+Date: Wed, 18 Sep 2019 16:24:30 +0200
+Subject: [PATCH 1/6] Hacky workaround for refreshing TRCs
+
+---
+ go/lib/infra/modules/trust/signhelper.go | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/go/lib/infra/modules/trust/signhelper.go b/go/lib/infra/modules/trust/signhelper.go
+index c6abaec123..dcec996c11 100644
+--- a/go/lib/infra/modules/trust/signhelper.go
++++ b/go/lib/infra/modules/trust/signhelper.go
+@@ -226,6 +226,12 @@ func (v *BasicVerifier) verify(ctx context.Context, msg common.RawBytes,
+ 	if err := v.checkSrc(src); err != nil {
+ 		return err
+ 	}
++	topts := infra.TRCOpts{
++		TrustStoreOpts: infra.TrustStoreOpts{Server: v.server},
++	}
++	if _, err := v.store.GetTRC(ctx, src.IA.I, scrypto.Version(src.TRCVer), topts); err != nil {
++		return err
++	}
+ 	opts := infra.ChainOpts{
+ 		TrustStoreOpts: infra.TrustStoreOpts{Server: v.server},
+ 	}
+
+From 654fa0ac323d78e695e562f302852ab8ed9b67eb Mon Sep 17 00:00:00 2001
+From: Mateusz Kowalski <kmateusz@inf.ethz.ch>
+Date: Wed, 18 Sep 2019 17:01:57 +0200
+Subject: [PATCH 2/6] DEBUG DEBUG git add .!
+
+---
+ go/lib/infra/modules/trust/signhelper.go | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/go/lib/infra/modules/trust/signhelper.go b/go/lib/infra/modules/trust/signhelper.go
+index dcec996c11..6e999fe7cd 100644
+--- a/go/lib/infra/modules/trust/signhelper.go
++++ b/go/lib/infra/modules/trust/signhelper.go
+@@ -25,6 +25,7 @@ import (
+ 	"github.com/scionproto/scion/go/lib/ctrl"
+ 	"github.com/scionproto/scion/go/lib/ctrl/cert_mgmt"
+ 	"github.com/scionproto/scion/go/lib/infra"
++	"github.com/scionproto/scion/go/lib/log"
+ 	"github.com/scionproto/scion/go/lib/scrypto"
+ 	"github.com/scionproto/scion/go/lib/util"
+ 	"github.com/scionproto/scion/go/proto"
+@@ -226,12 +227,20 @@ func (v *BasicVerifier) verify(ctx context.Context, msg common.RawBytes,
+ 	if err := v.checkSrc(src); err != nil {
+ 		return err
+ 	}
++	logger := log.FromCtx(ctx)
++	logger.Debug("[kmateusz] YO MAN 1")
+ 	topts := infra.TRCOpts{
+ 		TrustStoreOpts: infra.TrustStoreOpts{Server: v.server},
+ 	}
+-	if _, err := v.store.GetTRC(ctx, src.IA.I, scrypto.Version(src.TRCVer), topts); err != nil {
++	logger.Debug("[kmateusz] YO MAN 2")
++	logger.Debug("[kmateusz] ", "src", src)
++	_, err = v.store.GetTRC(ctx, src.IA.I, scrypto.Version(src.TRCVer), topts)
++
++	if err != nil {
++		logger.Debug("[kmateusz] YO MAN ERROR 1")
+ 		return err
+ 	}
++	logger.Debug("[kmateusz] YO MAN 3")
+ 	opts := infra.ChainOpts{
+ 		TrustStoreOpts: infra.TrustStoreOpts{Server: v.server},
+ 	}
+
+From 3a44374d8bcdb03bc02860a8f6faf5fdefd6b0bf Mon Sep 17 00:00:00 2001
+From: Mateusz Kowalski <kmateusz@inf.ethz.ch>
+Date: Thu, 19 Sep 2019 08:52:04 +0200
+Subject: [PATCH 3/6] Set TRCVer explicitely in VerifySegment
+
+---
+ go/lib/infra/modules/segverifier/segverifier.go | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/go/lib/infra/modules/segverifier/segverifier.go b/go/lib/infra/modules/segverifier/segverifier.go
+index 79dc68ea9c..fc72a33a68 100644
+--- a/go/lib/infra/modules/segverifier/segverifier.go
++++ b/go/lib/infra/modules/segverifier/segverifier.go
+@@ -207,12 +207,15 @@ func verifySegment(ctx context.Context, verifier infra.Verifier, server net.Addr
+ func VerifySegment(ctx context.Context, verifier infra.Verifier, server net.Addr,
+ 	segment *seg.PathSegment) error {
+
++	log.Debug("[juagargi] VerifySegment", "segment", segment)
+ 	for i, asEntry := range segment.ASEntries {
+ 		// Bind the verifier to the values specified in the AS Entry since
+ 		// the sign meta does not carry this information.
++		log.Debug("[juagargi] VerifySegment, inside loop", "asEntry", asEntry)
+ 		verifier := verifier.WithServer(server).WithSrc(ctrl.SignSrcDef{
+ 			IA:       asEntry.IA(),
+ 			ChainVer: asEntry.CertVer,
++			TRCVer:   asEntry.TrcVer,
+ 		})
+ 		if err := segment.VerifyASEntry(ctx, verifier, i); err != nil {
+ 			return common.NewBasicError("segverifier.VerifySegment", err, "segment", segment,
+
+From 663fbdf462e1ac92dcf7d9483d4d60d6576ed260 Mon Sep 17 00:00:00 2001
+From: Mateusz Kowalski <kmateusz@inf.ethz.ch>
+Date: Thu, 19 Sep 2019 09:38:03 +0200
+Subject: [PATCH 4/6] Cleanup comments
+
+---
+ go/lib/infra/modules/segverifier/segverifier.go |  2 --
+ go/lib/infra/modules/trust/signhelper.go        | 10 ++--------
+ 2 files changed, 2 insertions(+), 10 deletions(-)
+
+diff --git a/go/lib/infra/modules/segverifier/segverifier.go b/go/lib/infra/modules/segverifier/segverifier.go
+index fc72a33a68..8090497b36 100644
+--- a/go/lib/infra/modules/segverifier/segverifier.go
++++ b/go/lib/infra/modules/segverifier/segverifier.go
+@@ -207,11 +207,9 @@ func verifySegment(ctx context.Context, verifier infra.Verifier, server net.Addr
+ func VerifySegment(ctx context.Context, verifier infra.Verifier, server net.Addr,
+ 	segment *seg.PathSegment) error {
+
+-	log.Debug("[juagargi] VerifySegment", "segment", segment)
+ 	for i, asEntry := range segment.ASEntries {
+ 		// Bind the verifier to the values specified in the AS Entry since
+ 		// the sign meta does not carry this information.
+-		log.Debug("[juagargi] VerifySegment, inside loop", "asEntry", asEntry)
+ 		verifier := verifier.WithServer(server).WithSrc(ctrl.SignSrcDef{
+ 			IA:       asEntry.IA(),
+ 			ChainVer: asEntry.CertVer,
+diff --git a/go/lib/infra/modules/trust/signhelper.go b/go/lib/infra/modules/trust/signhelper.go
+index 6e999fe7cd..655e29dc24 100644
+--- a/go/lib/infra/modules/trust/signhelper.go
++++ b/go/lib/infra/modules/trust/signhelper.go
+@@ -228,19 +228,13 @@ func (v *BasicVerifier) verify(ctx context.Context, msg common.RawBytes,
+ 		return err
+ 	}
+ 	logger := log.FromCtx(ctx)
+-	logger.Debug("[kmateusz] YO MAN 1")
+ 	topts := infra.TRCOpts{
+ 		TrustStoreOpts: infra.TrustStoreOpts{Server: v.server},
+ 	}
+-	logger.Debug("[kmateusz] YO MAN 2")
+-	logger.Debug("[kmateusz] ", "src", src)
+-	_, err = v.store.GetTRC(ctx, src.IA.I, scrypto.Version(src.TRCVer), topts)
+-
+-	if err != nil {
+-		logger.Debug("[kmateusz] YO MAN ERROR 1")
++	logger.Debug("[TrustStore:BasicVerifier] Verifying", "src", src)
++	if _, err = v.store.GetTRC(ctx, src.IA.I, scrypto.Version(src.TRCVer), topts); err != nil {
+ 		return err
+ 	}
+-	logger.Debug("[kmateusz] YO MAN 3")
+ 	opts := infra.ChainOpts{
+ 		TrustStoreOpts: infra.TrustStoreOpts{Server: v.server},
+ 	}
+
+From 40012230c4769bd0acc0a814e0e5fc0706ac6214 Mon Sep 17 00:00:00 2001
+From: Mateusz Kowalski <kmateusz@inf.ethz.ch>
+Date: Thu, 19 Sep 2019 10:55:36 +0200
+Subject: [PATCH 5/6] Remove some logging
+
+---
+ go/lib/infra/modules/trust/signhelper.go | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/go/lib/infra/modules/trust/signhelper.go b/go/lib/infra/modules/trust/signhelper.go
+index 655e29dc24..58e3420b6e 100644
+--- a/go/lib/infra/modules/trust/signhelper.go
++++ b/go/lib/infra/modules/trust/signhelper.go
+@@ -227,11 +227,9 @@ func (v *BasicVerifier) verify(ctx context.Context, msg common.RawBytes,
+ 	if err := v.checkSrc(src); err != nil {
+ 		return err
+ 	}
+-	logger := log.FromCtx(ctx)
+ 	topts := infra.TRCOpts{
+ 		TrustStoreOpts: infra.TrustStoreOpts{Server: v.server},
+ 	}
+-	logger.Debug("[TrustStore:BasicVerifier] Verifying", "src", src)
+ 	if _, err = v.store.GetTRC(ctx, src.IA.I, scrypto.Version(src.TRCVer), topts); err != nil {
+ 		return err
+ 	}
+
+From 99c97ec3f1e27564531e538c5e58b38640e510af Mon Sep 17 00:00:00 2001
+From: Mateusz Kowalski <kmateusz@inf.ethz.ch>
+Date: Thu, 19 Sep 2019 11:54:06 +0200
+Subject: [PATCH 6/6] Remove unused import
+
+---
+ go/lib/infra/modules/trust/signhelper.go | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/go/lib/infra/modules/trust/signhelper.go b/go/lib/infra/modules/trust/signhelper.go
+index 58e3420b6e..05cb712125 100644
+--- a/go/lib/infra/modules/trust/signhelper.go
++++ b/go/lib/infra/modules/trust/signhelper.go
+@@ -25,7 +25,6 @@ import (
+ 	"github.com/scionproto/scion/go/lib/ctrl"
+ 	"github.com/scionproto/scion/go/lib/ctrl/cert_mgmt"
+ 	"github.com/scionproto/scion/go/lib/infra"
+-	"github.com/scionproto/scion/go/lib/log"
+ 	"github.com/scionproto/scion/go/lib/scrypto"
+ 	"github.com/scionproto/scion/go/lib/util"
+ 	"github.com/scionproto/scion/go/proto"
