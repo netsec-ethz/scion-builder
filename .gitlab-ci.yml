@@ -25,8 +25,12 @@ connectivity-check:
     - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
     - ln -f -s /usr/local/go/bin/* /usr/bin/
     # Install multiplatform toolchains
+    - apt install -y gcc-multilib
     - apt install -y libc6-armhf-cross libc6-dev-armhf-cross gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabi
     - apt install -y libc6-arm64-cross libc6-dev-arm64-cross gcc-aarch64-linux-gnu
+    - apt install -y libc6-i386-cross libc6-dev-i386-cross linux-libc-dev-i386-cross
+    # Hack for linux kernels for i386
+    - ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/asm
     # Clone SCION source code
     - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
     - mkdir -p $HOME/go/src/github.com/scionproto/
@@ -74,8 +78,8 @@ connectivity-check:
     # Build SCION binaries
     - export CGO_ENABLED=1
     - export GOOS=linux
-    - '[ "$CI_TARGET_ARCHITECTURE" == "armhf" ] && export GOARCH=arm || export GOARCH=$CI_TARGET_ARCHITECTURE'
-    - export CC=$CI_CC
+    - export CC=$CI_CC && echo $CC
+    - export GOARCH=$CI_GOARCH && echo $GOARCH
     - pushd bin
     - go build ../go/border/
     - go build ../go/beacon_srv/
@@ -111,6 +115,7 @@ all-deb-amd64:
   image: $CI_DOCKER_IMAGE
   variables:
     CI_TARGET_ARCHITECTURE: amd64
+    CI_GOARCH: amd64
     CI_CC: gcc
   <<: *build-deb-script
   artifacts:
@@ -118,11 +123,25 @@ all-deb-amd64:
     - output-amd64/
     expire_in: 1 hour
 
+all-deb-i386:
+  stage: build
+  image: $CI_DOCKER_IMAGE
+  variables:
+    CI_TARGET_ARCHITECTURE: i386
+    CI_GOARCH: 386
+    CI_CC: gcc
+  <<: *build-deb-script
+  artifacts:
+    paths:
+      - output-i386/
+    expire_in: 1 hour
+
 all-deb-arm64:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
     CI_TARGET_ARCHITECTURE: arm64
+    CI_GOARCH: arm64
     CI_CC: aarch64-linux-gnu-gcc
   <<: *build-deb-script
   artifacts:
@@ -135,6 +154,7 @@ all-deb-armhf:
   image: $CI_DOCKER_IMAGE
   variables:
     CI_TARGET_ARCHITECTURE: armhf
+    CI_GOARCH: arm
     CI_CC: arm-linux-gnueabihf-gcc
   <<: *build-deb-script
   artifacts:
