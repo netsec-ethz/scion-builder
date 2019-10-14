@@ -43,11 +43,8 @@ case "$1" in
         fi
 
         # refresh the configuration and restart services (systemctl restart scionlab.target must be called in scionlab-config)
-        if [ -z "$2" ]; then
-            # when installing for the first time make sure tgz with the configuration is always downloaded
+        if [ -e "/etc/scion/gen/scionlab-config.json" ]; then
             scionlab-config --force || true
-        else
-            scionlab-config || true
         fi
         
         # expiclitly restart services in case scionlab config was not updated
