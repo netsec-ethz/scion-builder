@@ -473,6 +473,8 @@ scionlab-debian-10-amd64-test:
 all-deb-testing-deploy:
   stage: pre-deploy
   image: $CI_DOCKER_IMAGE
+  except:
+    - master
   variables:
     CI_DEB_CODENAME: testing
     CI_DEB_PLATFORM: amd64
@@ -488,7 +490,17 @@ all-deb-devel-deploy:
     CI_DEB_PLATFORM: amd64
   <<: *deb-deploy-script
 
-all-deb-deploy:
+all-deb-preprod-deploy:
+  stage: pre-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - master
+  variables:
+    CI_DEB_CODENAME: preprod
+    CI_DEB_PLATFORM: amd64
+  <<: *deb-deploy-script
+
+all-deb-prod-deploy:
   stage: deploy
   image: $CI_DOCKER_IMAGE
   only:
