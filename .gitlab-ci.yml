@@ -470,7 +470,7 @@ scionlab-debian-10-amd64-test:
     - export CI_VERSION=$(printenv `echo PKG_VERSION_SCIONLAB`)
     - apt install -y scionlab=$CI_VERSION
 
-all-deb-pre-deploy:
+all-deb-testing-deploy:
   stage: pre-deploy
   image: $CI_DOCKER_IMAGE
   variables:
