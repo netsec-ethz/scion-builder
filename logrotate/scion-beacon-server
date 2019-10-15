@@ -1,7 +1,0 @@
-/var/log/scion/bs*.log {
-    weekly
-    rotate 4
-    missingok
-    compress
-    notifempty
-}
