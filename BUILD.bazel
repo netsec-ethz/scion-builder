@@ -427,7 +427,6 @@ pkg_deb(
         "scion-dispatcher (=" + PKG_VERSION_SCION_DISPATCHER + ")",
         "scion-tools (=" + PKG_VERSION_SCION_TOOLS + ")",
         "openssl",
-        "openvpn",
         "python3 (>=3.5)",
     ],
     description = "SCIONLab",
@@ -439,6 +438,9 @@ pkg_deb(
     preinst = "debian/scripts/scionlab.preinst",
     prerm = "debian/scripts/scionlab.prerm",
     priority = PKG_PRORITY,
+    recommends = [
+        "openvpn",
+    ],
     section = PKG_SECTION,
     version = PKG_VERSION_SCIONLAB,
 )
