@@ -478,6 +478,16 @@ all-deb-testing-deploy:
     CI_DEB_PLATFORM: amd64
   <<: *deb-deploy-script
 
+all-deb-devel-deploy:
+  stage: pre-deploy
+  image: $CI_DOCKER_IMAGE
+  only:
+    - /^devel\/.*$/
+  variables:
+    CI_DEB_CODENAME: devel
+    CI_DEB_PLATFORM: amd64
+  <<: *deb-deploy-script
+
 all-deb-deploy:
   stage: deploy
   image: $CI_DOCKER_IMAGE
