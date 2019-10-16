@@ -19,7 +19,7 @@ connectivity-check:
   script:
     # Prepare operating system
     - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
-    - apt update && apt install -y apt-transport-https
+    - apt update && apt install -y apt-transport-https ca-certificates
     - cp debian/apt.sources.list /etc/apt/sources.list
     - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget curl unzip gcc file python
     - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
@@ -464,7 +464,7 @@ scionlab-debian-10-amd64-test:
     - scp -v output-$CI_DEB_PLATFORM/*.deb $CI_SCP_TARGET:/tmp
     - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
     - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb || true"; done
-    - apt update && apt install -y apt-transport-https
+    - apt update && apt install -y apt-transport-https ca-certificates
     - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian $CI_DEB_CODENAME main" >> /etc/apt/sources.list && apt update
     - source ./RELEASE
     - export CI_VERSION=$(printenv `echo PKG_VERSION_SCIONLAB`)
@@ -512,7 +512,7 @@ all-deb-prod-deploy:
 
 .test-deb-deploy-script: &test-deb-deploy-script
   script:
-    - apt update && apt install -y apt-transport-https
+    - apt update && apt install -y apt-transport-https ca-certificates
     - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
     - source ./RELEASE
     - export CI_VERSION=$(printenv `echo $CI_VERSION_VARIABLE`)
