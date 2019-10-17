@@ -15,20 +15,20 @@ connectivity-check:
     - ping github.com -c1
     - nc -vz packages.netsec.inf.ethz.ch 22
 
-.build-deb-script: &build-deb-script
+.build-script: &build-script
   script:
     # Prepare operating system
+    - export DEBIAN_FRONTEND=noninteractive
     - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
-    - apt update && apt install -y apt-transport-https ca-certificates
-    - cp debian/apt.sources.list /etc/apt/sources.list
-    - rm -rf /var/lib/apt/lists/* && apt update && apt install -y git wget curl unzip gcc file python
+    - apt update && apt install -y apt-transport-https ca-certificates rpm git wget curl unzip gcc file python
     - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
     - ln -f -s /usr/local/go/bin/* /usr/bin/
     # Install multiplatform toolchains
     - apt install -y gcc-multilib
-    - apt install -y libc6-armhf-cross libc6-dev-armhf-cross gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabi
-    - apt install -y libc6-arm64-cross libc6-dev-arm64-cross gcc-aarch64-linux-gnu
-    - apt install -y libc6-i386-cross libc6-dev-i386-cross linux-libc-dev-i386-cross
+    - "apt install -y \
+      libc6-armhf-cross libc6-dev-armhf-cross gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabi \
+      libc6-arm64-cross libc6-dev-arm64-cross gcc-aarch64-linux-gnu \
+      libgcc-7-dev-i386-cross libgcc-7-dev libc6-dev libc6-dev-i386 libc6-i386-cross libc6-dev-i386-cross linux-libc-dev-i386-cross"
     # Hack for linux kernels for i386
     - ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/asm
     # Clone SCION source code
@@ -56,7 +56,14 @@ connectivity-check:
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCIONLAB/$PKG_VERSION_SCIONLAB/g" BUILD.bazel
-#    - '[[ $CI_COMMIT_TAG == release/* ]] && export CI_PKG_VERSION=$(echo $CI_COMMIT_TAG | sed "s@release/@@g") && sed -i "s/0.0.0/$CI_PKG_VERSION/g" BUILD.bazel && echo $CI_PKG_VERSION || true'
+    # Set variables in RPM specfile
+    - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_PATH_SERVER/$PKG_VERSION_SCION_PATH_SERVER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
     # Override some files from upstream SCION
     - cp BUILD.bazel scion/BUILD.bazel
     - pushd scion
@@ -90,21 +97,19 @@ connectivity-check:
     - go build ../go/tools/scmp/
     - go build ../go/tools/showpaths/
     - popd
-    # DEBUG ME
-    - ls -la .
     # Build SCION packages
-    - bazel build //:scion-systemd-wrapper-debian --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-border-router-debian --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-beacon-server-debian --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-certificate-server-debian --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-path-server-debian --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-daemon-debian --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-dispatcher-debian --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-tools-debian --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scionlab-debian --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-systemd-wrapper-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-border-router-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-beacon-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-certificate-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-path-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-daemon-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-dispatcher-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-tools-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scionlab-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
-    - cp bazel-bin/*_$CI_TARGET_ARCHITECTURE.deb ../output-$CI_TARGET_ARCHITECTURE
+    - cp bazel-bin/*$CI_TARGET_ARCHITECTURE.$CI_TARGET_PLATFORM ../output-$CI_TARGET_ARCHITECTURE
     # Place hashes of git repos in the output for auditing
     - cd ../scion && git log -1
     - cd ../scionlab && git log -1
@@ -113,23 +118,39 @@ all-deb-amd64:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
+    CI_TARGET_PLATFORM: deb
     CI_TARGET_ARCHITECTURE: amd64
     CI_GOARCH: amd64
     CI_CC: gcc
-  <<: *build-deb-script
+  <<: *build-script
   artifacts:
     paths:
     - output-amd64/
+    expire_in: 1 hour
+
+all-rpm-amd64:
+  stage: build
+  image: $CI_DOCKER_IMAGE
+  variables:
+    CI_TARGET_PLATFORM: rpm
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_GOARCH: amd64
+    CI_CC: gcc
+  <<: *build-script
+  artifacts:
+    paths:
+      - output-amd64/
     expire_in: 1 hour
 
 all-deb-i386:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
+    CI_TARGET_PLATFORM: deb
     CI_TARGET_ARCHITECTURE: i386
     CI_GOARCH: 386
     CI_CC: gcc
-  <<: *build-deb-script
+  <<: *build-script
   artifacts:
     paths:
       - output-i386/
@@ -139,10 +160,11 @@ all-deb-arm64:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
+    CI_TARGET_PLATFORM: deb
     CI_TARGET_ARCHITECTURE: arm64
     CI_GOARCH: arm64
     CI_CC: aarch64-linux-gnu-gcc
-  <<: *build-deb-script
+  <<: *build-script
   artifacts:
     paths:
       - output-arm64/
@@ -152,10 +174,11 @@ all-deb-armhf:
   stage: build
   image: $CI_DOCKER_IMAGE
   variables:
+    CI_TARGET_PLATFORM: deb
     CI_TARGET_ARCHITECTURE: armhf
     CI_GOARCH: arm
     CI_CC: arm-linux-gnueabihf-gcc
-  <<: *build-deb-script
+  <<: *build-script
   artifacts:
     paths:
       - output-armhf/
@@ -183,6 +206,28 @@ all-deb-armhf:
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
     - "[[ $(ls /lib/systemd/system/$CI_PACKAGE*.service | wc -l) -eq 0  ]]"
 
+.test-rpm-script: &test-rpm-script
+  script:
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
+    # Test installation
+    - rpm -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.rpm
+    - rpm -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
+    # Test system after the installation
+    - id scion
+    - getent group scion
+    - stat -c "%U %G" /var/log/scion | grep "scion scion"
+    - stat -c "%U %G" /var/lib/scion | grep "scion scion"
+    - stat -c "%U %G" /etc/scion | grep "scion scion"
+    - ls /lib/systemd/system/$CI_PACKAGE*.service
+    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+    # Test removal
+    - rpm -e $CI_PACKAGE
+    # Test system after the removal
+    - id scion
+    - getent group scion
+    - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
+    - "[[ $(ls /lib/systemd/system/$CI_PACKAGE*.service | wc -l) -eq 0  ]]"
+
 .test-systemd-wrapper-deb-script: &test-systemd-wrapper-deb-script
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
@@ -191,12 +236,28 @@ all-deb-armhf:
     - dpkg --purge $CI_PACKAGE
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
+.test-systemd-wrapper-rpm-script: &test-systemd-wrapper-rpm-script
+  script:
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
+    - rpm -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
+    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+    - rpm -e $CI_PACKAGE
+    - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
+
 .test-scion-tools-deb-script: &test-scion-tools-deb-script
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
     - dpkg --purge $CI_PACKAGE
+    - for CI_BINARY_NAME in $CI_BINARIES; do [[ ! -f /usr/bin/$CI_BINARY_NAME ]]; done
+
+.test-scion-tools-rpm-script: &test-scion-tools-rpm-script
+  script:
+    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
+    - rpm -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
+    - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
+    - rpm -e $CI_PACKAGE
     - for CI_BINARY_NAME in $CI_BINARIES; do [[ ! -f /usr/bin/$CI_BINARY_NAME ]]; done
 
 .test-scionlab-deb-script: &test-scionlab-deb-script
@@ -209,14 +270,15 @@ all-deb-armhf:
     - dpkg --purge $CI_PACKAGE
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
-systemd-wrapper-ubuntu-16.04-amd64-test:
-  stage: test-1
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-systemd-wrapper
-    CI_BINARY_NAME: scion-systemd-wrapper
-  <<: *test-systemd-wrapper-deb-script
+.test-scionlab-rpm-script: &test-scionlab-rpm-script
+  script:
+    - yum install -y openvpn openssl python3
+    - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.rpm
+    - rpm -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.rpm
+    - ls /lib/systemd/system/scionlab.target
+    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
+    - rpm -e $CI_PACKAGE
+    - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
 systemd-wrapper-ubuntu-18.04-amd64-test:
   stage: test-1
@@ -227,23 +289,23 @@ systemd-wrapper-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: scion-systemd-wrapper
   <<: *test-systemd-wrapper-deb-script
 
-systemd-wrapper-debian-10-amd64-test:
+#systemd-wrapper-debian-10-amd64-test:
+#  stage: test-1
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-systemd-wrapper
+#    CI_BINARY_NAME: scion-systemd-wrapper
+#  <<: *test-systemd-wrapper-deb-script
+
+systemd-wrapper-centos-7-amd64-test:
   stage: test-1
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-systemd-wrapper
     CI_BINARY_NAME: scion-systemd-wrapper
-  <<: *test-systemd-wrapper-deb-script
-
-scion-tools-ubuntu-16.04-amd64-test:
-  stage: test-1
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-tools
-    CI_BINARIES: "pingpong scmp showpaths"
-  <<: *test-scion-tools-deb-script
+  <<: *test-systemd-wrapper-rpm-script
 
 scion-tools-ubuntu-18.04-amd64-test:
   stage: test-1
@@ -254,23 +316,23 @@ scion-tools-ubuntu-18.04-amd64-test:
     CI_BINARIES: "pingpong scmp showpaths"
   <<: *test-scion-tools-deb-script
 
-scion-tools-debian-10-amd64-test:
+#scion-tools-debian-10-amd64-test:
+#  stage: test-1
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-tools
+#    CI_BINARIES: "pingpong scmp showpaths"
+#  <<: *test-scion-tools-deb-script
+
+scion-tools-centos-7-amd64-test:
   stage: test-1
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
     CI_BINARIES: "pingpong scmp showpaths"
-  <<: *test-scion-tools-deb-script
-
-border-router-ubuntu-16.04-amd64-test:
-  stage: test-2
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-border-router
-    CI_BINARY_NAME: border
-  <<: *test-deb-script
+  <<: *test-scion-tools-rpm-script
 
 border-router-ubuntu-18.04-amd64-test:
   stage: test-2
@@ -281,23 +343,23 @@ border-router-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: border
   <<: *test-deb-script
 
-border-router-debian-10-amd64-test:
+#border-router-debian-10-amd64-test:
+#  stage: test-2
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-border-router
+#    CI_BINARY_NAME: border
+#  <<: *test-deb-script
+
+border-router-centos-7-amd64-test:
   stage: test-2
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-border-router
     CI_BINARY_NAME: border
-  <<: *test-deb-script
-
-beacon-server-ubuntu-16.04-amd64-test:
-  stage: test-2
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-beacon-server
-    CI_BINARY_NAME: beacon_srv
-  <<: *test-deb-script
+  <<: *test-rpm-script
 
 beacon-server-ubuntu-18.04-amd64-test:
   stage: test-2
@@ -308,23 +370,23 @@ beacon-server-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: beacon_srv
   <<: *test-deb-script
 
-beacon-server-debian-10-amd64-test:
+#beacon-server-debian-10-amd64-test:
+#  stage: test-2
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-beacon-server
+#    CI_BINARY_NAME: beacon_srv
+#  <<: *test-deb-script
+
+beacon-server-centos-7-amd64-test:
   stage: test-2
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-beacon-server
     CI_BINARY_NAME: beacon_srv
-  <<: *test-deb-script
-
-certificate-server-ubuntu-16.04-amd64-test:
-  stage: test-2
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-certificate-server
-    CI_BINARY_NAME: cert_srv
-  <<: *test-deb-script
+  <<: *test-rpm-script
 
 certificate-server-ubuntu-18.04-amd64-test:
   stage: test-2
@@ -335,23 +397,23 @@ certificate-server-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: cert_srv
   <<: *test-deb-script
 
-certificate-server-debian-10-amd64-test:
+#certificate-server-debian-10-amd64-test:
+#  stage: test-2
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-certificate-server
+#    CI_BINARY_NAME: cert_srv
+#  <<: *test-deb-script
+
+certificate-server-centos-7-amd64-test:
   stage: test-2
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-certificate-server
     CI_BINARY_NAME: cert_srv
-  <<: *test-deb-script
-
-path-server-ubuntu-16.04-amd64-test:
-  stage: test-2
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-path-server
-    CI_BINARY_NAME: path_srv
-  <<: *test-deb-script
+  <<: *test-rpm-script
 
 path-server-ubuntu-18.04-amd64-test:
   stage: test-2
@@ -362,23 +424,23 @@ path-server-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: path_srv
   <<: *test-deb-script
 
-path-server-debian-10-amd64-test:
+#path-server-debian-10-amd64-test:
+#  stage: test-2
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-path-server
+#    CI_BINARY_NAME: path_srv
+#  <<: *test-deb-script
+
+path-server-centos-7-amd64-test:
   stage: test-2
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-path-server
     CI_BINARY_NAME: path_srv
-  <<: *test-deb-script
-
-daemon-ubuntu-16.04-amd64-test:
-  stage: test-2
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-daemon
-    CI_BINARY_NAME: sciond
-  <<: *test-deb-script
+  <<: *test-rpm-script
 
 daemon-ubuntu-18.04-amd64-test:
   stage: test-2
@@ -389,23 +451,23 @@ daemon-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: sciond
   <<: *test-deb-script
 
-daemon-debian-10-amd64-test:
+#daemon-debian-10-amd64-test:
+#  stage: test-2
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-daemon
+#    CI_BINARY_NAME: sciond
+#  <<: *test-deb-script
+
+daemon-centos-7-amd64-test:
   stage: test-2
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-daemon
     CI_BINARY_NAME: sciond
-  <<: *test-deb-script
-
-dispatcher-ubuntu-16.04-amd64-test:
-  stage: test-2
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-dispatcher
-    CI_BINARY_NAME: godispatcher
-  <<: *test-deb-script
+  <<: *test-rpm-script
 
 dispatcher-ubuntu-18.04-amd64-test:
   stage: test-2
@@ -416,23 +478,23 @@ dispatcher-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: godispatcher
   <<: *test-deb-script
 
-dispatcher-debian-10-amd64-test:
+#dispatcher-debian-10-amd64-test:
+#  stage: test-2
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-dispatcher
+#    CI_BINARY_NAME: godispatcher
+#  <<: *test-deb-script
+
+dispatcher-centos-7-amd64-test:
   stage: test-2
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-dispatcher
     CI_BINARY_NAME: godispatcher
-  <<: *test-deb-script
-
-scionlab-ubuntu-16.04-amd64-test:
-  stage: test-3
-  image: ubuntu:16.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scionlab
-    CI_BINARY_NAME: scionlab-config
-  <<: *test-scionlab-deb-script
+  <<: *test-rpm-script
 
 scionlab-ubuntu-18.04-amd64-test:
   stage: test-3
@@ -443,14 +505,23 @@ scionlab-ubuntu-18.04-amd64-test:
     CI_BINARY_NAME: scionlab-config
   <<: *test-scionlab-deb-script
 
-scionlab-debian-10-amd64-test:
+#scionlab-debian-10-amd64-test:
+#  stage: test-3
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scionlab
+#    CI_BINARY_NAME: scionlab-config
+#  <<: *test-scionlab-deb-script
+
+scionlab-centos-7-amd64-test:
   stage: test-3
-  image: debian:buster
+  image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scionlab
     CI_BINARY_NAME: scionlab-config
-  <<: *test-scionlab-deb-script
+  <<: *test-scionlab-rpm-script
 
 .deb-deploy-script: &deb-deploy-script
   before_script:

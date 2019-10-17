@@ -1,5 +1,6 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
+load("@bazel_tools//tools/build_defs/pkg:rpm.bzl", "pkg_rpm")
 load("@io_bazel_rules_go//go:def.bzl", "nogo")
 
 # gazelle:prefix github.com/scionproto/scion
@@ -45,7 +46,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scion-systemd-wrapper-debian",
+    name = "scion-systemd-wrapper-deb",
     architecture = PKG_ARCHITECTURE,
     data = ":scion-systemd-wrapper-bin",
     description = "SCION systemd wrapper",
@@ -54,6 +55,16 @@ pkg_deb(
     package = "scion-systemd-wrapper",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
+    version = PKG_VERSION_SCION_SYSTEMD_WRAPPER,
+)
+
+pkg_rpm(
+    name = "scion-systemd-wrapper-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-systemd-wrapper-bin",
+    ],
+    spec_file = "rhel/scion-systemd-wrapper.spec",
     version = PKG_VERSION_SCION_SYSTEMD_WRAPPER,
 )
 
@@ -86,7 +97,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scion-border-router-debian",
+    name = "scion-border-router-deb",
     architecture = PKG_ARCHITECTURE,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
@@ -103,6 +114,16 @@ pkg_deb(
     postinst = "debian/scripts/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
+    version = PKG_VERSION_SCION_BORDER_ROUTER,
+)
+
+pkg_rpm(
+    name = "scion-border-router-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-border-router",
+    ],
+    spec_file = "rhel/scion-border-router.spec",
     version = PKG_VERSION_SCION_BORDER_ROUTER,
 )
 
@@ -135,7 +156,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scion-beacon-server-debian",
+    name = "scion-beacon-server-deb",
     architecture = PKG_ARCHITECTURE,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
@@ -152,6 +173,16 @@ pkg_deb(
     postinst = "debian/scripts/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
+    version = PKG_VERSION_SCION_BEACON_SERVER,
+)
+
+pkg_rpm(
+    name = "scion-beacon-server-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-beacon-server",
+    ],
+    spec_file = "rhel/scion-beacon-server.spec",
     version = PKG_VERSION_SCION_BEACON_SERVER,
 )
 
@@ -184,7 +215,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scion-certificate-server-debian",
+    name = "scion-certificate-server-deb",
     architecture = PKG_ARCHITECTURE,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
@@ -201,6 +232,16 @@ pkg_deb(
     postinst = "debian/scripts/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
+    version = PKG_VERSION_SCION_CERTIFICATE_SERVER,
+)
+
+pkg_rpm(
+    name = "scion-certificate-server-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-certificate-server",
+    ],
+    spec_file = "rhel/scion-certificate-server.spec",
     version = PKG_VERSION_SCION_CERTIFICATE_SERVER,
 )
 
@@ -233,7 +274,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scion-path-server-debian",
+    name = "scion-path-server-deb",
     architecture = PKG_ARCHITECTURE,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
@@ -250,6 +291,16 @@ pkg_deb(
     postinst = "debian/scripts/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
+    version = PKG_VERSION_SCION_PATH_SERVER,
+)
+
+pkg_rpm(
+    name = "scion-path-server-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-path-server",
+    ],
+    spec_file = "rhel/scion-path-server.spec",
     version = PKG_VERSION_SCION_PATH_SERVER,
 )
 
@@ -282,7 +333,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scion-daemon-debian",
+    name = "scion-daemon-deb",
     architecture = PKG_ARCHITECTURE,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
@@ -299,6 +350,16 @@ pkg_deb(
     postinst = "debian/scripts/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
+    version = PKG_VERSION_SCION_DAEMON,
+)
+
+pkg_rpm(
+    name = "scion-daemon-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-daemon",
+    ],
+    spec_file = "rhel/scion-daemon.spec",
     version = PKG_VERSION_SCION_DAEMON,
 )
 
@@ -331,7 +392,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scion-dispatcher-debian",
+    name = "scion-dispatcher-deb",
     architecture = PKG_ARCHITECTURE,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
@@ -351,6 +412,16 @@ pkg_deb(
     version = PKG_VERSION_SCION_DISPATCHER,
 )
 
+pkg_rpm(
+    name = "scion-dispatcher-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-dispatcher",
+    ],
+    spec_file = "rhel/scion-dispatcher.spec",
+    version = PKG_VERSION_SCION_DISPATCHER,
+)
+
 # SCION Tools
 pkg_tar(
     name = "scion-tools-bin",
@@ -364,7 +435,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scion-tools-debian",
+    name = "scion-tools-deb",
     architecture = PKG_ARCHITECTURE,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
@@ -380,6 +451,16 @@ pkg_deb(
     postinst = "debian/scripts/scion.postinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
+    version = PKG_VERSION_SCION_TOOLS,
+)
+
+pkg_rpm(
+    name = "scion-tools-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-tools-bin",
+    ],
+    spec_file = "rhel/scion-tools.spec",
     version = PKG_VERSION_SCION_TOOLS,
 )
 
@@ -412,7 +493,7 @@ pkg_tar(
 )
 
 pkg_deb(
-    name = "scionlab-debian",
+    name = "scionlab-deb",
     architecture = PKG_ARCHITECTURE,
     #    conffiles = [
     #        "/usr/local/corp/etc/app.flagfile",
@@ -442,6 +523,16 @@ pkg_deb(
         "openvpn",
     ],
     section = PKG_SECTION,
+    version = PKG_VERSION_SCIONLAB,
+)
+
+pkg_rpm(
+    name = "scionlab-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scionlab",
+    ],
+    spec_file = "rhel/scionlab.spec",
     version = PKG_VERSION_SCIONLAB,
 )
 
