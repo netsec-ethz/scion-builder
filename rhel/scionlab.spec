@@ -43,6 +43,26 @@ cp ./lib/systemd/system/scionlab.target %{buildroot}/lib/systemd/system/scionlab
 %clean
 rm -rf %{buildroot}
 
+%post
+# check gen-certs/tls.{pem,key}
+if [ ! -e "/etc/scion/gen-certs/tls.pem" -o ! -e "/etc/scion/gen-certs/tls.key" ]; then
+    echo "SCIONLab: Generating TLS cert"
+    mkdir -p "/etc/scion/gen-certs"
+
+    pushd "/etc/scion/gen-certs"
+    openssl genrsa -out "tls.key" 2048
+    chmod 600 "tls.key"
+    openssl req -new -x509 -key "tls.key" -out "tls.pem" -days 3650 -subj /CN=scion_def_srv
+    popd
+
+    chown -R scion.scion "/etc/scion/gen-certs"
+fi
+
+# refresh the configuration and restart services (systemctl restart scionlab.target must be called in scionlab-config)
+if [ -e "/etc/scion/gen/scionlab-config.json" ]; then
+    scionlab-config --force || true
+fi
+
 %files
 %attr(0755, root, root) %{_bindir}/scionlab-config
 %attr(0644, root, root) /lib/systemd/system/scionlab.target
