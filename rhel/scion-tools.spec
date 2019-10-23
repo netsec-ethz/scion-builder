@@ -7,6 +7,9 @@ License: Apache License, v2.0
 
 Source0: bazel-out/k8-fastbuild/bin/scion-tools-bin.tar
 
+Requires: scion-daemon
+Requires: scion-dispatcher
+
 %description
 SCION Tools
 

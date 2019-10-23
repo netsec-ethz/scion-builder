@@ -443,6 +443,8 @@ pkg_deb(
     data = ":scion-tools-bin",
     depends = [
         "adduser",
+        "scion-daemon",
+        "scion-dispatcher",
     ],
     description = "SCION Tools",
     homepage = PKG_HOMEPAGE,

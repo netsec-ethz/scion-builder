@@ -247,6 +247,7 @@ all-deb-armhf:
 .test-scion-tools-deb-script: &test-scion-tools-deb-script
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-daemon*$CI_TARGET_ARCHITECTURE.deb output-$CI_TARGET_ARCHITECTURE/scion-dispatcher*$CI_TARGET_ARCHITECTURE.deb output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
     - dpkg --purge $CI_PACKAGE
@@ -255,6 +256,7 @@ all-deb-armhf:
 .test-scion-tools-rpm-script: &test-scion-tools-rpm-script
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
+    - rpm -i output-$CI_TARGET_ARCHITECTURE/scion-daemon*$CI_TARGET_ARCHITECTURE.rpm output-$CI_TARGET_ARCHITECTURE/scion-dispatcher*$CI_TARGET_ARCHITECTURE.rpm output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.rpm
     - rpm -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
     - rpm -e $CI_PACKAGE
