@@ -65,7 +65,7 @@ Not yet available.
 ## Upstream projects
 
 * https://github.com/scionproto/scion
-* https://github.com/netsec-ethz/netsec-scion
+* https://github.com/netsec-ethz/scion
 * https://github.com/netsec-ethz/scionlab/
 
 ## Origins
