@@ -79,8 +79,6 @@ connectivity-check:
     # Install SCION dependencies
     - cd $HOME/go/src/github.com/scionproto/scion
     - bazel fetch //...
-    - wget https://github.com/kormat/bzlcompat/releases/download/v0.6/bzlcompat-v0.6-linux-x86_64 -O /usr/bin/bzlcompat && chmod +x /usr/bin/bzlcompat
-    - bzlcompat -vendorBase=go
     # Build SCION binaries
     - export CGO_ENABLED=1
     - export GOOS=linux
