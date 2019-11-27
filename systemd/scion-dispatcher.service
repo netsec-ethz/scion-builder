@@ -14,6 +14,7 @@ ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/godispatcher /etc/scion/gen/di
 RemainAfterExit=False
 KillMode=control-group
 Restart=on-failure
+RestartSec=10
 
 [Install]
 WantedBy=scionlab.target
