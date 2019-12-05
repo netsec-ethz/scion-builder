@@ -76,10 +76,8 @@ connectivity-check:
     - cp -r rhel scion
     - cp -r systemd scion
     - cp scion-systemd-wrapper scion
-    # Install SCION dependencies
-    - cd $HOME/go/src/github.com/scionproto/scion
-    - bazel fetch //...
     # Build SCION binaries
+    - cd $HOME/go/src/github.com/scionproto/scion
     - export CGO_ENABLED=1
     - export GOOS=linux
     - export CC=$CI_CC && echo $CC
