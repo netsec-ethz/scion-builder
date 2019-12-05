@@ -15,12 +15,74 @@ connectivity-check:
     - ping github.com -c1
     - nc -vz packages.netsec.inf.ethz.ch 22
 
+go-deps-population:
+  stage: pre-build
+  image: $CI_DOCKER_IMAGE
+  # (kmateusz) Using artifacts instead of cache due to the lack of sticky runners and shared cache in our GitLab CI.
+  # That means if by any chance next job hits on a different runner, it will not have access to the cache populated
+  # here and will fail.
+  artifacts:
+    paths:
+      - scion/
+    expire_in: 1 hour
+  script:
+    # Prepare operating system
+    - export DEBIAN_FRONTEND=noninteractive
+    - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
+    - apt update && apt install -y apt-transport-https ca-certificates rpm git wget curl unzip gcc file python
+    # Install golang
+    - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
+    - ln -f -s /usr/local/go/bin/* /usr/bin/
+    # Clone SCION source code
+    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
+    - mkdir -p $HOME/go/src/github.com/scionproto/
+    - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
+    # Clone SCIONLab source code
+    - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
+    - mkdir -p $HOME/go/src/github.com/netsec-ethz/
+    - ln -s $(pwd)/scionlab /root/go/src/github.com/netsec-ethz/
+    # Override some files from upstream SCION
+    - pushd scion
+    - if [ ! -z "$(ls ../patches)" ]; then ls -l ../patches; for i in ../patches/*.patch; do git apply $i --verbose; done; fi
+    - popd
+    # Set variables in BUILD.bazel
+    - source ./RELEASE
+    - sed -i "s/CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER/$PKG_VERSION_SCION_SYSTEMD_WRAPPER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_PATH_SERVER/$PKG_VERSION_SCION_PATH_SERVER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCIONLAB/$PKG_VERSION_SCIONLAB/g" BUILD.bazel
+    - cp BUILD.bazel scion/BUILD.bazel
+    # Set variables in RPM specfile
+    - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_PATH_SERVER/$PKG_VERSION_SCION_PATH_SERVER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
+    # Copy SCIONLab automatic configuration script into SCION codebase
+    - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-config
+    # Copy build-related directories into SCION codebase
+    - cp -r debian scion
+    - cp -r rhel scion
+    - cp -r systemd scion
+    - cp scion-systemd-wrapper scion
+    # Place hashes of git repos in the output for auditing
+    - cd scion && git log -1
+    - cd ../scionlab && git log -1
+
 .build-script: &build-script
   script:
     # Prepare operating system
     - export DEBIAN_FRONTEND=noninteractive
     - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
     - apt update && apt install -y apt-transport-https ca-certificates rpm git wget curl unzip gcc file python
+    # Install golang
     - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
     - ln -f -s /usr/local/go/bin/* /usr/bin/
     # Install multiplatform toolchains
@@ -31,58 +93,23 @@ connectivity-check:
       libgcc-7-dev-i386-cross libgcc-7-dev libc6-dev libc6-dev-i386 libc6-i386-cross libc6-dev-i386-cross linux-libc-dev-i386-cross"
     # Hack for linux kernels for i386
     - ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/asm
-    # Clone SCION source code
-    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
-    - mkdir -p $HOME/go/src/github.com/scionproto/
-    - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
-    # Install SCION defined dependencies
-    - apt install -y $(grep -vE "^\s*#" scion/env/debian/pkgs.txt | tr "\n" " ")
-    # Clone SCIONLab source code
-    - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
-    - mkdir -p $HOME/go/src/github.com/netsec-ethz/
-    - ln -s $(pwd)/scionlab /root/go/src/github.com/netsec-ethz/
     # Install selected release of BAZEL
     - wget https://github.com/bazelbuild/bazel/releases/download/$CI_BAZEL_VERSION/bazel-$CI_BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
     - bash bazel_install_script.sh
-    # Set variables in BUILD.bazel
-    - source ./RELEASE
-    - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER/$PKG_VERSION_SCION_SYSTEMD_WRAPPER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_PATH_SERVER/$PKG_VERSION_SCION_PATH_SERVER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCIONLAB/$PKG_VERSION_SCIONLAB/g" BUILD.bazel
-    # Set variables in RPM specfile
-    - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_PATH_SERVER/$PKG_VERSION_SCION_PATH_SERVER/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
-    # Override some files from upstream SCION
-    - cp BUILD.bazel scion/BUILD.bazel
-    - pushd scion
-    - if [ ! -z "$(ls ../patches)" ]; then ls -l ../patches; for i in ../patches/*.patch; do git apply $i --verbose; done; fi
-    - popd
-    # Copy SCIONLab automatic configuration script into SCION codebase
-    - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-config
-    # Copy build-related directories into SCION codebase
-    - cp -r debian scion
-    - cp -r rhel scion
-    - cp -r systemd scion
-    - cp scion-systemd-wrapper scion
-    # Build SCION binaries
-    - cd $HOME/go/src/github.com/scionproto/scion
+    # Create symlinks for Go
+    - mkdir -p $HOME/go/src/github.com/scionproto/
+    - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
+    - mkdir -p $HOME/go/src/github.com/netsec-ethz/
+    - ln -s $(pwd)/scionlab /root/go/src/github.com/netsec-ethz/
+    # Install SCION defined dependencies
+    - apt install -y $(grep -vE "^\s*#" scion/env/debian/pkgs.txt | tr "\n" " ")
+    # Prepare GO environment
     - export CGO_ENABLED=1
     - export GOOS=linux
     - export CC=$CI_CC && echo $CC
     - export GOARCH=$CI_GOARCH && echo $GOARCH
-    - pushd bin
+    # Build SCION binaries
+    - cd $HOME/go/src/github.com/scionproto/scion/bin
     - go build ../go/border/
     - go build ../go/beacon_srv/
     - go build ../go/cert_srv/
@@ -92,8 +119,9 @@ connectivity-check:
     - go build ../go/examples/pingpong/
     - go build ../go/tools/scmp/
     - go build ../go/tools/showpaths/
-    - popd
     # Build SCION packages
+    - cd $HOME/go/src/github.com/scionproto/scion
+    - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
     - bazel build //:scion-systemd-wrapper-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-border-router-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-beacon-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
@@ -106,9 +134,6 @@ connectivity-check:
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*$CI_TARGET_ARCHITECTURE.$CI_TARGET_PLATFORM ../output-$CI_TARGET_ARCHITECTURE
-    # Place hashes of git repos in the output for auditing
-    - cd ../scion && git log -1
-    - cd ../scionlab && git log -1
 
 all-deb-amd64:
   stage: build
