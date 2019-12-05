@@ -143,6 +143,8 @@ all-rpm-amd64:
 all-deb-i386:
   stage: build
   image: $CI_DOCKER_IMAGE
+  except:
+    - token
   variables:
     CI_TARGET_PLATFORM: deb
     CI_TARGET_ARCHITECTURE: i386
@@ -157,6 +159,8 @@ all-deb-i386:
 all-deb-arm64:
   stage: build
   image: $CI_DOCKER_IMAGE
+  except:
+    - token
   variables:
     CI_TARGET_PLATFORM: deb
     CI_TARGET_ARCHITECTURE: arm64
@@ -171,6 +175,8 @@ all-deb-arm64:
 all-deb-armhf:
   stage: build
   image: $CI_DOCKER_IMAGE
+  except:
+    - token
   variables:
     CI_TARGET_PLATFORM: deb
     CI_TARGET_ARCHITECTURE: armhf
@@ -546,6 +552,7 @@ all-deb-testing-deploy:
   image: $CI_DOCKER_IMAGE
   except:
     - master
+    - token
   variables:
     CI_DEB_CODENAME: testing
     CI_DEB_PLATFORM: amd64
@@ -556,6 +563,8 @@ all-deb-devel-deploy:
   image: $CI_DOCKER_IMAGE
   only:
     - /^devel\/.*$/
+  except:
+    - token
   variables:
     CI_DEB_CODENAME: devel
     CI_DEB_PLATFORM: amd64
@@ -566,6 +575,8 @@ all-deb-preprod-deploy:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_DEB_CODENAME: preprod
     CI_DEB_PLATFORM: amd64
@@ -576,6 +587,8 @@ all-deb-prod-deploy:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_DEB_CODENAME: all
     CI_DEB_PLATFORM: "*"
@@ -594,6 +607,8 @@ systemd-wrapper-deb-deploy-test:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_PACKAGE: scion-systemd-wrapper
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_SYSTEMD_WRAPPER
@@ -604,6 +619,8 @@ beacon-server-deb-deploy-test:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_PACKAGE: scion-beacon-server
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_BEACON_SERVER
@@ -614,6 +631,8 @@ certificate-server-deb-deploy-test:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_PACKAGE: scion-certificate-server
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_CERTIFICATE_SERVER
@@ -624,6 +643,8 @@ path-server-deb-deploy-test:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_PACKAGE: scion-path-server
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_PATH_SERVER
@@ -634,6 +655,8 @@ daemon-deb-deploy-test:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_PACKAGE: scion-daemon
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_DAEMON
@@ -644,6 +667,8 @@ dispatcher-deb-deploy-test:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_PACKAGE: scion-dispatcher
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_DISPATCHER
@@ -654,6 +679,8 @@ scion-tools-deb-deploy-test:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_PACKAGE: scion-tools
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_TOOLS
@@ -664,6 +691,8 @@ scionlab-deb-deploy-test:
   image: $CI_DOCKER_IMAGE
   only:
     - master
+  except:
+    - token
   variables:
     CI_PACKAGE: scionlab
     CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB
