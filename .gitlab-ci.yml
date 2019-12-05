@@ -116,7 +116,6 @@ go-deps-population:
     - go build ../go/path_srv/
     - go build ../go/sciond/
     - go build ../go/godispatcher/
-    - go build ../go/examples/pingpong/
     - go build ../go/tools/scmp/
     - go build ../go/tools/showpaths/
     # Build SCION packages
@@ -342,7 +341,7 @@ scion-tools-ubuntu-18.04-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
-    CI_BINARIES: "pingpong scmp showpaths"
+    CI_BINARIES: "scmp showpaths"
   <<: *test-scion-tools-deb-script
 
 #scion-tools-debian-10-amd64-test:
@@ -351,7 +350,7 @@ scion-tools-ubuntu-18.04-amd64-test:
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
 #    CI_PACKAGE: scion-tools
-#    CI_BINARIES: "pingpong scmp showpaths"
+#    CI_BINARIES: "scmp showpaths"
 #  <<: *test-scion-tools-deb-script
 
 scion-tools-centos-7-amd64-test:
@@ -360,7 +359,7 @@ scion-tools-centos-7-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
-    CI_BINARIES: "pingpong scmp showpaths"
+    CI_BINARIES: "scmp showpaths"
   <<: *test-scion-tools-rpm-script
 
 border-router-ubuntu-18.04-amd64-test:

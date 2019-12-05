@@ -27,7 +27,6 @@ tar xvf bazel-out/k8-fastbuild/bin/scion-tools-bin.tar
 rm -rf %{buildroot}
 
 mkdir -p %{buildroot}%{_bindir}/
-install -m 755 ./usr/bin/pingpong %{buildroot}%{_bindir}/pingpong
 install -m 755 ./usr/bin/scmp %{buildroot}%{_bindir}/scmp
 install -m 755 ./usr/bin/showpaths %{buildroot}%{_bindir}/showpaths
 
@@ -35,6 +34,5 @@ install -m 755 ./usr/bin/showpaths %{buildroot}%{_bindir}/showpaths
 rm -rf %{buildroot}
 
 %files
-%attr(0755, root, root) %{_bindir}/pingpong
 %attr(0755, root, root) %{_bindir}/scmp
 %attr(0755, root, root) %{_bindir}/showpaths

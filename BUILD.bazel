@@ -426,7 +426,6 @@ pkg_rpm(
 pkg_tar(
     name = "scion-tools-bin",
     srcs = [
-        "bin/pingpong",
         "bin/scmp",
         "bin/showpaths",
     ],
