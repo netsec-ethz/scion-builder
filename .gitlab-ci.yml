@@ -11,6 +11,9 @@ stages:
 connectivity-check:
   stage: pre-build
   image: busybox
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - ping github.com -c1
     - nc -vz packages.netsec.inf.ethz.ch 22
@@ -18,6 +21,9 @@ connectivity-check:
 go-deps-population:
   stage: pre-build
   image: $CI_DOCKER_IMAGE
+  retry:
+    max: 2
+    when: runner_system_failure
   # (kmateusz) Using artifacts instead of cache due to the lack of sticky runners and shared cache in our GitLab CI.
   # That means if by any chance next job hits on a different runner, it will not have access to the cache populated
   # here and will fail.
@@ -77,6 +83,9 @@ go-deps-population:
     - cd ../scionlab && git log -1
 
 .build-script: &build-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     # Prepare operating system
     - export DEBIAN_FRONTEND=noninteractive
@@ -211,6 +220,9 @@ all-deb-armhf:
     expire_in: 1 hour
 
 .test-deb-script: &test-deb-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     # Test installation
@@ -233,6 +245,9 @@ all-deb-armhf:
     - "[[ $(ls /lib/systemd/system/$CI_PACKAGE*.service | wc -l) -eq 0  ]]"
 
 .test-rpm-script: &test-rpm-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
     # Test installation
@@ -255,6 +270,9 @@ all-deb-armhf:
     - "[[ $(ls /lib/systemd/system/$CI_PACKAGE*.service | wc -l) -eq 0  ]]"
 
 .test-systemd-wrapper-deb-script: &test-systemd-wrapper-deb-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
@@ -263,6 +281,9 @@ all-deb-armhf:
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
 .test-systemd-wrapper-rpm-script: &test-systemd-wrapper-rpm-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
     - rpm -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
@@ -271,6 +292,9 @@ all-deb-armhf:
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
 .test-scion-tools-deb-script: &test-scion-tools-deb-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-daemon*$CI_TARGET_ARCHITECTURE.deb output-$CI_TARGET_ARCHITECTURE/scion-dispatcher*$CI_TARGET_ARCHITECTURE.deb output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
@@ -280,6 +304,9 @@ all-deb-armhf:
     - for CI_BINARY_NAME in $CI_BINARIES; do [[ ! -f /usr/bin/$CI_BINARY_NAME ]]; done
 
 .test-scion-tools-rpm-script: &test-scion-tools-rpm-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
     - rpm -i output-$CI_TARGET_ARCHITECTURE/scion-daemon*$CI_TARGET_ARCHITECTURE.rpm output-$CI_TARGET_ARCHITECTURE/scion-dispatcher*$CI_TARGET_ARCHITECTURE.rpm output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.rpm
@@ -289,6 +316,9 @@ all-deb-armhf:
     - for CI_BINARY_NAME in $CI_BINARIES; do [[ ! -f /usr/bin/$CI_BINARY_NAME ]]; done
 
 .test-scionlab-deb-script: &test-scionlab-deb-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - apt update && apt install -y openvpn openssl python3
     - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
@@ -299,6 +329,9 @@ all-deb-armhf:
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
 .test-scionlab-rpm-script: &test-scionlab-rpm-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - yum install -y openvpn openssl python3
     - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.rpm
@@ -552,6 +585,9 @@ scionlab-centos-7-amd64-test:
   <<: *test-scionlab-rpm-script
 
 .deb-deploy-script: &deb-deploy-script
+  retry:
+    max: 2
+    when: runner_system_failure
   before_script:
     - 'which ssh-agent || ( apt update && apt-get install -qq openssh-client )'
     - eval $(ssh-agent -s)
@@ -617,6 +653,9 @@ all-deb-prod-deploy:
   <<: *deb-deploy-script
 
 .test-deb-deploy-script: &test-deb-deploy-script
+  retry:
+    max: 2
+    when: runner_system_failure
   script:
     - apt update && apt install -y apt-transport-https ca-certificates
     - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
