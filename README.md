@@ -33,9 +33,11 @@ Pipeline can be run manually in order to build packages (without releasing them)
 
 ### Releasing packages
 
-In order to release a package to the DEB repository a tag `release/0.0.0` should be created (obviously changing `0.0.0` to a desired version). This will trigger an additional step in the pipeline responsible for uploading and releasing the generated packages.
+Bump the version of the packages you want to release in RELEASE.
+This can be done directly on master or as part of a merge request.
 
-Overwriting an already existing version is not allowed and will fail either at the level of pushing a tag to the git repository or at the moment of uploading packages to the hosting server.
+The version of the umbrella package scionnlab *always* needs to be bumped when releasing any package.
+The reason for this is that scionlab package depends on the exact versions of the other packages -- this seems fairly dumb, but is done by choice to reduce the number of possible ways for the expected users to screw up.
 
 ### Versioning and backtracing
 
@@ -43,7 +45,7 @@ If it is ever needed to check which commit a selected version of DEB package is 
 
 ## Schedule
 
-The builder is configured to run twice per day in order to check whether the packages can be still created successfuly, but without releasing them. The last step has to be invoked manually by the operator as described above (by pushing a proper tag).
+The builder is configured to run twice per day in order to check whether the packages can be still created successfuly, but without releasing them. The last step has to be invoked manually by the operator as described above (by bumping the versions in RELEASE).
 
 ## Package installation
 
