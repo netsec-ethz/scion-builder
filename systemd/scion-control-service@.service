@@ -1,5 +1,5 @@
 [Unit]
-Description=SCION Certificate Server
+Description=SCION Control Service
 Documentation=https://www.scionlab.org
 After=network-online.target scion-dispatcher.service
 Wants=network-online.target
@@ -9,7 +9,7 @@ PartOf=scionlab.target
 Type=simple
 User=scion
 Group=scion
-ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/cert_srv /etc/scion/gen/ISD-isd-/AS-as-/cs%i/cs.toml %i
+ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/cs /etc/scion/gen/ISD-isd-/AS-as-/cs%i/cs.toml %i
 RemainAfterExit=False
 KillMode=control-group
 Restart=on-failure

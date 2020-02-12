@@ -44,7 +44,8 @@ go-deps-population:
     - mkdir -p $HOME/go/src/github.com/scionproto/
     - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
     # Clone SCIONLab source code
-    - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
+    #- git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
+    - git clone $CI_SCIONLAB_REPO -b master scionlab
     - mkdir -p $HOME/go/src/github.com/netsec-ethz/
     - ln -s $(pwd)/scionlab /root/go/src/github.com/netsec-ethz/
     # Override some files from upstream SCION
@@ -55,9 +56,7 @@ go-deps-population:
     - source ./RELEASE
     - sed -i "s/CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER/$PKG_VERSION_SCION_SYSTEMD_WRAPPER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_PATH_SERVER/$PKG_VERSION_SCION_PATH_SERVER/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_CONTROL_SERVICE/$PKG_VERSION_SCION_CONTROL_SERVICE/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" BUILD.bazel
@@ -65,9 +64,7 @@ go-deps-population:
     - cp BUILD.bazel scion/BUILD.bazel
     # Set variables in RPM specfile
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" rhel/scionlab.spec
-    - sed -i "s/CI_PKG_VERSION_SCION_PATH_SERVER/$PKG_VERSION_SCION_PATH_SERVER/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_CONTROL_SERVICE/$PKG_VERSION_SCION_CONTROL_SERVICE/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
@@ -120,9 +117,7 @@ go-deps-population:
     # Build SCION binaries
     - cd $HOME/go/src/github.com/scionproto/scion/bin
     - go build ../go/border/
-    - go build ../go/beacon_srv/
-    - go build ../go/cert_srv/
-    - go build ../go/path_srv/
+    - go build ../go/cs/
     - go build ../go/sciond/
     - go build ../go/godispatcher/
     - go build ../go/tools/scmp/
@@ -132,9 +127,7 @@ go-deps-population:
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
     - bazel build //:scion-systemd-wrapper-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-border-router-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-beacon-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-certificate-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-path-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build //:scion-control-service-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-daemon-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-dispatcher-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scion-tools-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
@@ -422,85 +415,31 @@ border-router-centos-7-amd64-test:
     CI_BINARY_NAME: border
   <<: *test-rpm-script
 
-beacon-server-ubuntu-18.04-amd64-test:
+control-service-ubuntu-18.04-amd64-test:
   stage: test-2
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-beacon-server
-    CI_BINARY_NAME: beacon_srv
+    CI_PACKAGE: scion-control-service
+    CI_BINARY_NAME: cs
   <<: *test-deb-script
 
-#beacon-server-debian-10-amd64-test:
+#control-service-debian-10-amd64-test:
 #  stage: test-2
 #  image: debian:buster
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
-#    CI_PACKAGE: scion-beacon-server
-#    CI_BINARY_NAME: beacon_srv
+#    CI_PACKAGE: scion-control-service
+#    CI_BINARY_NAME: cs
 #  <<: *test-deb-script
 
-beacon-server-centos-7-amd64-test:
+control-service-centos-7-amd64-test:
   stage: test-2
   image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-beacon-server
-    CI_BINARY_NAME: beacon_srv
-  <<: *test-rpm-script
-
-certificate-server-ubuntu-18.04-amd64-test:
-  stage: test-2
-  image: ubuntu:18.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-certificate-server
-    CI_BINARY_NAME: cert_srv
-  <<: *test-deb-script
-
-#certificate-server-debian-10-amd64-test:
-#  stage: test-2
-#  image: debian:buster
-#  variables:
-#    CI_TARGET_ARCHITECTURE: amd64
-#    CI_PACKAGE: scion-certificate-server
-#    CI_BINARY_NAME: cert_srv
-#  <<: *test-deb-script
-
-certificate-server-centos-7-amd64-test:
-  stage: test-2
-  image: centos:7
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-certificate-server
-    CI_BINARY_NAME: cert_srv
-  <<: *test-rpm-script
-
-path-server-ubuntu-18.04-amd64-test:
-  stage: test-2
-  image: ubuntu:18.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-path-server
-    CI_BINARY_NAME: path_srv
-  <<: *test-deb-script
-
-#path-server-debian-10-amd64-test:
-#  stage: test-2
-#  image: debian:buster
-#  variables:
-#    CI_TARGET_ARCHITECTURE: amd64
-#    CI_PACKAGE: scion-path-server
-#    CI_BINARY_NAME: path_srv
-#  <<: *test-deb-script
-
-path-server-centos-7-amd64-test:
-  stage: test-2
-  image: centos:7
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-path-server
-    CI_BINARY_NAME: path_srv
+    CI_PACKAGE: scion-control-service
+    CI_BINARY_NAME: cs
   <<: *test-rpm-script
 
 daemon-ubuntu-18.04-amd64-test:
@@ -675,7 +614,7 @@ systemd-wrapper-deb-deploy-test:
     CI_VERSION_VARIABLE: PKG_VERSION_SCION_SYSTEMD_WRAPPER
   <<: *test-deb-deploy-script
 
-beacon-server-deb-deploy-test:
+control-service-deb-deploy-test:
   stage: post-deploy
   image: $CI_DOCKER_IMAGE
   only:
@@ -683,32 +622,8 @@ beacon-server-deb-deploy-test:
   except:
     - triggers
   variables:
-    CI_PACKAGE: scion-beacon-server
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_BEACON_SERVER
-  <<: *test-deb-deploy-script
-
-certificate-server-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_PACKAGE: scion-certificate-server
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_CERTIFICATE_SERVER
-  <<: *test-deb-deploy-script
-
-path-server-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_PACKAGE: scion-path-server
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_PATH_SERVER
+    CI_PACKAGE: scion-control-service
+    CI_VERSION_VARIABLE: PKG_VERSION_SCION_CONTROL_SERVICE
   <<: *test-deb-deploy-script
 
 daemon-deb-deploy-test:

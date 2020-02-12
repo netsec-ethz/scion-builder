@@ -8,9 +8,7 @@ License: Apache License, v2.0
 Source0: bazel-out/k8-fastbuild/bin/scionlab.tar.gz
 
 Requires: scion-border-router = CI_PKG_VERSION_SCION_BORDER_ROUTER
-Requires: scion-beacon-server = CI_PKG_VERSION_SCION_BEACON_SERVER
-Requires: scion-certificate-server = CI_PKG_VERSION_SCION_CERTIFICATE_SERVER
-Requires: scion-path-server = CI_PKG_VERSION_SCION_PATH_SERVER
+Requires: scion-control-service = CI_PKG_VERSION_SCION_CONTROL_SERVICE
 Requires: scion-daemon = CI_PKG_VERSION_SCION_DAEMON
 Requires: scion-dispatcher = CI_PKG_VERSION_SCION_DISPATCHER
 Requires: scion-tools = CI_PKG_VERSION_SCION_TOOLS
