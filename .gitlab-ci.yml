@@ -40,12 +40,12 @@ go-deps-population:
     - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
     - ln -f -s /usr/local/go/bin/* /usr/bin/
     # Clone SCION source code
-    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
+    #- git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
+    - git clone https://github.com/netsec-ethz/scion.git -b master scion
     - mkdir -p $HOME/go/src/github.com/scionproto/
     - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
     # Clone SCIONLab source code
-    #- git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
-    - git clone $CI_SCIONLAB_REPO -b master scionlab
+    - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
     - mkdir -p $HOME/go/src/github.com/netsec-ethz/
     - ln -s $(pwd)/scionlab /root/go/src/github.com/netsec-ethz/
     # Override some files from upstream SCION
