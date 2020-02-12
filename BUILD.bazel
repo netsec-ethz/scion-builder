@@ -134,7 +134,7 @@ pkg_tar(
 )
 
 pkg_tar(
-    name = "scion-conrol-service-systemd",
+    name = "scion-control-service-systemd",
     srcs = [
         "systemd/scion-control-service@.service",
     ],
