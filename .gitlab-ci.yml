@@ -133,24 +133,25 @@ go-deps-population:
     - bazel build //:scion-tools-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     - bazel build //:scionlab-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
     # Fixup missing bazel debian package relationships
-    - "if [[ $CI_TARGET_PLATFORM == 'deb' ]]; then \
-        mkdir -p ../debian-pkg-fixup/rebuild; \
-        cp bazel-bin/scion-control-service_*$CI_TARGET_ARCHITECTURE.deb ../debian-pkg-fixup/; \
-        echo Fixing packages $(ls ../debian-pkg-fixup/*.deb); \
-        for p in ../debian-pkg-fixup/*.deb; do \
-          dpkg -I ${p}; \
-          dpkg-deb -x ${p} ../debian-pkg-fixup/rebuild; \
-          dpkg-deb -e ${p} ../debian-pkg-fixup/rebuild/DEBIAN; \
-          sed -i '/Depends:.*/a Replaces: scion-beacon-server, scion-path-server, scion-certificate-server' ../debian-pkg-fixup/rebuild/DEBIAN/control; \
-          sed -i '/Depends:.*/a Conflicts: scion-beacon-server, scion-path-server, scion-certificate-server' ../debian-pkg-fixup/rebuild/DEBIAN/control; \
-          sed -i '/Depends:.*/a Provides: scion-beacon-server, scion-path-server, scion-certificate-server' ../debian-pkg-fixup/rebuild/DEBIAN/control; \
-          sed -i 's/Built-Using: Bazel/Built-Using: Not Bazel/' ../debian-pkg-fixup/rebuild/DEBIAN/control; \
-          cat ../debian-pkg-fixup/rebuild/DEBIAN/control; \
-          dpkg-deb -b ../debian-pkg-fixup/rebuild/ ${p}; \
-          dpkg -I ${p}; \
-          mv ${p} bazel-bin/; \
-          rm ../debian-pkg-fixup/rebuild -r && mkdir ../debian-pkg-fixup/rebuild; \
-        done \
+    - "if [[ $CI_TARGET_PLATFORM == 'deb' ]]; then
+        mkdir -p ../debian-pkg-fixup/rebuild;
+        cp bazel-bin/scion-control-service_*$CI_TARGET_ARCHITECTURE.deb ../debian-pkg-fixup/;
+        echo Fixing packages $(ls ../debian-pkg-fixup/*.deb);
+        for p in ../debian-pkg-fixup/*.deb; do
+          echo 'Initial package info:'; dpkg -I ${p};
+          dpkg-deb -x ${p} ../debian-pkg-fixup/rebuild;
+          dpkg-deb -e ${p} ../debian-pkg-fixup/rebuild/DEBIAN;
+          sed -i '/Depends:.*/a Provides: scion-beacon-server, scion-path-server, scion-certificate-server\\
+          
+          Conflicts: scion-beacon-server, scion-path-server, scion-certificate-server\\
+          
+          Replaces: scion-beacon-server, scion-path-server, scion-certificate-server' ../debian-pkg-fixup/rebuild/DEBIAN/control;
+          sed -i 's/Built-Using: Bazel/Built-Using: Not Bazel/' ../debian-pkg-fixup/rebuild/DEBIAN/control;
+          dpkg-deb -b ../debian-pkg-fixup/rebuild/ ${p};
+          echo 'Updated package info:'; dpkg -I ${p};
+          mv ${p} bazel-bin/;
+          rm ../debian-pkg-fixup/rebuild -r && mkdir ../debian-pkg-fixup/rebuild;
+        done
       fi"
     # Prepare packages to shipment
     - mkdir ../output-$CI_TARGET_ARCHITECTURE
