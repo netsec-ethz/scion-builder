@@ -4,7 +4,6 @@ stages:
   - test-1
   - test-2
   - test-3
-  - pre-deploy
   - deploy
   - post-deploy
 
@@ -17,6 +16,7 @@ connectivity-check:
   script:
     - ping github.com -c1
     - nc -vz packages.netsec.inf.ethz.ch 22
+    - nc -vz packages-test.netsec.inf.ethz.ch 22
 
 go-deps-population:
   stage: pre-build
@@ -594,50 +594,22 @@ scionlab-centos-7-amd64-test:
     - ssh-add <(echo "$CI_SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - ssh -q $CI_SCP_TARGET "rm -f /tmp/*.deb"
   script:
-    - scp -v output-$CI_DEB_PLATFORM/*.deb $CI_SCP_TARGET:/tmp
-    - export files=$(ssh -q $CI_SCP_TARGET "cd /tmp && ls /tmp/*.deb") && echo $files
-    - for deb in $files; do ssh -q $CI_SCP_TARGET "reprepro -b /home/reprepro/reprepro includedeb $CI_DEB_CODENAME $deb || true"; done
-    - apt update && apt install -y apt-transport-https ca-certificates
-    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian $CI_DEB_CODENAME main" >> /etc/apt/sources.list && apt update
-    - source ./RELEASE
-    - export CI_VERSION=$(printenv `echo PKG_VERSION_SCIONLAB`)
-    - apt install -y scionlab=$CI_VERSION
+    - repo_ssh_target=reprepro@$CI_PACKAGE_REPO
+    - tmpdir=$(ssh -q $repo_ssh_target "mktemp -d --suffix .debs")
+    - scp -v output-*/*.deb $repo_ssh_target:$tmpdir
+    - ssh -q $repo_ssh_target 'set +x; for deb in ' $tmpdir '/*.deb; do reprepro -b /home/reprepro/reprepro includedeb all $deb; done'
+    - ssh -q $repo_ssh_target 'rm -r ' $tmpdir
 
-all-deb-testing-deploy:
-  stage: pre-deploy
-  image: $CI_DOCKER_IMAGE
-  except:
-    - master
-    - triggers
-  variables:
-    CI_DEB_CODENAME: testing
-    CI_DEB_PLATFORM: amd64
-  <<: *deb-deploy-script
-
-all-deb-devel-deploy:
-  stage: pre-deploy
+all-deb-staging-deploy:
+  stage: deploy
   image: $CI_DOCKER_IMAGE
   only:
-    - /^devel\/.*$/
+    - /^staging.*$/
   except:
     - triggers
   variables:
-    CI_DEB_CODENAME: devel
-    CI_DEB_PLATFORM: amd64
-  <<: *deb-deploy-script
-
-all-deb-preprod-deploy:
-  stage: pre-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_DEB_CODENAME: preprod
-    CI_DEB_PLATFORM: amd64
+    CI_PACKAGE_REPO: packages-test.netsec.inf.ethz.ch
   <<: *deb-deploy-script
 
 all-deb-prod-deploy:
@@ -648,8 +620,7 @@ all-deb-prod-deploy:
   except:
     - triggers
   variables:
-    CI_DEB_CODENAME: all
-    CI_DEB_PLATFORM: "*"
+    CI_PACKAGE_REPO: packages.netsec.inf.ethz.ch
   <<: *deb-deploy-script
 
 .test-deb-deploy-script: &test-deb-deploy-script
@@ -658,103 +629,36 @@ all-deb-prod-deploy:
     when: runner_system_failure
   script:
     - apt update && apt install -y apt-transport-https ca-certificates
-    - echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list && apt update
-    - source ./RELEASE
-    - export CI_VERSION=$(printenv `echo $CI_VERSION_VARIABLE`)
-    - apt show $CI_PACKAGE=$CI_VERSION
+    - echo "deb [trusted=yes] https://$CI_PACKAGE_REPO/debian all main" >> /etc/apt/sources.list && apt update
+    # Loop over all packages, check whether expected version is available from repo.
+    #
+    # Get package names and versions by mangling RELEASE file such that e.g. the line
+    #    export PKG_VERSION_SCION_SYSTEMD_WRAPPERR=1.0.3
+    # becomes
+    #    scion-systemd-wrapper=1.0.3
+    #
+    - sed -n '/^export PKG_VERSION_/{s///;s/.*/\L\0/;y/_/-/;p}' ./RELEASE | while read pkg_and_version; do
+    -   apt show "$pkg_and_version"
+    - done
 
-systemd-wrapper-deb-deploy-test:
-  stage: post-deploy
+all-deb-staging-deploy-test:
+  stage: deploy
   image: $CI_DOCKER_IMAGE
   only:
-    - master
+    - /^staging.*$/
   except:
     - triggers
   variables:
-    CI_PACKAGE: scion-systemd-wrapper
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_SYSTEMD_WRAPPER
+    CI_PACKAGE_REPO: packages-test.netsec.inf.ethz.ch
   <<: *test-deb-deploy-script
 
-beacon-server-deb-deploy-test:
-  stage: post-deploy
+all-deb-prod-deploy-test:
+  stage: deploy
   image: $CI_DOCKER_IMAGE
   only:
     - master
   except:
     - triggers
   variables:
-    CI_PACKAGE: scion-beacon-server
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_BEACON_SERVER
-  <<: *test-deb-deploy-script
-
-certificate-server-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_PACKAGE: scion-certificate-server
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_CERTIFICATE_SERVER
-  <<: *test-deb-deploy-script
-
-path-server-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_PACKAGE: scion-path-server
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_PATH_SERVER
-  <<: *test-deb-deploy-script
-
-daemon-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_PACKAGE: scion-daemon
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_DAEMON
-  <<: *test-deb-deploy-script
-
-dispatcher-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_PACKAGE: scion-dispatcher
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_DISPATCHER
-  <<: *test-deb-deploy-script
-
-scion-tools-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_PACKAGE: scion-tools
-    CI_VERSION_VARIABLE: PKG_VERSION_SCION_TOOLS
-  <<: *test-deb-deploy-script
-
-scionlab-deb-deploy-test:
-  stage: post-deploy
-  image: $CI_DOCKER_IMAGE
-  only:
-    - master
-  except:
-    - triggers
-  variables:
-    CI_PACKAGE: scionlab
-    CI_VERSION_VARIABLE: PKG_VERSION_SCIONLAB
+    CI_PACKAGE_REPO: packages.netsec.inf.ethz.ch
   <<: *test-deb-deploy-script
