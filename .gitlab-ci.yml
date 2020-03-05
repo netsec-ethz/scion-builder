@@ -642,7 +642,7 @@ all-deb-prod-deploy:
     - done
 
 all-deb-staging-deploy-test:
-  stage: deploy
+  stage: post-deploy
   image: $CI_DOCKER_IMAGE
   only:
     - /^staging.*$/
@@ -653,7 +653,7 @@ all-deb-staging-deploy-test:
   <<: *test-deb-deploy-script
 
 all-deb-prod-deploy-test:
-  stage: deploy
+  stage: post-deploy
   image: $CI_DOCKER_IMAGE
   only:
     - master
