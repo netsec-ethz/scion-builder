@@ -598,7 +598,7 @@ scionlab-centos-7-amd64-test:
     - repo_ssh_target=reprepro@$CI_PACKAGE_REPO
     - tmpdir=$(ssh -q $repo_ssh_target "mktemp -d --suffix .debs")
     - scp -v output-*/*.deb $repo_ssh_target:$tmpdir
-    - ssh -q $repo_ssh_target 'set +x; for deb in ' $tmpdir '/*.deb; do reprepro -b /home/reprepro/reprepro includedeb all $deb; done'
+    - ssh -q $repo_ssh_target 'set -x; for deb in '$tmpdir'/*.deb; do reprepro -b /home/reprepro/reprepro includedeb all $deb; done'
     - ssh -q $repo_ssh_target 'rm -r ' $tmpdir
 
 all-deb-staging-deploy:
