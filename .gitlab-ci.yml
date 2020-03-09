@@ -605,7 +605,7 @@ scionlab-centos-7-amd64-test:
     #       the shell escaping gets (even more) hairy.
     - repo_ssh_target=reprepro@$CI_PACKAGE_REPO
     - tmpdir=$(ssh -q $repo_ssh_target "mktemp -d --suffix .debs")
-    - existing_debs=$(ssh -q $repo_ssh_target reprepro -b /home/reprepro/reprepro --list-format '${$basename}\n' list all)
+    - existing_debs=$(ssh -q $repo_ssh_target reprepro -b /home/reprepro/reprepro --list-format \''${$basename}\n'\' list all)
     - debs_to_deploy=$(ls output-*/*.deb | grep -vF "$existing_debs")
     - debs_to_skip=$(ls output-*/*.deb | grep -F "$existing_debs")
     - if [ -n "$debs_to_skip" ]; then
