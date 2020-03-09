@@ -612,9 +612,11 @@ scionlab-centos-7-amd64-test:
     -   echo "Skipping existing *.deb:"
     -   echo "$debs_to_skip"
     - fi
-    - scp -v $debs_to_deploy $repo_ssh_target:$tmpdir
-    - ssh -q $repo_ssh_target 'set -x; for deb in '$tmpdir'/*.deb; do reprepro -b /home/reprepro/reprepro includedeb all $deb; done'
-    - ssh -q $repo_ssh_target 'rm -r ' $tmpdir
+      if [ -n "$deps_to_deploy" ]; then
+    -   scp -v $debs_to_deploy $repo_ssh_target:$tmpdir
+    -   ssh -q $repo_ssh_target 'set -x; for deb in '$tmpdir'/*.deb; do reprepro -b /home/reprepro/reprepro includedeb all $deb; done'
+    -   ssh -q $repo_ssh_target 'rm -r ' $tmpdir
+    - fi
 
 all-deb-staging-deploy:
   stage: deploy
