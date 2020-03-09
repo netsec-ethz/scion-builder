@@ -595,9 +595,24 @@ scionlab-centos-7-amd64-test:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
+    #
+    # Copy (only) new versions of .debs to package repomachine and include them into the repository
+    # We skip existing versions of .debs because reprepro will complain loudly
+    # if the hashes don't match and our builds don't seem be reproducible enough.
+    #
+    # Note: the dance with only copying the new versions looks like a pointless optimisation;
+    #       this could also be done entirely on the repo machine, but simply
+    #       the shell escaping gets (even more) hairy.
     - repo_ssh_target=reprepro@$CI_PACKAGE_REPO
     - tmpdir=$(ssh -q $repo_ssh_target "mktemp -d --suffix .debs")
-    - scp -v output-*/*.deb $repo_ssh_target:$tmpdir
+    - existing_debs=$(ssh -q $repo_ssh_target reprepro -b /home/reprepro/reprepro --list-format '${$basename}\n' list all)
+    - debs_to_deploy=$(ls output-*/*.deb | grep -vF "$existing_debs")
+    - debs_to_skip=$(ls output-*/*.deb | grep -F "$existing_debs")
+    - if [ -n "$debs_to_skip" ]; then
+    -   echo "Skipping existing *.deb:"
+    -   echo "$debs_to_skip"
+    - fi
+    - scp -v $debs_to_deploy $repo_ssh_target:$tmpdir
     - ssh -q $repo_ssh_target 'set -x; for deb in '$tmpdir'/*.deb; do reprepro -b /home/reprepro/reprepro includedeb all $deb; done'
     - ssh -q $repo_ssh_target 'rm -r ' $tmpdir
 
