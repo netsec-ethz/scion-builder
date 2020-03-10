@@ -41,7 +41,7 @@ go-deps-population:
     - ln -f -s /usr/local/go/bin/* /usr/bin/
     # Clone SCION source code
     #- git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
-    - git clone https://github.com/netsec-ethz/scion.git -b master scion
+    - git clone https://github.com/scionproto/scion.git -b master scion
     - mkdir -p $HOME/go/src/github.com/scionproto/
     - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
     # Clone SCIONLab source code
