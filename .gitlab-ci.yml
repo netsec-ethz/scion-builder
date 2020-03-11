@@ -18,41 +18,22 @@ connectivity-check:
     - nc -vz packages.netsec.inf.ethz.ch 22
     - nc -vz packages-test.netsec.inf.ethz.ch 22
 
-go-deps-population:
+expand-bazel-templ:
   stage: pre-build
-  image: $CI_DOCKER_IMAGE
+  image: busybox
   retry:
     max: 2
     when: runner_system_failure
-  # (kmateusz) Using artifacts instead of cache due to the lack of sticky runners and shared cache in our GitLab CI.
-  # That means if by any chance next job hits on a different runner, it will not have access to the cache populated
-  # here and will fail.
   artifacts:
     paths:
-      - scion/
+      - BUILD.bazel
+      - rhel/scionlab.spec
+      - bazel_install_script.sh
     expire_in: 1 hour
   script:
-    # Prepare operating system
-    - export DEBIAN_FRONTEND=noninteractive
-    - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
-    - apt update && apt install -y apt-transport-https ca-certificates rpm git wget curl unzip gcc file python
-    # Install golang
-    - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
-    - ln -f -s /usr/local/go/bin/* /usr/bin/
-    # Clone SCION source code
-    - git clone $CI_SCION_REPO -b $CI_SCION_BRANCH scion
-    - mkdir -p $HOME/go/src/github.com/scionproto/
-    - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
-    # Clone SCIONLab source code
-    - git clone $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
-    - mkdir -p $HOME/go/src/github.com/netsec-ethz/
-    - ln -s $(pwd)/scionlab /root/go/src/github.com/netsec-ethz/
-    # Override some files from upstream SCION
-    - pushd scion
-    - if [ ! -z "$(ls ../patches)" ]; then ls -l ../patches; for i in ../patches/*.patch; do git apply $i --verbose; done; fi
-    - popd
     # Set variables in BUILD.bazel
     - source ./RELEASE
+    - cp BUILD.bazel.templ BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER/$PKG_VERSION_SCION_SYSTEMD_WRAPPER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" BUILD.bazel
@@ -62,8 +43,8 @@ go-deps-population:
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCIONLAB/$PKG_VERSION_SCIONLAB/g" BUILD.bazel
-    - cp BUILD.bazel scion/BUILD.bazel
     # Set variables in RPM specfile
+    - cp rhel/scionlab.spec.templ rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_BEACON_SERVER/$PKG_VERSION_SCION_BEACON_SERVER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_CERTIFICATE_SERVER/$PKG_VERSION_SCION_CERTIFICATE_SERVER/g" rhel/scionlab.spec
@@ -71,16 +52,28 @@ go-deps-population:
     - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
-    # Copy SCIONLab automatic configuration script into SCION codebase
-    - cp scionlab/scionlab/hostfiles/scionlab-config scion/scionlab-config
-    # Copy build-related directories into SCION codebase
-    - cp -r debian scion
-    - cp -r rhel scion
-    - cp -r systemd scion
-    - cp scion-systemd-wrapper scion
+    # Prefetch selected version of bazel installer:
+    - wget https://github.com/bazelbuild/bazel/releases/download/$CI_BAZEL_VERSION/bazel-$CI_BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
+
+clone-repositories:
+  stage: pre-build
+  image: buildpack-deps:bionic-scm
+  retry:
+    max: 2
+    when: runner_system_failure
+  artifacts:
+    paths:
+      - scionlab
+      - scion
+  script:
+    # Clone SCION/SCIONLab source code and put it in an artifact, so that all
+    # of the following build steps are certainly using the same revision.
+    - git clone --depth=1 $CI_SCION_REPO -b $CI_SCION_BRANCH scion
+    - git clone --depth=1 $CI_SCIONLAB_REPO -b $CI_SCIONLAB_BRANCH scionlab
     # Place hashes of git repos in the output for auditing
-    - cd scion && git log -1
-    - cd ../scionlab && git log -1
+    - git -C scion/ log -1
+    - git -C scionlab/ log -1
+
 
 .build-script: &build-script
   retry:
@@ -90,62 +83,64 @@ go-deps-population:
     # Prepare operating system
     - export DEBIAN_FRONTEND=noninteractive
     - echo "Acquire::By-Hash \"yes\"; " > /etc/apt/apt.conf.d/01byhash
-    - apt update && apt install -y apt-transport-https ca-certificates rpm git wget curl unzip gcc file python
+    # Install RPM tools and multiplatform toolchains
+    - apt-get update
+    - apt-get install -y
+      rpm
+      libc6-armhf-cross libc6-dev-armhf-cross gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabi
+      libc6-arm64-cross libc6-dev-arm64-cross gcc-aarch64-linux-gnu
+      gcc-7-multilib libgcc-7-dev-i386-cross libgcc-7-dev libc6-dev libc6-dev-i386 libc6-i386-cross libc6-dev-i386-cross linux-libc-dev-i386-cross
+    # Hack for linux kernels for i386
+    - ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/asm
     # Install golang
     - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
     - ln -f -s /usr/local/go/bin/* /usr/bin/
-    # Install multiplatform toolchains
-    - apt install -y gcc-multilib
-    - "apt install -y \
-      libc6-armhf-cross libc6-dev-armhf-cross gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabi \
-      libc6-arm64-cross libc6-dev-arm64-cross gcc-aarch64-linux-gnu \
-      libgcc-7-dev-i386-cross libgcc-7-dev libc6-dev libc6-dev-i386 libc6-i386-cross libc6-dev-i386-cross linux-libc-dev-i386-cross"
-    # Hack for linux kernels for i386
-    - ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/asm
     # Install selected release of BAZEL
-    - wget https://github.com/bazelbuild/bazel/releases/download/$CI_BAZEL_VERSION/bazel-$CI_BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
     - bash bazel_install_script.sh
-    # Create symlinks for Go
-    - mkdir -p $HOME/go/src/github.com/scionproto/
-    - ln -s $(pwd)/scion /root/go/src/github.com/scionproto/
-    - mkdir -p $HOME/go/src/github.com/netsec-ethz/
-    - ln -s $(pwd)/scionlab /root/go/src/github.com/netsec-ethz/
-    # Install SCION defined dependencies
-    - apt install -y $(grep -vE "^\s*#" scion/env/debian/pkgs.txt | tr "\n" " ")
+
+    # Override some files from upstream SCION
+    - pushd scion
+    - if [ ! -z "$(ls ../patches)" ]; then ls -l ../patches; for i in ../patches/*.patch; do git apply $i --verbose; done; fi
+    - popd
+
     # Prepare GO environment
     - export CGO_ENABLED=1
     - export GOOS=linux
     - export CC=$CI_CC && echo $CC
     - export GOARCH=$CI_GOARCH && echo $GOARCH
     # Build SCION binaries
-    - cd $HOME/go/src/github.com/scionproto/scion/bin
-    - go build ../go/border/
-    - go build ../go/beacon_srv/
-    - go build ../go/cert_srv/
-    - go build ../go/path_srv/
-    - go build ../go/sciond/
-    - go build ../go/godispatcher/
-    - go build ../go/tools/scmp/
-    - go build ../go/tools/showpaths/
+    - mkdir bin/
+    - pushd scion
+    - go build -o ../bin/
+        ./go/border/
+        ./go/beacon_srv/
+        ./go/cert_srv/
+        ./go/path_srv/
+        ./go/sciond/
+        ./go/godispatcher/
+        ./go/tools/scmp/
+        ./go/tools/showpaths/
+        ./go/tools/scion-pki/
+    - popd
     # Build SCION packages
-    - cd $HOME/go/src/github.com/scionproto/scion
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
-    - bazel build //:scion-systemd-wrapper-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-border-router-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-beacon-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-certificate-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-path-server-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-daemon-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-dispatcher-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scion-tools-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
-    - bazel build //:scionlab-$CI_TARGET_PLATFORM --workspace_status_command=./tools/bazel-build-env
+    - bazel build
+        //:scion-systemd-wrapper-$CI_TARGET_PLATFORM
+        //:scion-border-router-$CI_TARGET_PLATFORM
+        //:scion-beacon-server-$CI_TARGET_PLATFORM
+        //:scion-certificate-server-$CI_TARGET_PLATFORM
+        //:scion-path-server-$CI_TARGET_PLATFORM
+        //:scion-daemon-$CI_TARGET_PLATFORM
+        //:scion-dispatcher-$CI_TARGET_PLATFORM
+        //:scion-tools-$CI_TARGET_PLATFORM
+        //:scionlab-$CI_TARGET_PLATFORM
     # Prepare packages to shipment
-    - mkdir ../output-$CI_TARGET_ARCHITECTURE
-    - cp bazel-bin/*$CI_TARGET_ARCHITECTURE.$CI_TARGET_PLATFORM ../output-$CI_TARGET_ARCHITECTURE
+    - mkdir output-$CI_TARGET_ARCHITECTURE
+    - cp bazel-bin/*$CI_TARGET_ARCHITECTURE.$CI_TARGET_PLATFORM output-$CI_TARGET_ARCHITECTURE
 
 all-deb-amd64:
   stage: build
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   variables:
     CI_TARGET_PLATFORM: deb
     CI_TARGET_ARCHITECTURE: amd64
@@ -159,7 +154,7 @@ all-deb-amd64:
 
 all-rpm-amd64:
   stage: build
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   variables:
     CI_TARGET_PLATFORM: rpm
     CI_TARGET_ARCHITECTURE: amd64
@@ -173,7 +168,7 @@ all-rpm-amd64:
 
 all-deb-i386:
   stage: build
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   except:
     - triggers
   variables:
@@ -189,7 +184,7 @@ all-deb-i386:
 
 all-deb-arm64:
   stage: build
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   except:
     - triggers
   variables:
@@ -205,7 +200,7 @@ all-deb-arm64:
 
 all-deb-armhf:
   stage: build
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   except:
     - triggers
   variables:
@@ -620,7 +615,7 @@ scionlab-centos-7-amd64-test:
 
 all-deb-staging-deploy:
   stage: deploy
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   only:
     - /^staging.*$/
   except:
@@ -631,7 +626,7 @@ all-deb-staging-deploy:
 
 all-deb-prod-deploy:
   stage: deploy
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   only:
     - master
   except:
@@ -660,7 +655,7 @@ all-deb-prod-deploy:
 
 all-deb-staging-deploy-test:
   stage: post-deploy
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   only:
     - /^staging.*$/
   except:
@@ -671,7 +666,7 @@ all-deb-staging-deploy-test:
 
 all-deb-prod-deploy-test:
   stage: post-deploy
-  image: $CI_DOCKER_IMAGE
+  image: buildpack-deps:bionic
   only:
     - master
   except:

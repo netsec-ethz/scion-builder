@@ -1,10 +1,5 @@
-load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
 load("@bazel_tools//tools/build_defs/pkg:rpm.bzl", "pkg_rpm")
-load("@io_bazel_rules_go//go:def.bzl", "nogo")
-
-# gazelle:prefix github.com/scionproto/scion
-gazelle(name = "gazelle")
 
 # Variables used to prepare DEB and RPM packages
 PKG_ARCHITECTURE = "CI_TARGET_ARCHITECTURE"
@@ -428,6 +423,7 @@ pkg_tar(
     srcs = [
         "bin/scmp",
         "bin/showpaths",
+        "bin/scion-pki",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -469,7 +465,7 @@ pkg_rpm(
 pkg_tar(
     name = "scionlab-config-bin",
     srcs = [
-        "scionlab-config",
+        "scionlab/scionlab/hostfiles/scionlab-config",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -535,37 +531,4 @@ pkg_rpm(
     ],
     spec_file = "rhel/scionlab.spec",
     version = PKG_VERSION_SCIONLAB,
-)
-
-# Nogo - Go code analysis tool
-nogo(
-    name = "nogo",
-    config = "nogo.json",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//go/lint:log",
-        "@org_golang_x_tools//go/analysis/passes/asmdecl:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/assign:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/atomic:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/bools:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/buildtag:go_tool_library",
-        # This crashes the build of @com_github_vishvananda_netlink
-        # "@org_golang_x_tools//go/analysis/passes/cgocall:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/composite:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/copylock:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/httpresponse:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/loopclosure:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/lostcancel:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/nilfunc:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/nilness:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/printf:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/shift:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/stdmethods:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/structtag:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/tests:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/unmarshal:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/unreachable:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/unsafeptr:go_tool_library",
-        "@org_golang_x_tools//go/analysis/passes/unusedresult:go_tool_library",
-    ],
 )
