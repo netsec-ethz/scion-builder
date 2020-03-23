@@ -20,7 +20,6 @@ CI process relies on some variables defined below. They can be configured using 
 
 ### DEB repository configuration
 
-* `CI_SCP_TARGET`
 * `CI_SSH_PRIVATE_KEY`
 
 ## Usage
@@ -53,12 +52,12 @@ Based on the current configuration, packages can be installed in one of the foll
 
 ### Debian-based
 ```bash
-echo "deb [trusted=yes] http://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list
+echo "deb [trusted=yes] http://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list.d/scionlab.list
 ```
 
 ```bash
 apt install -y apt-transport-https
-echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list
+echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> /etc/apt/sources.list.d/scionlab.list
 ```
 
 ### RH-based
@@ -73,7 +72,3 @@ Not yet available.
 ## Origins
 
 https://github.com/netsec-ethz/scion-debian-packager/
-
-## Further improvements
-
-It is foreseen to integrate this repo and its pipeline with GitLab workflow, i.e. where every PR triggers a pipeline here and returns a result. Initial investigations show due to lack of GitLab Premium license this would need to be done through CircleCI already used in GitLab. And additional step would need to be written and GitLab API endpoint would be called from there. GitHub webhooks can't be used directly as the payload has a completely different syntax from the one supported by GitLab.
