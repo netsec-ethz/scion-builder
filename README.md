@@ -51,6 +51,19 @@ echo "deb [trusted=yes] https://packages.netsec.inf.ethz.ch/debian all main" >> 
 ### RH-based
 Not yet available.
 
+## Staging repository
+
+For branches matching the pattern `^staging.*`, packages are deployed to the staging package repository `https://packages-test.netsec.inf.ethz.ch/debian`.
+
+The repository does not allow re-deploying the same package version multiple times.
+To work around this we can manually **remove all packages in the test repository**:
+
+`ssh` to the repository machine `packages-test.netsec.inf.ethz.ch` and run
+
+```bash
+sudo /home/reprepro/wipe-test-reprepro.sh
+```
+
 ## Upstream projects
 
 * https://github.com/scionproto/scion
