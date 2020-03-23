@@ -70,7 +70,7 @@ clone-repositories:
     # Clone SCION/SCIONLab source code and put it in an artifact, so that all
     # of the following build steps are certainly using the same revision.
     - git clone --depth=1 https://github.com/scionproto/scion.git -b master scion
-    - git clone --depth=1 https://github.com/netsec-ethz/scionlab.git -b develop scionlab
+    - git clone --depth=1 https://github.com/netsec-ethz/scionlab.git -b scionlab_version_upgrade_w_packages scionlab
     # Place hashes of git repos in the output for auditing
     - git -C scion/ log -1
     - git -C scionlab/ log -1
