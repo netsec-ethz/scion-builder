@@ -29,6 +29,7 @@ expand-bazel-templ:
       - BUILD.bazel
       - rhel/scionlab.spec
       - bazel_install_script.sh
+      - go.linux-amd64.tar.gz
     expire_in: 1 hour
   script:
     # Set variables in BUILD.bazel
@@ -49,7 +50,11 @@ expand-bazel-templ:
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
     # Prefetch selected version of bazel installer:
-    - wget https://github.com/bazelbuild/bazel/releases/download/$CI_BAZEL_VERSION/bazel-$CI_BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
+    - BAZEL_VERSION=0.25.3
+    - wget https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
+    # Prefetch selected go version:
+    - GOLANG_VERSION=1.13.4
+    - wget https://dl.google.com/go/go$GOLANG_VERSION.linux-amd64.tar.gz -O go.linux-amd64.tar.gz
 
 clone-repositories:
   stage: pre-build
@@ -89,7 +94,7 @@ clone-repositories:
     # Hack for linux kernels for i386
     - ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/asm
     # Install golang
-    - curl -fSL "https://dl.google.com/go/go$CI_GOLANG_VERSION.linux-amd64.tar.gz" | tar xzC /usr/local
+    - tar -f go.linux-amd64.tar.gz -xzC /usr/local
     - ln -f -s /usr/local/go/bin/* /usr/bin/
     # Install selected release of BAZEL
     - bash bazel_install_script.sh
