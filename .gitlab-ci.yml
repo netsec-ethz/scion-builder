@@ -129,7 +129,7 @@ clone-repositories:
     - pushd scion
     - startup_version=$(cat git_version)-scionlab
     - go build -o ../bin/
-        -ldflags=-Xgithub.com/scionproto/scion/go/lib/env.StartupVersion=$startup_version
+        -ldflags="-X github.com/scionproto/scion/go/lib/env.StartupVersion=$startup_version"
         ./go/border/
         ./go/cs/
         ./go/sciond/
