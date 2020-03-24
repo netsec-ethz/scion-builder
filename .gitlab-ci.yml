@@ -69,10 +69,25 @@ clone-repositories:
   script:
     # Clone SCION/SCIONLab source code and put it in an artifact, so that all
     # of the following build steps are certainly using the same revision.
-    - git clone --depth=1 https://github.com/scionproto/scion.git -b master scion
+
+    # SCION
+    # Note: cloning upstream repository too, to get all tags.
+    - git clone https://github.com/scionproto/scion.git
+    - pushd scion
+    - git remote add netsec-ethz https://github.com/netsec-ethz/scion.git
+    - git fetch netsec-ethz
+    # TODO: switch to building netsec-ethz/scionlab before merging to master
+    # git checkout netsec-ethz/scionlab
+    - git checkout origin/master
+    - git describe --tags > git_version
+    # Place place hash in the log for auditing
+    - git log -1
+    - rm -rf .git # shrink, won't need this to build
+    - popd
+
+    # SCIONLab
+    # TODO: switch to building master before merging to master
     - git clone --depth=1 https://github.com/netsec-ethz/scionlab.git -b scionlab_version_upgrade_w_packages scionlab
-    # Place hashes of git repos in the output for auditing
-    - git -C scion/ log -1
     - git -C scionlab/ log -1
 
 
@@ -112,7 +127,9 @@ clone-repositories:
     # Build SCION binaries
     - mkdir bin/
     - pushd scion
+    - startup_version=$(cat git_version)-scionlab
     - go build -o ../bin/
+        -ldflags=-Xgithub.com/scionproto/scion/go/lib/env.StartupVersion=$startup_version
         ./go/border/
         ./go/cs/
         ./go/sciond/
