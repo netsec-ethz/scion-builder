@@ -87,7 +87,7 @@ clone-repositories:
 
     # SCIONLab
     # TODO: switch to building master before merging to master
-    - git clone --depth=1 https://github.com/netsec-ethz/scionlab.git -b scionlab_version_upgrade_w_packages scionlab
+    - git clone --depth=1 https://github.com/netsec-ethz/scionlab.git -b develop scionlab
     - git -C scionlab/ log -1
 
 
