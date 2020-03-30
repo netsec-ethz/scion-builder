@@ -32,8 +32,8 @@ case "$1" in
         chown -R scion:scion /var/lib/scion/
 
         # Same for gen folder
-		mkdir -p /etc/scion/
-		chown -R scion:scion /etc/scion/
+        mkdir -p /etc/scion/
+        chown -R scion:scion /etc/scion/
 
         # own /run/shm/dispatcher
         mkdir -p /run/shm/dispatcher

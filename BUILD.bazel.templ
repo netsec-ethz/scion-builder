@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
 load("@bazel_tools//tools/build_defs/pkg:rpm.bzl", "pkg_rpm")
+load("//:utils.bzl", "substitute_deb_version")
 
 # Variables used to prepare DEB and RPM packages
 PKG_ARCHITECTURE = "CI_TARGET_ARCHITECTURE"
@@ -137,6 +138,12 @@ pkg_tar(
     package_dir = "/lib/systemd/system",
 )
 
+substitute_deb_version(
+    name = "scion-control-service-preinst",
+    src = "debian/scripts/scion.preinst",
+    version = PKG_VERSION_SCION_CONTROL_SERVICE,
+)
+
 pkg_tar(
     name = "scion-control-service",
     extension = "tar.gz",
@@ -162,6 +169,7 @@ pkg_deb(
     maintainer = PKG_MAINTAINER,
     package = "scion-control-service",
     postinst = "debian/scripts/scion.postinst",
+    preinst = ":scion-control-service-preinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_CONTROL_SERVICE,
@@ -205,6 +213,12 @@ pkg_tar(
     ],
 )
 
+substitute_deb_version(
+    name = "scion-daemon-preinst",
+    src = "debian/scripts/scion.preinst",
+    version = PKG_VERSION_SCION_DAEMON,
+)
+
 pkg_deb(
     name = "scion-daemon-deb",
     architecture = PKG_ARCHITECTURE,
@@ -221,6 +235,7 @@ pkg_deb(
     maintainer = PKG_MAINTAINER,
     package = "scion-daemon",
     postinst = "debian/scripts/scion.postinst",
+    preinst = ":scion-daemon-preinst",
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_DAEMON,
