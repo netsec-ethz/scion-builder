@@ -76,9 +76,7 @@ clone-repositories:
     - pushd scion
     - git remote add netsec-ethz https://github.com/netsec-ethz/scion.git
     - git fetch netsec-ethz
-    # TODO: switch to building netsec-ethz/scionlab before merging to master
-    # git checkout netsec-ethz/scionlab
-    - git checkout origin/master
+    - git checkout netsec-ethz/scionlab
     - git describe --tags > git_version
     # Place place hash in the log for auditing
     - git log -1
@@ -86,8 +84,7 @@ clone-repositories:
     - popd
 
     # SCIONLab
-    # TODO: switch to building master before merging to master
-    - git clone --depth=1 https://github.com/netsec-ethz/scionlab.git -b develop scionlab
+    - git clone --depth=1 https://github.com/netsec-ethz/scionlab.git -b master scionlab
     - git -C scionlab/ log -1
 
 
