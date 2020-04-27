@@ -29,6 +29,8 @@ rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_bindir}/
 install -m 755 ./usr/bin/scmp %{buildroot}%{_bindir}/scmp
 install -m 755 ./usr/bin/showpaths %{buildroot}%{_bindir}/showpaths
+install -m 755 ./usr/bin/scion-pki %{buildroot}%{_bindir}/scion-pki
+install -m 755 ./usr/bin/pathdb_dump %{buildroot}%{_bindir}/pathdb_dump
 
 %clean
 rm -rf %{buildroot}
@@ -36,3 +38,5 @@ rm -rf %{buildroot}
 %files
 %attr(0755, root, root) %{_bindir}/scmp
 %attr(0755, root, root) %{_bindir}/showpaths
+%attr(0755, root, root) %{_bindir}/scion-pki
+%attr(0755, root, root) %{_bindir}/pathdb_dump

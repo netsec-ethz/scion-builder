@@ -126,7 +126,7 @@ clone-repositories:
     - pushd scion
     - startup_version=$(cat git_version)-scionlab
     - go build -o ../bin/
-        -ldflags="-X github.com/scionproto/scion/go/lib/env.StartupVersion=$startup_version"
+        -ldflags="-s -w -X github.com/scionproto/scion/go/lib/env.StartupVersion=$startup_version"
         ./go/border/
         ./go/cs/
         ./go/sciond/
@@ -134,6 +134,7 @@ clone-repositories:
         ./go/tools/scmp/
         ./go/tools/showpaths/
         ./go/tools/scion-pki/
+        ./go/tools/pathdb_dump/
     - popd
     # Build SCION packages
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
@@ -401,7 +402,7 @@ scion-tools-ubuntu-18.04-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
-    CI_BINARIES: "scmp showpaths"
+    CI_BINARIES: "scmp showpaths scion-pki pathdb_dump"
   <<: *test-scion-tools-deb-script
 
 #scion-tools-debian-10-amd64-test:
@@ -419,7 +420,7 @@ scion-tools-centos-7-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
-    CI_BINARIES: "scmp showpaths"
+    CI_BINARIES: "scmp showpaths scion-pki pathdb_dump"
   <<: *test-scion-tools-rpm-script
 
 border-router-ubuntu-18.04-amd64-test:
