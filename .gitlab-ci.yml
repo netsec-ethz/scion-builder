@@ -68,7 +68,8 @@ clone-repositories:
       - scion
   script:
     # Clone SCION/SCIONLab source code and put it in an artifact, so that all
-    # of the following build steps are certainly using the same revision.
+    # of the following build steps can share this checkout.
+    - source ./RELEASE
 
     # SCION
     # Note: cloning upstream repository too, to get all tags.
@@ -76,7 +77,7 @@ clone-repositories:
     - pushd scion
     - git remote add netsec-ethz https://github.com/netsec-ethz/scion.git
     - git fetch netsec-ethz
-    - git checkout netsec-ethz/scionlab
+    - git checkout "$SCION_COMMIT"
     - git describe --tags > git_version
     # Place place hash in the log for auditing
     - git log -1
@@ -84,8 +85,13 @@ clone-repositories:
     - popd
 
     # SCIONLab
-    - git clone --depth=1 https://github.com/netsec-ethz/scionlab.git -b master scionlab
-    - git -C scionlab/ log -1
+    - git clone https://github.com/netsec-ethz/scionlab.git
+    - pushd scionlab
+    - git checkout "$SCIONLAB_COMMIT"
+    - git log -1
+    - rm -rf .git
+    - popd
+
 
 
 .build-script: &build-script
