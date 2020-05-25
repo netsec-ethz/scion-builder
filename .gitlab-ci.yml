@@ -77,7 +77,7 @@ clone-repositories:
     - pushd scion
     - git remote add netsec-ethz https://github.com/netsec-ethz/scion.git
     - git fetch netsec-ethz
-    - git checkout "$SCION_COMMIT"
+    - git -c advice.detachedHead=false checkout "$SCION_COMMIT"
     - git describe --tags > git_version
     # Place place hash in the log for auditing
     - git log -1
@@ -87,7 +87,7 @@ clone-repositories:
     # SCIONLab
     - git clone https://github.com/netsec-ethz/scionlab.git
     - pushd scionlab
-    - git checkout "$SCIONLAB_COMMIT"
+    - git -c advice.detachedHead=false checkout "$SCIONLAB_COMMIT"
     - git log -1
     - rm -rf .git
     - popd
