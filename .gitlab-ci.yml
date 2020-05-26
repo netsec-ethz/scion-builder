@@ -85,8 +85,11 @@ clone-repositories:
     - popd
 
     # SCIONLab
-    - git clone https://github.com/netsec-ethz/scionlab.git
+    - mkdir scionlab
     - pushd scionlab
+    - git init
+    - git remote add origin https://github.com/netsec-ethz/scionlab.git
+    - git fetch origin --depth=1 "$SCIONLAB_COMMIT"
     - git -c advice.detachedHead=false checkout "$SCIONLAB_COMMIT"
     - git log -1
     - rm -rf .git
