@@ -18,6 +18,22 @@ connectivity-check:
     - nc -vz packages.netsec.inf.ethz.ch 22
     - nc -vz packages-test.netsec.inf.ethz.ch 22
 
+version-sanity-check:
+  stage: pre-build
+  image: buildpack-deps:bionic-scm
+  except:
+    - master
+  script:
+    # Whenever "RELEASE" is touched, check that PKG_VERSION_SCIONLAB is touched
+    - if git diff --name-only "origin/master" | grep ^RELEASE$; then
+    -   git diff "origin/master" -- RELEASE | grep '^+.*PKG_VERSION_SCIONLAB'
+        || ( echo -e "!!! Oops !!!"
+                     "\nIt looks like you forgot to increment the version for scionlab."
+                     "\nThe version of the scionlab metapackage must be bumped whenever incrementing
+                     any other package version!";
+            exit 1 )
+    - fi
+
 expand-bazel-templ:
   stage: pre-build
   image: busybox
