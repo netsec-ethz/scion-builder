@@ -19,6 +19,8 @@ PKG_VERSION_SCION_BORDER_ROUTER = "CI_PKG_VERSION_SCION_BORDER_ROUTER"
 
 PKG_VERSION_SCION_CONTROL_SERVICE = "CI_PKG_VERSION_SCION_CONTROL_SERVICE"
 
+PKG_VERSION_SCION_SIG = "CI_PKG_VERSION_SCION_SIG"
+
 PKG_VERSION_SCION_DAEMON = "CI_PKG_VERSION_SCION_DAEMON"
 
 PKG_VERSION_SCION_DISPATCHER = "CI_PKG_VERSION_SCION_DISPATCHER"
@@ -183,6 +185,65 @@ pkg_rpm(
     ],
     spec_file = "rhel/scion-control-service.spec",
     version = PKG_VERSION_SCION_CONTROL_SERVICE,
+)
+
+# SIG (Scion IP Gateway)
+pkg_tar(
+    name = "scion-sig-bin",
+    srcs =[
+        "bin/sig",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+pkg_tar(
+    name = "scion-sig-templates",
+    srcs = [
+        "hostfiles/sig.config",
+        "hostfiles/rules.json",
+        "hostfiles/extra-topology-sig.json",
+    ],
+    mode = "0644",
+    package_dir = "/usr/share/doc/scion-ip-gateway/templates",
+)
+
+pkg_tar(
+    name = "scion-sig",
+    extension = "tar.gz",
+    deps = [
+        ":scion-sig-bin",
+        ":scion-sig-templates",
+    ],
+)
+
+pkg_deb(
+    name = "scion-sig-deb",
+    architecture = PKG_ARCHITECTURE,
+    data = ":scion-sig",
+    depends = [
+        "libcap2-bin",
+        "scion-daemon",
+        "scion-dispatcher",
+    ],
+    description = "SCION IP Gateway",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-sig",
+    postinst = "debian/scripts/sig.postinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION_SCION_SIG,
+)
+
+pkg_rpm(
+    name = "scion-sig-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-sig",
+    ],
+    spec_file = "rhel/scion-sig.spec",
+    version = PKG_VERSION_SCION_SIG,
 )
 
 # SCION Daemon
