@@ -200,12 +200,11 @@ pkg_tar(
 pkg_tar(
     name = "scion-sig-templates",
     srcs = [
-        "hostfiles/sig.config",
-        "hostfiles/rules.json",
-        "hostfiles/extra-topology-sig.json",
+        "hostfiles/sig.toml",
+        "hostfiles/sig.json",
     ],
     mode = "0644",
-    package_dir = "/usr/share/doc/scion-ip-gateway/templates",
+    package_dir = "/etc/scion/",
 )
 
 pkg_tar(

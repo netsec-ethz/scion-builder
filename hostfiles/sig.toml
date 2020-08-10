@@ -1,0 +1,7 @@
+[sig]
+    id = "sig-1"
+    sig_config = "/etc/scion/sig.json"
+    tun = "sig"
+
+[log.file]
+    path = "/var/log/scion/sig.log"
