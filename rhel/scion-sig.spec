@@ -30,10 +30,9 @@ rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_bindir}/
 install -m 755 ./usr/bin/sig %{buildroot}%{_bindir}/sig
 
-mkdir -p %{buildroot}/usr/share/doc/scion-ip-gateway/templates
-cp ./usr/share/doc/scion-ip-gateway/templates/sig.config %{buildroot}/usr/share/doc/scion-ip-gateway/templates/sig.config
-cp ./usr/share/doc/scion-ip-gateway/templates/rules.json %{buildroot}/usr/share/doc/scion-ip-gateway/templates/rules.json
-cp ./usr/share/doc/scion-ip-gateway/templates/extra-topology-sig.json %{buildroot}/usr/share/doc/scion-ip-gateway/templates/extra-topology-sig.json
+mkdir -p %{buildroot}/etc/scion/
+cp ./etc/scion/sig.toml %{buildroot}/etc/scion/sig.toml
+cp ./etc/scion/sig.json %{buildroot}/etc/scion/sig.json
 
 %clean
 rm -rf %{buildroot}
@@ -41,8 +40,7 @@ rm -rf %{buildroot}
 %files
 %attr(0755, root, root) %{_bindir}/sig
 
-%attr(0644, scion, scion) /usr/share/doc/scion-ip-gateway/templates/sig.config
-%attr(0644, scion, scion) /usr/share/doc/scion-ip-gateway/templates/rules.json
-%attr(0644, scion, scion) /usr/share/doc/scion-ip-gateway/templates/extra-topology-sig.json
+%attr(0644, scion, scion) /etc/scion/sig.toml
+%attr(0644, scion, scion) /etc/scion/sig.json
 
-%dir %attr(0755, scion, scion) /usr/share/doc/scion-ip-gateway/templates
+%dir %attr(0755, scion, scion) /etc/scion/
