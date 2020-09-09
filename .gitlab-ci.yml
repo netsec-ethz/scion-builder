@@ -25,7 +25,7 @@ version-sanity-check:
     - master
   script:
     # Whenever "RELEASE" is touched (except for SIG), check that PKG_VERSION_SCIONLAB is also touched
-    - if git diff "origin/master" -U0 -- RELEASE | tail -n +5 | grep -v -e '^@@ ' -e PKG_VERSION_SCION_SIG -e PKG_VERSION_SCION_SYSTEMD_WRAPPER; then
+    - if git diff "origin/master" -U0 -- RELEASE | tail -n +5 | grep -v -e '^@@ ' -e SCION_COMMIT -e PKG_VERSION_SCION_SIG -e PKG_VERSION_SCION_SYSTEMD_WRAPPER; then
     -   git diff "origin/master" -- RELEASE | grep '^+.*PKG_VERSION_SCIONLAB'
         || ( echo -e "!!! Oops !!!"
                      "\nIt looks like you forgot to increment the version for scionlab."
