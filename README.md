@@ -53,16 +53,13 @@ Not yet available.
 
 ## Staging repository
 
-For branches matching the pattern `^staging.*`, packages are deployed to the staging package repository `https://packages-test.netsec.inf.ethz.ch/debian`.
+Packages can be deployed to the packages-test.netsec.inf.ethz.ch staging
+repository by triggering the manual build step "all-deb-staging-deploy" in a
+pipeline.
 
-The repository does not allow re-deploying the same package version multiple times.
-To work around this we can manually **remove all packages in the test repository**:
-
-`ssh` to the repository machine `packages-test.netsec.inf.ethz.ch` and run
-
-```bash
-sudo /home/reprepro/wipe-test-reprepro.sh
-```
+Note: the repository does not allow re-deploying the same package version
+multiple times. To work around this, the package repository is always wiped
+clear before staging deployment.
 
 ## Upstream projects
 

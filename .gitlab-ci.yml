@@ -1,9 +1,7 @@
 stages:
   - pre-build
   - build
-  - test-1
-  - test-2
-  - test-3
+  - test
   - deploy
   - post-deploy
 
@@ -399,7 +397,7 @@ all-deb-armhf:
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
 systemd-wrapper-ubuntu-18.04-amd64-test:
-  stage: test-1
+  stage: test
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -408,7 +406,7 @@ systemd-wrapper-ubuntu-18.04-amd64-test:
   <<: *test-systemd-wrapper-deb-script
 
 #systemd-wrapper-debian-10-amd64-test:
-#  stage: test-1
+#  stage: test
 #  image: debian:buster
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
@@ -417,7 +415,7 @@ systemd-wrapper-ubuntu-18.04-amd64-test:
 #  <<: *test-systemd-wrapper-deb-script
 
 systemd-wrapper-centos-7-amd64-test:
-  stage: test-1
+  stage: test
   image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -426,7 +424,7 @@ systemd-wrapper-centos-7-amd64-test:
   <<: *test-systemd-wrapper-rpm-script
 
 scion-tools-ubuntu-18.04-amd64-test:
-  stage: test-1
+  stage: test
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -435,7 +433,7 @@ scion-tools-ubuntu-18.04-amd64-test:
   <<: *test-scion-tools-deb-script
 
 #scion-tools-debian-10-amd64-test:
-#  stage: test-1
+#  stage: test
 #  image: debian:buster
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
@@ -444,7 +442,7 @@ scion-tools-ubuntu-18.04-amd64-test:
 #  <<: *test-scion-tools-deb-script
 
 scion-tools-centos-7-amd64-test:
-  stage: test-1
+  stage: test
   image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -453,7 +451,7 @@ scion-tools-centos-7-amd64-test:
   <<: *test-scion-tools-rpm-script
 
 border-router-ubuntu-18.04-amd64-test:
-  stage: test-2
+  stage: test
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -462,7 +460,7 @@ border-router-ubuntu-18.04-amd64-test:
   <<: *test-deb-script
 
 #border-router-debian-10-amd64-test:
-#  stage: test-2
+#  stage: test
 #  image: debian:buster
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
@@ -471,7 +469,7 @@ border-router-ubuntu-18.04-amd64-test:
 #  <<: *test-deb-script
 
 border-router-centos-7-amd64-test:
-  stage: test-2
+  stage: test
   image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -480,7 +478,7 @@ border-router-centos-7-amd64-test:
   <<: *test-rpm-script
 
 control-service-ubuntu-18.04-amd64-test:
-  stage: test-2
+  stage: test
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -489,7 +487,7 @@ control-service-ubuntu-18.04-amd64-test:
   <<: *test-deb-script
 
 #control-service-debian-10-amd64-test:
-#  stage: test-2
+#  stage: test
 #  image: debian:buster
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
@@ -498,7 +496,7 @@ control-service-ubuntu-18.04-amd64-test:
 #  <<: *test-deb-script
 
 control-service-centos-7-amd64-test:
-  stage: test-2
+  stage: test
   image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -507,7 +505,7 @@ control-service-centos-7-amd64-test:
   <<: *test-rpm-script
 
 daemon-ubuntu-18.04-amd64-test:
-  stage: test-2
+  stage: test
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -516,7 +514,7 @@ daemon-ubuntu-18.04-amd64-test:
   <<: *test-deb-script
 
 #daemon-debian-10-amd64-test:
-#  stage: test-2
+#  stage: test
 #  image: debian:buster
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
@@ -525,7 +523,7 @@ daemon-ubuntu-18.04-amd64-test:
 #  <<: *test-deb-script
 
 daemon-centos-7-amd64-test:
-  stage: test-2
+  stage: test
   image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -534,7 +532,7 @@ daemon-centos-7-amd64-test:
   <<: *test-rpm-script
 
 dispatcher-ubuntu-18.04-amd64-test:
-  stage: test-2
+  stage: test
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -543,7 +541,7 @@ dispatcher-ubuntu-18.04-amd64-test:
   <<: *test-deb-script
 
 #dispatcher-debian-10-amd64-test:
-#  stage: test-2
+#  stage: test
 #  image: debian:buster
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
@@ -552,7 +550,7 @@ dispatcher-ubuntu-18.04-amd64-test:
 #  <<: *test-deb-script
 
 dispatcher-centos-7-amd64-test:
-  stage: test-2
+  stage: test
   image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -561,7 +559,7 @@ dispatcher-centos-7-amd64-test:
   <<: *test-rpm-script
 
 scionlab-ubuntu-18.04-amd64-test:
-  stage: test-3
+  stage: test
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -570,7 +568,7 @@ scionlab-ubuntu-18.04-amd64-test:
   <<: *test-scionlab-deb-script
 
 #scionlab-debian-10-amd64-test:
-#  stage: test-3
+#  stage: test
 #  image: debian:buster
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
@@ -579,7 +577,7 @@ scionlab-ubuntu-18.04-amd64-test:
 #  <<: *test-scionlab-deb-script
 
 scionlab-centos-7-amd64-test:
-  stage: test-3
+  stage: test
   image: centos:7
   variables:
     CI_TARGET_ARCHITECTURE: amd64
@@ -587,7 +585,7 @@ scionlab-centos-7-amd64-test:
     CI_BINARY_NAME: scionlab-config
   <<: *test-scionlab-rpm-script
 
-.deb-deploy-script: &deb-deploy-script
+.deb-deploy-before-script: &deb-deploy-before-script
   retry:
     max: 2
     when: runner_system_failure
@@ -597,7 +595,8 @@ scionlab-centos-7-amd64-test:
     - ssh-add <(echo "$CI_SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-  script:
+
+.deb-deploy-script: &deb-deploy-script
     #
     # Copy (only) new versions of .debs to package repomachine and include them into the repository
     # We skip existing versions of .debs because reprepro will complain loudly
@@ -629,13 +628,14 @@ scionlab-centos-7-amd64-test:
 all-deb-staging-deploy:
   stage: deploy
   image: buildpack-deps:bionic
-  only:
-    - /^staging.*$/
-  except:
-    - triggers
+  when: manual
+  allow_failure: false
   variables:
     CI_PACKAGE_REPO: packages-test.netsec.inf.ethz.ch
-  <<: *deb-deploy-script
+  <<: *deb-deploy-before-script
+  script:
+    - ssh reprepro@packages-test.netsec.inf.ethz.ch /home/reprepro/wipe-test-reprepro.sh
+    - *deb-deploy-script
 
 all-deb-prod-deploy:
   stage: deploy
@@ -646,7 +646,9 @@ all-deb-prod-deploy:
     - triggers
   variables:
     CI_PACKAGE_REPO: packages.netsec.inf.ethz.ch
-  <<: *deb-deploy-script
+  <<: *deb-deploy-before-script
+  script:
+    - *deb-deploy-script
 
 .test-deb-deploy-script: &test-deb-deploy-script
   retry:
@@ -669,10 +671,8 @@ all-deb-prod-deploy:
 all-deb-staging-deploy-test:
   stage: post-deploy
   image: buildpack-deps:bionic
-  only:
-    - /^staging.*$/
-  except:
-    - triggers
+  needs: 
+    - all-deb-staging-deploy
   variables:
     CI_PACKAGE_REPO: packages-test.netsec.inf.ethz.ch
   <<: *test-deb-deploy-script
@@ -680,6 +680,8 @@ all-deb-staging-deploy-test:
 all-deb-prod-deploy-test:
   stage: post-deploy
   image: buildpack-deps:bionic
+  needs: 
+    - all-deb-prod-deploy
   only:
     - master
   except:
