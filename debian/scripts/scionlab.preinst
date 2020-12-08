@@ -4,3 +4,9 @@ set -e
 # Systemd is required but we don't want to install it automatically
 # thus using "Depends" directive is not a proper place for this check
 [[ `systemctl` =~ -\.mount ]] || [[ -f /.dockerenv ]] || echo "Systemd is a prerequisite for this package"
+
+if [ "$1" = upgrade ] && [ ! -f /.dockerenv ]; then
+  # This should rather be in the old prerm script -- but it wasn't, so we do this
+  # here, too.
+  systemctl stop scionlab.target
+fi

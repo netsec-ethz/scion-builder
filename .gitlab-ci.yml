@@ -23,7 +23,7 @@ version-sanity-check:
     - master
   script:
     # Whenever "RELEASE" is touched (except for SIG), check that PKG_VERSION_SCIONLAB is also touched
-    - if git diff "origin/master" -U0 -- RELEASE | tail -n +5 | grep -v -e '^@@ ' -e SCION_COMMIT -e PKG_VERSION_SCION_SIG -e PKG_VERSION_SCION_SYSTEMD_WRAPPER; then
+    - if git diff "origin/master" -U0 -- RELEASE | tail -n +5 | grep -v -e '^@@ ' -e SCION_COMMIT -e PKG_VERSION_SCION_SIG; then
     -   git diff "origin/master" -- RELEASE | grep '^+.*PKG_VERSION_SCIONLAB'
         || ( echo -e "!!! Oops !!!"
                      "\nIt looks like you forgot to increment the version for scionlab."
@@ -49,7 +49,6 @@ expand-bazel-templ:
     # Set variables in BUILD.bazel
     - source ./RELEASE
     - cp BUILD.bazel.templ BUILD.bazel
-    - sed -i "s/CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER/$PKG_VERSION_SCION_SYSTEMD_WRAPPER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_CONTROL_SERVICE/$PKG_VERSION_SCION_CONTROL_SERVICE/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_SIG/$PKG_VERSION_SCION_SIG/g" BUILD.bazel
@@ -65,10 +64,10 @@ expand-bazel-templ:
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
     # Prefetch selected version of bazel installer:
-    - BAZEL_VERSION=0.25.3
+    - BAZEL_VERSION=3.7.1
     - wget https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
     # Prefetch selected go version:
-    - GOLANG_VERSION=1.13.4
+    - GOLANG_VERSION=1.14.9
     - wget https://dl.google.com/go/go$GOLANG_VERSION.linux-amd64.tar.gz -O go.linux-amd64.tar.gz
 
 clone-repositories:
@@ -152,20 +151,22 @@ clone-repositories:
     - startup_version=$(cat git_version)-scionlab
     - go build -o ../bin/
         -ldflags="-s -w -X github.com/scionproto/scion/go/lib/env.StartupVersion=$startup_version"
-        ./go/border/
+        ./go/posix-router/
         ./go/cs/
-        ./go/sig/
+        ./go/posix-gateway/
         ./go/sciond/
-        ./go/godispatcher/
-        ./go/tools/scmp/
-        ./go/tools/showpaths/
-        ./go/tools/scion-pki/
+        ./go/dispatcher/
+        ./go/scion/
+        ./go/scion-pki/
         ./go/tools/pathdb_dump/
+    - mv ../bin/{posix-router,scion-border-router}
+    - mv ../bin/{cs,scion-control-service}
+    - mv ../bin/{posix-gateway,scion-ip-gateway}
+    - mv ../bin/{dispatcher,scion-dispatcher}
     - popd
     # Build SCION packages
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
     - bazel build
-        //:scion-systemd-wrapper-$CI_TARGET_PLATFORM
         //:scion-border-router-$CI_TARGET_PLATFORM
         //:scion-control-service-$CI_TARGET_PLATFORM
         //:scion-sig-$CI_TARGET_PLATFORM
@@ -173,27 +174,6 @@ clone-repositories:
         //:scion-dispatcher-$CI_TARGET_PLATFORM
         //:scion-tools-$CI_TARGET_PLATFORM
         //:scionlab-$CI_TARGET_PLATFORM
-    # Fixup missing bazel debian package relationships
-    - "if [[ $CI_TARGET_PLATFORM == 'deb' ]]; then
-        mkdir -p ../debian-pkg-fixup/rebuild;
-        cp bazel-bin/scion-control-service_*$CI_TARGET_ARCHITECTURE.deb ../debian-pkg-fixup/;
-        echo Fixing packages $(ls ../debian-pkg-fixup/*.deb);
-        for p in ../debian-pkg-fixup/*.deb; do
-          echo 'Initial package info:'; dpkg -I ${p};
-          dpkg-deb -x ${p} ../debian-pkg-fixup/rebuild;
-          dpkg-deb -e ${p} ../debian-pkg-fixup/rebuild/DEBIAN;
-          sed -i '/Depends:.*/a Provides: scion-beacon-server, scion-path-server, scion-certificate-server\\
-          
-          Conflicts: scion-beacon-server, scion-path-server, scion-certificate-server\\
-          
-          Replaces: scion-beacon-server, scion-path-server, scion-certificate-server' ../debian-pkg-fixup/rebuild/DEBIAN/control;
-          sed -i 's/Built-Using: Bazel/Built-Using: Not Bazel/' ../debian-pkg-fixup/rebuild/DEBIAN/control;
-          dpkg-deb -b ../debian-pkg-fixup/rebuild/ ${p};
-          echo 'Updated package info:'; dpkg -I ${p};
-          mv ${p} bazel-bin/;
-          rm ../debian-pkg-fixup/rebuild -r && mkdir ../debian-pkg-fixup/rebuild;
-        done
-      fi"
     # Prepare packages to shipment
     - mkdir output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*$CI_TARGET_ARCHITECTURE.$CI_TARGET_PLATFORM output-$CI_TARGET_ARCHITECTURE
@@ -281,12 +261,10 @@ all-deb-armhf:
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     # Test installation
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     # Test system after the installation
     - id scion
     - getent group scion
-    - stat -c "%U %G" /var/log/scion | grep "scion scion"
     - stat -c "%U %G" /var/lib/scion | grep "scion scion"
     - stat -c "%U %G" /etc/scion | grep "scion scion"
     - ls /lib/systemd/system/$CI_PACKAGE*.service
@@ -306,12 +284,10 @@ all-deb-armhf:
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
     # Test installation
-    - rpm -i output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.rpm
     - rpm -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
     # Test system after the installation
     - id scion
     - getent group scion
-    - stat -c "%U %G" /var/log/scion | grep "scion scion"
     - stat -c "%U %G" /var/lib/scion | grep "scion scion"
     - stat -c "%U %G" /etc/scion | grep "scion scion"
     - ls /lib/systemd/system/$CI_PACKAGE*.service
@@ -324,35 +300,13 @@ all-deb-armhf:
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
     - "[[ $(ls /lib/systemd/system/$CI_PACKAGE*.service | wc -l) -eq 0  ]]"
 
-.test-systemd-wrapper-deb-script: &test-systemd-wrapper-deb-script
-  retry:
-    max: 2
-    when: runner_system_failure
-  script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
-    - dpkg --purge $CI_PACKAGE
-    - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
-
-.test-systemd-wrapper-rpm-script: &test-systemd-wrapper-rpm-script
-  retry:
-    max: 2
-    when: runner_system_failure
-  script:
-    - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
-    - rpm -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
-    - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
-    - rpm -e $CI_PACKAGE
-    - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
-
 .test-scion-tools-deb-script: &test-scion-tools-deb-script
   retry:
     max: 2
     when: runner_system_failure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-daemon*$CI_TARGET_ARCHITECTURE.deb output-$CI_TARGET_ARCHITECTURE/scion-dispatcher*$CI_TARGET_ARCHITECTURE.deb output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.deb
+    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion-daemon*$CI_TARGET_ARCHITECTURE.deb output-$CI_TARGET_ARCHITECTURE/scion-dispatcher*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.deb
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
     - dpkg --purge $CI_PACKAGE
@@ -364,7 +318,7 @@ all-deb-armhf:
     when: runner_system_failure
   script:
     - ls -l output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
-    - rpm -i output-$CI_TARGET_ARCHITECTURE/scion-daemon*$CI_TARGET_ARCHITECTURE.rpm output-$CI_TARGET_ARCHITECTURE/scion-dispatcher*$CI_TARGET_ARCHITECTURE.rpm output-$CI_TARGET_ARCHITECTURE/scion-systemd-wrapper*$CI_TARGET_ARCHITECTURE.rpm
+    - rpm -i output-$CI_TARGET_ARCHITECTURE/scion-daemon*$CI_TARGET_ARCHITECTURE.rpm output-$CI_TARGET_ARCHITECTURE/scion-dispatcher*$CI_TARGET_ARCHITECTURE.rpm
     - rpm -i output-$CI_TARGET_ARCHITECTURE/$CI_PACKAGE*$CI_TARGET_ARCHITECTURE.rpm
     - for CI_BINARY_NAME in $CI_BINARIES; do ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755; done
     - rpm -e $CI_PACKAGE
@@ -375,7 +329,7 @@ all-deb-armhf:
     max: 2
     when: runner_system_failure
   script:
-    - apt update && apt install -y openvpn openssl python3 libcap2-bin
+    - apt update && apt install -y openvpn python3 libcap2-bin
     - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
     - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
     - ls /lib/systemd/system/scionlab.target
@@ -388,7 +342,7 @@ all-deb-armhf:
     max: 2
     when: runner_system_failure
   script:
-    - yum install -y openvpn openssl python3 libcap
+    - yum install -y openvpn python3 libcap
     - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.rpm
     - rpm -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.rpm
     - ls /lib/systemd/system/scionlab.target
@@ -396,40 +350,13 @@ all-deb-armhf:
     - rpm -e $CI_PACKAGE
     - "[[ ! -f /usr/bin/$CI_BINARY_NAME ]]"
 
-systemd-wrapper-ubuntu-18.04-amd64-test:
-  stage: test
-  image: ubuntu:18.04
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-systemd-wrapper
-    CI_BINARY_NAME: scion-systemd-wrapper
-  <<: *test-systemd-wrapper-deb-script
-
-#systemd-wrapper-debian-10-amd64-test:
-#  stage: test
-#  image: debian:buster
-#  variables:
-#    CI_TARGET_ARCHITECTURE: amd64
-#    CI_PACKAGE: scion-systemd-wrapper
-#    CI_BINARY_NAME: scion-systemd-wrapper
-#  <<: *test-systemd-wrapper-deb-script
-
-systemd-wrapper-centos-7-amd64-test:
-  stage: test
-  image: centos:7
-  variables:
-    CI_TARGET_ARCHITECTURE: amd64
-    CI_PACKAGE: scion-systemd-wrapper
-    CI_BINARY_NAME: scion-systemd-wrapper
-  <<: *test-systemd-wrapper-rpm-script
-
 scion-tools-ubuntu-18.04-amd64-test:
   stage: test
   image: ubuntu:18.04
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
-    CI_BINARIES: "scmp showpaths scion-pki pathdb_dump"
+    CI_BINARIES: "scion scion-pki pathdb_dump"
   <<: *test-scion-tools-deb-script
 
 #scion-tools-debian-10-amd64-test:
@@ -438,7 +365,7 @@ scion-tools-ubuntu-18.04-amd64-test:
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
 #    CI_PACKAGE: scion-tools
-#    CI_BINARIES: "scmp showpaths"
+#    CI_BINARIES: "scion scion-pki pathdb_dump"
 #  <<: *test-scion-tools-deb-script
 
 scion-tools-centos-7-amd64-test:
@@ -447,7 +374,7 @@ scion-tools-centos-7-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-tools
-    CI_BINARIES: "scmp showpaths scion-pki pathdb_dump"
+    CI_BINARIES: "scion scion-pki pathdb_dump"
   <<: *test-scion-tools-rpm-script
 
 border-router-ubuntu-18.04-amd64-test:
@@ -456,7 +383,7 @@ border-router-ubuntu-18.04-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-border-router
-    CI_BINARY_NAME: border
+    CI_BINARY_NAME: scion-border-router
   <<: *test-deb-script
 
 #border-router-debian-10-amd64-test:
@@ -465,7 +392,7 @@ border-router-ubuntu-18.04-amd64-test:
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
 #    CI_PACKAGE: scion-border-router
-#    CI_BINARY_NAME: border
+#    CI_BINARY_NAME: scion-border-router
 #  <<: *test-deb-script
 
 border-router-centos-7-amd64-test:
@@ -474,7 +401,7 @@ border-router-centos-7-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-border-router
-    CI_BINARY_NAME: border
+    CI_BINARY_NAME: scion-border-router
   <<: *test-rpm-script
 
 control-service-ubuntu-18.04-amd64-test:
@@ -537,7 +464,7 @@ dispatcher-ubuntu-18.04-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-dispatcher
-    CI_BINARY_NAME: godispatcher
+    CI_BINARY_NAME: scion-dispatcher
   <<: *test-deb-script
 
 #dispatcher-debian-10-amd64-test:
@@ -546,7 +473,7 @@ dispatcher-ubuntu-18.04-amd64-test:
 #  variables:
 #    CI_TARGET_ARCHITECTURE: amd64
 #    CI_PACKAGE: scion-dispatcher
-#    CI_BINARY_NAME: godispatcher
+#    CI_BINARY_NAME: scion-dispatcher
 #  <<: *test-deb-script
 
 dispatcher-centos-7-amd64-test:
@@ -555,7 +482,7 @@ dispatcher-centos-7-amd64-test:
   variables:
     CI_TARGET_ARCHITECTURE: amd64
     CI_PACKAGE: scion-dispatcher
-    CI_BINARY_NAME: godispatcher
+    CI_BINARY_NAME: scion-dispatcher
   <<: *test-rpm-script
 
 scionlab-ubuntu-18.04-amd64-test:
@@ -660,9 +587,9 @@ all-deb-prod-deploy:
     # Loop over all packages, check whether expected version is available from repo.
     #
     # Get package names and versions by mangling RELEASE file such that e.g. the line
-    #    export PKG_VERSION_SCION_SYSTEMD_WRAPPERR=1.0.3
+    #    export PKG_VERSION_SCION_BORDER_ROUTER=1.0.3
     # becomes
-    #    scion-systemd-wrapper=1.0.3
+    #    scion-border-router=1.0.3
     #
     - sed -n '/^export PKG_VERSION_/{s///;s/.*/\L\0/;y/_/-/;p}' ./RELEASE | while read pkg_and_version; do
     -   apt show "$pkg_and_version"

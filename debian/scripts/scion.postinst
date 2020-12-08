@@ -23,10 +23,6 @@ case "$1" in
         getent group scion >/dev/null 2>&1 || groupadd scion >/dev/null 2>&1
         usermod -g scion scion >/dev/null 2>&1
 
-        # Create directory for logs and own it
-        mkdir -p /var/log/scion/
-        chown scion:scion /var/log/scion/
-
         # Same for gen-cache folder
         mkdir -p /var/lib/scion/
         chown -R scion:scion /var/lib/scion/

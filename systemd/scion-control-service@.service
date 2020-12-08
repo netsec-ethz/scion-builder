@@ -9,10 +9,11 @@ PartOf=scionlab.target
 Type=simple
 User=scion
 Group=scion
-ExecStart=/usr/bin/scion-systemd-wrapper /usr/bin/cs /etc/scion/gen/ISD-isd-/AS-as-/cs%i/cs.toml %i
+ExecStart=/usr/bin/scion-control-service --config /etc/scion/%i.toml
 RemainAfterExit=False
 KillMode=control-group
 Restart=on-failure
 
 [Install]
 WantedBy=scionlab.target
+DefaultInstance=cs-1

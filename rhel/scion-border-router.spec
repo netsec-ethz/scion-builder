@@ -9,7 +9,6 @@ Source0: bazel-out/k8-fastbuild/bin/scion-border-router.tar.gz
 
 Requires: shadow-utils
 Requires: systemd
-Requires: scion-systemd-wrapper
 
 %description
 SCION Border Router
@@ -35,22 +34,20 @@ exit 0
 rm -rf %{buildroot}
 
 mkdir -p %{buildroot}%{_bindir}/
-install -m 755 ./usr/bin/border %{buildroot}%{_bindir}/border
+install -m 755 ./usr/bin/scion-border-router %{buildroot}%{_bindir}/scion-border-router
 
 #mkdir -p %{buildroot}%{_unitdir}/
 mkdir -p %{buildroot}/lib/systemd/system/
 cp ./lib/systemd/system/scion-border-router@.service %{buildroot}/lib/systemd/system/scion-border-router@.service
 
 mkdir -p %{buildroot}%{_sysconfdir}/scion
-mkdir -p %{buildroot}%{_var}/log/scion
 mkdir -p %{buildroot}%{_var}/lib/scion
 
 %clean
 rm -rf %{buildroot}
 
 %files
-%attr(0755, root, root) %{_bindir}/border
+%attr(0755, root, root) %{_bindir}/scion-border-router
 %attr(0644, root, root) /lib/systemd/system/scion-border-router@.service
 %dir %attr(0755, scion, scion) %{_sysconfdir}/scion
-%dir %attr(0755, scion, scion) %{_var}/log/scion
 %dir %attr(0755, scion, scion) %{_var}/lib/scion

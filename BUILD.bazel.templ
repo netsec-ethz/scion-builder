@@ -1,5 +1,5 @@
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_deb", "pkg_tar")
-load("@bazel_tools//tools/build_defs/pkg:rpm.bzl", "pkg_rpm")
+load("@rules_pkg//:pkg.bzl", "pkg_deb", "pkg_tar")
+load("@rules_pkg//:rpm.bzl", "pkg_rpm")
 load("//:utils.bzl", "substitute_deb_version")
 
 # Variables used to prepare DEB and RPM packages
@@ -12,8 +12,6 @@ PKG_MAINTAINER = "ETH Zurich, SCIONLab Team <scionlab-admins@sympa.ethz.ch>"
 PKG_PRORITY = "optional"
 
 PKG_SECTION = "net"
-
-PKG_VERSION_SCION_SYSTEMD_WRAPPER = "CI_PKG_VERSION_SCION_SYSTEMD_WRAPPER"
 
 PKG_VERSION_SCION_BORDER_ROUTER = "CI_PKG_VERSION_SCION_BORDER_ROUTER"
 
@@ -29,44 +27,11 @@ PKG_VERSION_SCION_TOOLS = "CI_PKG_VERSION_SCION_TOOLS"
 
 PKG_VERSION_SCIONLAB = "CI_PKG_VERSION_SCIONLAB"
 
-# SCION wrapper script
-pkg_tar(
-    name = "scion-systemd-wrapper-bin",
-    srcs = [
-        "scion-systemd-wrapper",
-    ],
-    mode = "0755",
-    package_dir = "/usr/bin",
-)
-
-pkg_deb(
-    name = "scion-systemd-wrapper-deb",
-    architecture = PKG_ARCHITECTURE,
-    data = ":scion-systemd-wrapper-bin",
-    description = "SCION systemd wrapper",
-    homepage = PKG_HOMEPAGE,
-    maintainer = PKG_MAINTAINER,
-    package = "scion-systemd-wrapper",
-    priority = PKG_PRORITY,
-    section = PKG_SECTION,
-    version = PKG_VERSION_SCION_SYSTEMD_WRAPPER,
-)
-
-pkg_rpm(
-    name = "scion-systemd-wrapper-rpm",
-    architecture = PKG_ARCHITECTURE,
-    data = [
-        ":scion-systemd-wrapper-bin",
-    ],
-    spec_file = "rhel/scion-systemd-wrapper.spec",
-    version = PKG_VERSION_SCION_SYSTEMD_WRAPPER,
-)
-
 # SCION Border Router
 pkg_tar(
     name = "scion-border-router-bin",
     srcs = [
-        "bin/border",
+        "bin/scion-border-router",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -99,7 +64,6 @@ pkg_deb(
     data = ":scion-border-router",
     depends = [
         "adduser",
-        "scion-systemd-wrapper",
     ],
     description = "SCION Border Router",
     homepage = PKG_HOMEPAGE,
@@ -125,7 +89,7 @@ pkg_rpm(
 pkg_tar(
     name = "scion-control-service-bin",
     srcs = [
-        "bin/cs",
+        "bin/scion-control-service",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -164,7 +128,21 @@ pkg_deb(
     data = ":scion-control-service",
     depends = [
         "adduser",
-        "scion-systemd-wrapper",
+    ],
+    provides = [
+        "scion-beacon-server",
+        "scion-path-server",
+        "scion-certificate-server",
+    ],
+    conflicts = [
+        "scion-beacon-server",
+        "scion-path-server",
+        "scion-certificate-server",
+    ],
+    replaces = [
+        "scion-beacon-server",
+        "scion-path-server",
+        "scion-certificate-server",
     ],
     description = "SCION Control Service",
     homepage = PKG_HOMEPAGE,
@@ -191,14 +169,23 @@ pkg_rpm(
 pkg_tar(
     name = "scion-sig-bin",
     srcs =[
-        "bin/sig",
+        "bin/scion-ip-gateway",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
 )
 
 pkg_tar(
-    name = "scion-sig-templates",
+    name = "scion-sig-systemd",
+    srcs = [
+        "systemd/scion-ip-gateway.service",
+    ],
+    mode = "0644",
+    package_dir = "/lib/systemd/system",
+)
+
+pkg_tar(
+    name = "scion-sig-config",
     srcs = [
         "hostfiles/sig.toml",
         "hostfiles/sig.json",
@@ -212,7 +199,8 @@ pkg_tar(
     extension = "tar.gz",
     deps = [
         ":scion-sig-bin",
-        ":scion-sig-templates",
+        ":scion-sig-systemd",
+        ":scion-sig-config",
     ],
 )
 
@@ -247,6 +235,15 @@ pkg_rpm(
 
 # SCION Daemon
 pkg_tar(
+    name = "scion-daemon-config",
+    srcs = [
+        "hostfiles/sciond.toml",
+    ],
+    mode = "0644",
+    package_dir = "/etc/scion/",
+)
+
+pkg_tar(
     name = "scion-daemon-bin",
     srcs = [
         "bin/sciond",
@@ -258,7 +255,7 @@ pkg_tar(
 pkg_tar(
     name = "scion-daemon-systemd",
     srcs = [
-        "systemd/scion-daemon@.service",
+        "systemd/scion-daemon.service",
     ],
     mode = "0644",
     package_dir = "/lib/systemd/system",
@@ -270,6 +267,7 @@ pkg_tar(
     deps = [
         ":scion-daemon-bin",
         ":scion-daemon-systemd",
+        ":scion-daemon-config",
     ],
 )
 
@@ -288,7 +286,6 @@ pkg_deb(
     data = ":scion-daemon",
     depends = [
         "adduser",
-        "scion-systemd-wrapper",
     ],
     description = "SCION Daemon",
     homepage = PKG_HOMEPAGE,
@@ -313,9 +310,18 @@ pkg_rpm(
 
 # SCION Dispatcher
 pkg_tar(
+    name = "scion-dispatcher-config",
+    srcs = [
+        "hostfiles/dispatcher.toml",
+    ],
+    mode = "0644",
+    package_dir = "/etc/scion/",
+)
+
+pkg_tar(
     name = "scion-dispatcher-bin",
     srcs = [
-        "bin/godispatcher",
+        "bin/scion-dispatcher",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
@@ -336,6 +342,7 @@ pkg_tar(
     deps = [
         ":scion-dispatcher-bin",
         ":scion-dispatcher-systemd",
+        ":scion-dispatcher-config",
     ],
 )
 
@@ -348,7 +355,6 @@ pkg_deb(
     data = ":scion-dispatcher",
     depends = [
         "adduser",
-        "scion-systemd-wrapper",
     ],
     description = "SCION Dispatcher",
     homepage = PKG_HOMEPAGE,
@@ -374,8 +380,7 @@ pkg_rpm(
 pkg_tar(
     name = "scion-tools-bin",
     srcs = [
-        "bin/scmp",
-        "bin/showpaths",
+        "bin/scion",
         "bin/scion-pki",
         "bin/pathdb_dump",
     ],
@@ -394,6 +399,9 @@ pkg_deb(
         "adduser",
         "scion-daemon",
         "scion-dispatcher",
+    ],
+    breaks = [
+        "scion-apps-webapp (<= 2.1.1)",
     ],
     description = "SCION Tools",
     homepage = PKG_HOMEPAGE,
@@ -456,7 +464,6 @@ pkg_deb(
         "scion-daemon (=" + PKG_VERSION_SCION_DAEMON + ")",
         "scion-dispatcher (=" + PKG_VERSION_SCION_DISPATCHER + ")",
         "scion-tools (=" + PKG_VERSION_SCION_TOOLS + ")",
-        "openssl",
         "python3 (>=3.5)",
     ],
     description = "SCIONLab",

@@ -33,7 +33,7 @@ case "$1" in
         new_major="${new_version%%.*}"
         if [ "$old_major" != "$new_major" ]; then
           # Remove potentially incompatible cache
-          rm -rf /var/lib/scion/*
+          rm -rf /var/lib/scion/*.db
         fi
 
         ;;

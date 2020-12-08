@@ -28,7 +28,7 @@ tar xvf bazel-out/k8-fastbuild/bin/scion-sig.tar.gz
 rm -rf %{buildroot}
 
 mkdir -p %{buildroot}%{_bindir}/
-install -m 755 ./usr/bin/sig %{buildroot}%{_bindir}/sig
+install -m 755 ./usr/bin/scion-ip-gateway %{buildroot}%{_bindir}/scion-ip-gateway
 
 mkdir -p %{buildroot}/etc/scion/
 cp ./etc/scion/sig.toml %{buildroot}/etc/scion/sig.toml
@@ -38,7 +38,7 @@ cp ./etc/scion/sig.json %{buildroot}/etc/scion/sig.json
 rm -rf %{buildroot}
 
 %files
-%attr(0755, root, root) %{_bindir}/sig
+%attr(0755, root, root) %{_bindir}/scion-ip-gateway
 
 %attr(0644, scion, scion) /etc/scion/sig.toml
 %attr(0644, scion, scion) /etc/scion/sig.json

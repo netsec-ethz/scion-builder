@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
-if [ "$1" = remove ] && [ ! -f /.dockerenv ]; then
-    systemctl disable scionlab.target
-    systemctl stop scionlab.target
+if [ -f /.dockerenv ]; then
+  exit 0
 fi
+
+case "$1" in
+    # Stop services before pulling the rug from under systemd.
+    upgrade)
+        systemctl stop scionlab.target
+        ;;
+    remove)
+        systemctl disable scionlab.target
+        systemctl stop scionlab.target
+        ;;
+    *)
+        ;;
+esac

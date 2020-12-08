@@ -9,7 +9,6 @@ Source0: bazel-out/k8-fastbuild/bin/scion-daemon.tar.gz
 
 Requires: shadow-utils
 Requires: systemd
-Requires: scion-systemd-wrapper
 
 %description
 SCION Daemon
@@ -39,10 +38,12 @@ install -m 755 ./usr/bin/sciond %{buildroot}%{_bindir}/sciond
 
 #mkdir -p %{buildroot}%{_unitdir}/
 mkdir -p %{buildroot}/lib/systemd/system/
-cp ./lib/systemd/system/scion-daemon@.service %{buildroot}/lib/systemd/system/scion-daemon@.service
+cp ./lib/systemd/system/scion-daemon.service %{buildroot}/lib/systemd/system/scion-daemon.service
+
+mkdir -p %{buildroot}/etc/scion/
+cp ./etc/scion/sciond.toml %{buildroot}/etc/scion/sciond.toml
 
 mkdir -p %{buildroot}%{_sysconfdir}/scion
-mkdir -p %{buildroot}%{_var}/log/scion
 mkdir -p %{buildroot}%{_var}/lib/scion
 mkdir -p %{buildroot}/run/shm/sciond
 
@@ -51,8 +52,8 @@ rm -rf %{buildroot}
 
 %files
 %attr(0755, root, root) %{_bindir}/sciond
-%attr(0644, root, root) /lib/systemd/system/scion-daemon@.service
+%attr(0644, root, root) /lib/systemd/system/scion-daemon.service
+%attr(0644, scion, scion) /etc/scion/sciond.toml
 %dir %attr(0755, scion, scion) %{_sysconfdir}/scion
-%dir %attr(0755, scion, scion) %{_var}/log/scion
 %dir %attr(0755, scion, scion) %{_var}/lib/scion
 %dir %attr(0777, scion, scion) /run/shm/sciond

@@ -27,8 +27,7 @@ tar xvf bazel-out/k8-fastbuild/bin/scion-tools-bin.tar
 rm -rf %{buildroot}
 
 mkdir -p %{buildroot}%{_bindir}/
-install -m 755 ./usr/bin/scmp %{buildroot}%{_bindir}/scmp
-install -m 755 ./usr/bin/showpaths %{buildroot}%{_bindir}/showpaths
+install -m 755 ./usr/bin/scion %{buildroot}%{_bindir}/scion
 install -m 755 ./usr/bin/scion-pki %{buildroot}%{_bindir}/scion-pki
 install -m 755 ./usr/bin/pathdb_dump %{buildroot}%{_bindir}/pathdb_dump
 
@@ -36,7 +35,6 @@ install -m 755 ./usr/bin/pathdb_dump %{buildroot}%{_bindir}/pathdb_dump
 rm -rf %{buildroot}
 
 %files
-%attr(0755, root, root) %{_bindir}/scmp
-%attr(0755, root, root) %{_bindir}/showpaths
+%attr(0755, root, root) %{_bindir}/scion
 %attr(0755, root, root) %{_bindir}/scion-pki
 %attr(0755, root, root) %{_bindir}/pathdb_dump

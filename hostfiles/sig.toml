@@ -1,7 +1,5 @@
-[sig]
-    id = "sig-1"
-    sig_config = "/etc/scion/sig.json"
-    tun = "sig"
+[gateway]
+traffic_policy_file = "/etc/scion/sig.json"
 
-[log.file]
-    path = "/var/log/scion/sig.log"
+[log.console]
+level = "debug"

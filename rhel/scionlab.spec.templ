@@ -13,7 +13,6 @@ Requires: scion-daemon = CI_PKG_VERSION_SCION_DAEMON
 Requires: scion-dispatcher = CI_PKG_VERSION_SCION_DISPATCHER
 Requires: scion-tools = CI_PKG_VERSION_SCION_TOOLS
 
-Requires: openssl
 Requires: python3 >= 3.5
 
 Recommends: openvpn
@@ -42,19 +41,8 @@ cp ./lib/systemd/system/scionlab.target %{buildroot}/lib/systemd/system/scionlab
 rm -rf %{buildroot}
 
 %post
-# check gen-certs/tls.{pem,key}
-if [ ! -e "/etc/scion/gen-certs/tls.pem" -o ! -e "/etc/scion/gen-certs/tls.key" ]; then
-    echo "SCIONLab: Generating TLS cert"
-    mkdir -p "/etc/scion/gen-certs"
-
-    pushd "/etc/scion/gen-certs"
-    openssl genrsa -out "tls.key" 2048
-    chmod 600 "tls.key"
-    openssl req -new -x509 -key "tls.key" -out "tls.pem" -days 3650 -subj /CN=scion_def_srv
-    popd
-
-    chown -R scion.scion "/etc/scion/gen-certs"
-fi
+# remove no longer needed gen-certs TLS certificates
+rm -r "/etc/scion/gen-certs" 2> /dev/null || true
 
 # refresh the configuration and restart services (systemctl restart scionlab.target must be called in scionlab-config)
 if [ -e "/etc/scion/gen/scionlab-config.json" ]; then

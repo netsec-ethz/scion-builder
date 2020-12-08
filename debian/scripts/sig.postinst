@@ -16,7 +16,7 @@ set -e
 case "$1" in
     configure)
         # capabilities required by the SIG binary
-        setcap cap_net_admin+eip /usr/bin/sig
+        setcap cap_net_admin+eip /usr/bin/scion-ip-gateway
         ;;
     abort-*)
         # How'd we get here??

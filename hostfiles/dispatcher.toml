@@ -1,0 +1,8 @@
+[dispatcher]
+id = "dispatcher"
+
+[metrics]
+prometheus = "[127.0.0.1]:30441"
+
+[log.console]
+level = "debug"
