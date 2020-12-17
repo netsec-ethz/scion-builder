@@ -13,4 +13,4 @@ connection = "/var/lib/scion/sd.path.db"
 connection = "/var/lib/scion/sd.trust.db"
 
 [log.console]
-level = "debug"
+level = "info"

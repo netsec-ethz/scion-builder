@@ -2,4 +2,4 @@
 traffic_policy_file = "/etc/scion/sig.json"
 
 [log.console]
-level = "debug"
+level = "info"
