@@ -12,6 +12,7 @@ Group=scion
 ExecStartPre=/bin/rm -rf /run/shm/dispatcher/
 ExecStart=/usr/bin/scion-dispatcher --config /etc/scion/dispatcher.toml
 RemainAfterExit=False
+LimitNOFILE=4096
 KillMode=control-group
 Restart=on-failure
 RestartSec=10
