@@ -437,6 +437,7 @@ pkg_tar(
     name = "scionlab-systemd",
     srcs = [
         "systemd/scionlab.target",
+        "scionlab/scionlab/hostfiles/scionlab-config.service",
     ],
     mode = "0644",
     package_dir = "/lib/systemd/system",
