@@ -58,9 +58,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-border-router-deb",
     architecture = PKG_ARCHITECTURE,
-    #    conffiles = [
-    #        "/usr/local/corp/etc/app.flagfile",
-    #    ],
     data = ":scion-border-router",
     depends = [
         "adduser",
@@ -122,9 +119,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-control-service-deb",
     architecture = PKG_ARCHITECTURE,
-    #    conffiles = [
-    #        "/usr/local/corp/etc/app.flagfile",
-    #    ],
     data = ":scion-control-service",
     depends = [
         "adduser",
@@ -221,6 +215,10 @@ pkg_deb(
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_SIG,
+    conffiles = [
+        "/etc/scion/sig.toml",
+        "/etc/scion/sig.json",
+    ],
 )
 
 pkg_rpm(
@@ -280,9 +278,6 @@ substitute_deb_version(
 pkg_deb(
     name = "scion-daemon-deb",
     architecture = PKG_ARCHITECTURE,
-    #    conffiles = [
-    #        "/usr/local/corp/etc/app.flagfile",
-    #    ],
     data = ":scion-daemon",
     depends = [
         "adduser",
@@ -296,6 +291,9 @@ pkg_deb(
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_DAEMON,
+    conffiles = [
+        "/etc/scion/sciond.toml",
+    ],
 )
 
 pkg_rpm(
@@ -349,9 +347,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-dispatcher-deb",
     architecture = PKG_ARCHITECTURE,
-    #    conffiles = [
-    #        "/usr/local/corp/etc/app.flagfile",
-    #    ],
     data = ":scion-dispatcher",
     depends = [
         "adduser",
@@ -364,6 +359,9 @@ pkg_deb(
     priority = PKG_PRORITY,
     section = PKG_SECTION,
     version = PKG_VERSION_SCION_DISPATCHER,
+    conffiles = [
+        "/etc/scion/dispatcher.toml",
+    ],
 )
 
 pkg_rpm(
@@ -391,9 +389,6 @@ pkg_tar(
 pkg_deb(
     name = "scion-tools-deb",
     architecture = PKG_ARCHITECTURE,
-    #    conffiles = [
-    #        "/usr/local/corp/etc/app.flagfile",
-    #    ],
     data = ":scion-tools-bin",
     depends = [
         "adduser",
@@ -455,9 +450,6 @@ pkg_tar(
 pkg_deb(
     name = "scionlab-deb",
     architecture = PKG_ARCHITECTURE,
-    #    conffiles = [
-    #        "/usr/local/corp/etc/app.flagfile",
-    #    ],
     data = ":scionlab",
     depends = [
         "scion-border-router (=" + PKG_VERSION_SCION_BORDER_ROUTER + ")",
