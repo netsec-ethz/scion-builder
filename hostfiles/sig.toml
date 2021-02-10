@@ -1,5 +1,8 @@
 [gateway]
 traffic_policy_file = "/etc/scion/sig.json"
 
+[metrics]
+prometheus = "127.0.0.1:30456"
+
 [log.console]
 level = "info"
