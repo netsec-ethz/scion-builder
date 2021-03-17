@@ -33,7 +33,10 @@ case "$1" in
 
         # refresh the configuration and restart services (systemctl restart scionlab.target must be called in scionlab-config)
         if [ -f "/etc/scion/scionlab-config.json" -o -f "/etc/scion/gen/scionlab-config.json" ]; then
-            scionlab-config --force || true
+            if [ "${DEBIAN_FRONTEND}" == "noninteractive" ]; then
+              scionlab_config_args="--keep"
+            fi
+            scionlab-config $scionlab_config_args || true
         fi
         
         # expiclitly restart services in case scionlab config was not updated

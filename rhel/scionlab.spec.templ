@@ -46,7 +46,7 @@ rm -r "/etc/scion/gen-certs" 2> /dev/null || true
 
 # refresh the configuration and restart services (systemctl restart scionlab.target must be called in scionlab-config)
 if [ -e "/etc/scion/gen/scionlab-config.json" ]; then
-    scionlab-config --force || true
+    scionlab-config || true
 fi
 
 %files
