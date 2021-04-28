@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 export SCION_COMMIT=cc12299067923ba84905cbaa4face144fad38e6e     # netsec-ethz/scion:scionlab, 2021/04/22
-export SCIONLAB_COMMIT=00b2062d12df5bad2abf45aa894a69c56237ea45  # netsec-ethz/scionlab:develop 2021/04/22
+export SCIONLAB_COMMIT=d5ba5a41067628c02785a9c9f4bfb7113f1ebbba  # netsec-ethz/scionlab:develop 2021/04/28
 export PKG_VERSION_SCION_BORDER_ROUTER=3.2.2
 export PKG_VERSION_SCION_CONTROL_SERVICE=3.2.1
 export PKG_VERSION_SCION_SIG=3.2.1
 export PKG_VERSION_SCION_DAEMON=3.2.1
 export PKG_VERSION_SCION_DISPATCHER=3.2.1
 export PKG_VERSION_SCION_TOOLS=3.2.2
-export PKG_VERSION_SCIONLAB=3.3.3
+export PKG_VERSION_SCIONLAB=3.3.4
