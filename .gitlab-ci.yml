@@ -22,8 +22,8 @@ version-sanity-check:
   except:
     - master
   script:
-    # Whenever "RELEASE" is touched (except for SIG), check that PKG_VERSION_SCIONLAB is also touched
-    - if git diff "origin/master" -U0 -- RELEASE | tail -n +5 | grep -v -e '^@@ ' -e SCION_COMMIT -e PKG_VERSION_SCION_SIG; then
+    # Whenever "RELEASE" is touched (except for SIG and bootstrapper), check that PKG_VERSION_SCIONLAB is also touched
+    - if git diff "origin/master" -U0 -- RELEASE | tail -n +5 | grep -v -e '^@@ ' -e SCION_COMMIT -e PKG_VERSION_SCION_SIG -e PKG_VERSION_SCION_BOOTSTRAPPER; then
     -   git diff "origin/master" -- RELEASE | grep '^+.*PKG_VERSION_SCIONLAB'
         || ( echo -e "!!! Oops !!!"
                      "\nIt looks like you forgot to increment the version for scionlab."
@@ -80,6 +80,7 @@ clone-repositories:
     paths:
       - scionlab
       - scion
+      - bootstrapper
     expire_in: 1 hour
   script:
     # Clone SCION/SCIONLab source code and put it in an artifact, so that all
@@ -110,6 +111,14 @@ clone-repositories:
     - rm -rf .git
     - popd
 
+    # SCION endhost bootstrapper
+    - git clone https://github.com/netsec-ethz/bootstrapper.git
+    - pushd bootstrapper
+    - git -c advice.detachedHead=false checkout "v${PKG_VERSION_SCION_BOOTSTRAPPER}"
+    - git log -1
+    - rm -rf .git
+    - popd
+
 
 
 .build-script: &build-script
@@ -123,7 +132,7 @@ clone-repositories:
     # Install RPM tools and multiplatform toolchains
     - apt-get update
     - apt-get install -y
-      rpm
+      rpm make
       libc6-armhf-cross libc6-dev-armhf-cross gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-arm-linux-gnueabihf binutils-arm-linux-gnueabi
       libc6-arm64-cross libc6-dev-arm64-cross gcc-aarch64-linux-gnu
       gcc-7-multilib libgcc-7-dev-i386-cross libgcc-7-dev libc6-dev libc6-dev-i386 libc6-i386-cross libc6-dev-i386-cross linux-libc-dev-i386-cross
@@ -164,6 +173,8 @@ clone-repositories:
     - mv ../bin/{posix-gateway,scion-ip-gateway}
     - mv ../bin/{dispatcher,scion-dispatcher}
     - popd
+    # Create output directory
+    - mkdir output-$CI_TARGET_ARCHITECTURE
     # Build SCION packages
     - sed -i "s/CI_TARGET_ARCHITECTURE/$CI_TARGET_ARCHITECTURE/g" BUILD.bazel
     - bazel build
@@ -175,8 +186,14 @@ clone-repositories:
         //:scion-tools-$CI_TARGET_PLATFORM
         //:scionlab-$CI_TARGET_PLATFORM
     # Prepare packages to shipment
-    - mkdir output-$CI_TARGET_ARCHITECTURE
     - cp bazel-bin/*$CI_TARGET_ARCHITECTURE.$CI_TARGET_PLATFORM output-$CI_TARGET_ARCHITECTURE
+    # Build bootstrapper package
+    - source ./RELEASE
+    - pushd bootstrapper
+    - make package_$CI_TARGET_PLATFORM
+    # Copy artifact to top-level output directory
+    - cp bazel-bin/*$CI_TARGET_ARCHITECTURE.$CI_TARGET_PLATFORM ../output-$CI_TARGET_ARCHITECTURE/
+    - popd
 
 all-deb-amd64:
   stage: build
