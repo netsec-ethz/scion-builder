@@ -94,9 +94,12 @@ clone-repositories:
     - git remote add netsec-ethz https://github.com/netsec-ethz/scion.git
     - git fetch netsec-ethz
     - git -c advice.detachedHead=false checkout "$SCION_COMMIT"
-    - git describe --tags > git_version
-    # Place place hash in the log for auditing
+    # Override some files from SCION head
+    - if [ ! -z "$(ls ../patches)" ]; then ls -l ../patches; for i in ../patches/*.patch; do git apply $i --verbose; done; fi
+    - git describe --tags --dirty=-patched > git_version
+    # Show HEAD commit and diff in runner log for auditing
     - git log -1
+    - git diff
     - rm -rf .git # shrink, won't need this to build
     - popd
 
@@ -143,11 +146,6 @@ clone-repositories:
     - ln -f -s /usr/local/go/bin/* /usr/bin/
     # Install selected release of BAZEL
     - bash bazel_install_script.sh
-
-    # Override some files from upstream SCION
-    - pushd scion
-    - if [ ! -z "$(ls ../patches)" ]; then ls -l ../patches; for i in ../patches/*.patch; do git apply $i --verbose; done; fi
-    - popd
 
     # Prepare GO environment
     - export CGO_ENABLED=1
