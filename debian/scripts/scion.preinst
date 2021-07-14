@@ -29,9 +29,9 @@ case "$1" in
     upgrade|install)
         old_version=$2
         new_version=__DEB_VERSION__
-        old_major="${old_version%%.*}"
-        new_major="${new_version%%.*}"
-        if [ "$old_major" != "$new_major" ]; then
+        old_major_minor=$(echo "$old_version" | cut -d. -f1-2)
+        new_major_minor=$(echo "$new_version" | cut -d. -f1-2)
+        if [ "$old_major_minor" != "$new_major_minor" ]; then
           # Remove potentially incompatible cache
           rm -rf /var/lib/scion/*.db
         fi
