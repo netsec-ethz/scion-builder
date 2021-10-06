@@ -35,10 +35,6 @@ case "$1" in
         mkdir -p /run/shm/dispatcher
         chown -R scion:scion /run/shm/dispatcher
 
-        # own /run/shm/sciond
-        mkdir -p /run/shm/sciond
-        chown -R scion:scion /run/shm/sciond
-
         ;;
     abort-*)
         # we get here if e.g. prerm fails

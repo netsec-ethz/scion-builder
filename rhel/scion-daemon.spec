@@ -45,7 +45,6 @@ cp ./etc/scion/sciond.toml %{buildroot}/etc/scion/sciond.toml
 
 mkdir -p %{buildroot}%{_sysconfdir}/scion
 mkdir -p %{buildroot}%{_var}/lib/scion
-mkdir -p %{buildroot}/run/shm/sciond
 
 %clean
 rm -rf %{buildroot}
@@ -56,4 +55,3 @@ rm -rf %{buildroot}
 %attr(0644, scion, scion) /etc/scion/sciond.toml
 %dir %attr(0755, scion, scion) %{_sysconfdir}/scion
 %dir %attr(0755, scion, scion) %{_var}/lib/scion
-%dir %attr(0777, scion, scion) /run/shm/sciond

@@ -161,12 +161,13 @@ clone-repositories:
         ./go/posix-router/
         ./go/cs/
         ./go/posix-gateway/
-        ./go/sciond/
+        ./go/daemon/
         ./go/dispatcher/
         ./go/scion/
         ./go/scion-pki/
         ./go/tools/pathdb_dump/
     - mv ../bin/{posix-router,scion-border-router}
+    - mv ../bin/{daemon,sciond}
     - mv ../bin/{cs,scion-control-service}
     - mv ../bin/{posix-gateway,scion-ip-gateway}
     - mv ../bin/{dispatcher,scion-dispatcher}
