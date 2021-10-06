@@ -51,6 +51,7 @@ expand-bazel-templ:
     - cp BUILD.bazel.templ BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_CONTROL_SERVICE/$PKG_VERSION_SCION_CONTROL_SERVICE/g" BUILD.bazel
+    - sed -i "s/CI_PKG_VERSION_SCION_COLIBRI_SERVICE/$PKG_VERSION_SCION_COLIBRI_SERVICE/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_SIG/$PKG_VERSION_SCION_SIG/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" BUILD.bazel
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" BUILD.bazel
@@ -60,6 +61,7 @@ expand-bazel-templ:
     - cp rhel/scionlab.spec.templ rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_BORDER_ROUTER/$PKG_VERSION_SCION_BORDER_ROUTER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_CONTROL_SERVICE/$PKG_VERSION_SCION_CONTROL_SERVICE/g" rhel/scionlab.spec
+    - sed -i "s/CI_PKG_VERSION_SCION_COLIBRI_SERVICE/$PKG_VERSION_SCION_COLIBRI_SERVICE/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_DAEMON/$PKG_VERSION_SCION_DAEMON/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
@@ -160,6 +162,7 @@ clone-repositories:
         -ldflags="-s -w -X github.com/scionproto/scion/go/lib/env.StartupVersion=$startup_version"
         ./go/posix-router/
         ./go/cs/
+        ./go/co/
         ./go/posix-gateway/
         ./go/daemon/
         ./go/dispatcher/
@@ -169,6 +172,7 @@ clone-repositories:
     - mv ../bin/{posix-router,scion-border-router}
     - mv ../bin/{daemon,sciond}
     - mv ../bin/{cs,scion-control-service}
+    - mv ../bin/{co,scion-colibri-service}
     - mv ../bin/{posix-gateway,scion-ip-gateway}
     - mv ../bin/{dispatcher,scion-dispatcher}
     - popd
@@ -179,6 +183,7 @@ clone-repositories:
     - bazel build
         //:scion-border-router-$CI_TARGET_PLATFORM
         //:scion-control-service-$CI_TARGET_PLATFORM
+        //:scion-colibri-service-$CI_TARGET_PLATFORM
         //:scion-sig-$CI_TARGET_PLATFORM
         //:scion-daemon-$CI_TARGET_PLATFORM
         //:scion-dispatcher-$CI_TARGET_PLATFORM
@@ -446,6 +451,34 @@ control-service-centos-7-amd64-test:
     CI_PACKAGE: scion-control-service
     CI_BINARY_NAME: cs
   <<: *test-rpm-script
+
+colibri-service-ubuntu-18.04-amd64-test:
+  stage: test
+  image: ubuntu:18.04
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-colibri-service
+    CI_BINARY_NAME: co
+  <<: *test-deb-script
+
+#colibri-service-debian-10-amd64-test:
+#  stage: test
+#  image: debian:buster
+#  variables:
+#    CI_TARGET_ARCHITECTURE: amd64
+#    CI_PACKAGE: scion-colibri-service
+#    CI_BINARY_NAME: co
+#  <<: *test-deb-script
+
+colibri-service-centos-7-amd64-test:
+  stage: test
+  image: centos:7
+  variables:
+    CI_TARGET_ARCHITECTURE: amd64
+    CI_PACKAGE: scion-colibri-service
+    CI_BINARY_NAME: co
+  <<: *test-rpm-script
+
 
 daemon-ubuntu-18.04-amd64-test:
   stage: test

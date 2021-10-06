@@ -17,6 +17,8 @@ PKG_VERSION_SCION_BORDER_ROUTER = "CI_PKG_VERSION_SCION_BORDER_ROUTER"
 
 PKG_VERSION_SCION_CONTROL_SERVICE = "CI_PKG_VERSION_SCION_CONTROL_SERVICE"
 
+PKG_VERSION_SCION_COLIBRI_SERVICE = "CI_PKG_VERSION_SCION_COLIBRI_SERVICE"
+
 PKG_VERSION_SCION_SIG = "CI_PKG_VERSION_SCION_SIG"
 
 PKG_VERSION_SCION_DAEMON = "CI_PKG_VERSION_SCION_DAEMON"
@@ -157,6 +159,68 @@ pkg_rpm(
     ],
     spec_file = "rhel/scion-control-service.spec",
     version = PKG_VERSION_SCION_CONTROL_SERVICE,
+)
+
+# SCION Colibri Service
+pkg_tar(
+    name = "scion-colibri-service-bin",
+    srcs = [
+        "bin/scion-colibri-service",
+    ],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+pkg_tar(
+    name = "scion-colibri-service-systemd",
+    srcs = [
+        "systemd/scion-colibri-service@.service",
+    ],
+    mode = "0644",
+    package_dir = "/lib/systemd/system",
+)
+
+substitute_deb_version(
+    name = "scion-colibri-service-preinst",
+    src = "debian/scripts/scion.preinst",
+    version = PKG_VERSION_SCION_COLIBRI_SERVICE,
+)
+
+pkg_tar(
+    name = "scion-colibri-service",
+    extension = "tar.gz",
+    deps = [
+        ":scion-colibri-service-bin",
+        ":scion-colibri-service-systemd",
+    ],
+)
+
+pkg_deb(
+    name = "scion-colibri-service-deb",
+    architecture = PKG_ARCHITECTURE,
+    data = ":scion-colibri-service",
+    depends = [
+        "adduser",
+    ],
+    description = "SCION Colibri Service",
+    homepage = PKG_HOMEPAGE,
+    maintainer = PKG_MAINTAINER,
+    package = "scion-colibri-service",
+    postinst = "debian/scripts/scion.postinst",
+    preinst = ":scion-colibri-service-preinst",
+    priority = PKG_PRORITY,
+    section = PKG_SECTION,
+    version = PKG_VERSION_SCION_COLIBRI_SERVICE,
+)
+
+pkg_rpm(
+    name = "scion-colibri-service-rpm",
+    architecture = PKG_ARCHITECTURE,
+    data = [
+        ":scion-colibri-service",
+    ],
+    spec_file = "rhel/scion-colibri-service.spec",
+    version = PKG_VERSION_SCION_COLIBRI_SERVICE,
 )
 
 # SIG (Scion IP Gateway)
@@ -454,6 +518,7 @@ pkg_deb(
     depends = [
         "scion-border-router (=" + PKG_VERSION_SCION_BORDER_ROUTER + ")",
         "scion-control-service (=" + PKG_VERSION_SCION_CONTROL_SERVICE + ")",
+        "scion-colibri-service (=" + PKG_VERSION_SCION_COLIBRI_SERVICE + ")",
         "scion-daemon (=" + PKG_VERSION_SCION_DAEMON + ")",
         "scion-dispatcher (=" + PKG_VERSION_SCION_DISPATCHER + ")",
         "scion-tools (=" + PKG_VERSION_SCION_TOOLS + ")",
