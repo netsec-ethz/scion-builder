@@ -12,5 +12,8 @@ connection = "/var/lib/scion/sd.path.db"
 [trust_db]
 connection = "/var/lib/scion/sd.trust.db"
 
+[drkey_db]
+connection = "/var/lib/scion/sd.drkey.db"
+
 [log.console]
 level = "info"
