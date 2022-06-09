@@ -350,9 +350,11 @@ all-deb-armhf:
     max: 2
     when: runner_system_failure
   script:
-    - apt update && apt install -y openvpn python3 libcap2-bin
+    - apt update
     - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
-    - dpkg -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.deb
+    - pushd output-$CI_TARGET_ARCHITECTURE
+    - apt-get install $(ls ./scion*$CI_TARGET_ARCHITECTURE.deb) -y
+    - popd
     - ls /lib/systemd/system/scionlab.target
     - ls /usr/bin/$CI_BINARY_NAME && stat --format '%a' /usr/bin/$CI_BINARY_NAME | grep 755
     - dpkg --purge $CI_PACKAGE
@@ -363,7 +365,7 @@ all-deb-armhf:
     max: 2
     when: runner_system_failure
   script:
-    - yum install -y openvpn python3 libcap
+    - yum install -y openvpn python3 libcap openssl
     - ls -l output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.rpm
     - rpm -i output-$CI_TARGET_ARCHITECTURE/scion*$CI_TARGET_ARCHITECTURE.rpm
     - ls /lib/systemd/system/scionlab.target
