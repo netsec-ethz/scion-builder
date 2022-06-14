@@ -66,7 +66,7 @@ expand-bazel-templ:
     - sed -i "s/CI_PKG_VERSION_SCION_DISPATCHER/$PKG_VERSION_SCION_DISPATCHER/g" rhel/scionlab.spec
     - sed -i "s/CI_PKG_VERSION_SCION_TOOLS/$PKG_VERSION_SCION_TOOLS/g" rhel/scionlab.spec
     # Prefetch selected version of bazel installer:
-    - BAZEL_VERSION=3.7.1
+    - BAZEL_VERSION=4.2.1
     - wget https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh -O bazel_install_script.sh
     # Prefetch selected go version:
     - GOLANG_VERSION=1.17.11
