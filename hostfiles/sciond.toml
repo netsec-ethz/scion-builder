@@ -12,7 +12,7 @@ connection = "/var/lib/scion/sd.path.db"
 [trust_db]
 connection = "/var/lib/scion/sd.trust.db"
 
-[drkey_db]
+[drkey_lvl2_db]
 connection = "/var/lib/scion/sd.drkey.db"
 
 [log.console]
